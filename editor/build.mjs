@@ -1,0 +1,14 @@
+import {build} from 'esbuild';
+import {cp, mkdir, readFile, writeFile} from 'node:fs/promises';
+import {dirname, resolve} from 'node:path';
+const out = resolve('../build/generated/editor/assets/singularbots/html');
+await mkdir(out, {recursive:true});
+await build({entryPoints:['src/editor.js'],bundle:true,outfile:out+'/editor.js',target:'chrome116',minify:true,legalComments:'eof'});
+await cp('src/index.html', out+'/index.html');
+await cp('src/style.css', out+'/style.css');
+await cp('src/theme.css', out+'/theme.css');
+await cp('assets', out+'/assets', {recursive:true});
+await cp('node_modules/blockly/media', out+'/media', {recursive:true});
+await cp('assets/Blockly-LICENSE.txt', out+'/blockly-license.txt');
+await writeFile(out+'/versions.json',JSON.stringify({blockly:'11.2.2',targetChromium:116,stage:'browser-foundation'}));
+console.log('Bundled offline Blockly 11.2.2 editor:', out);

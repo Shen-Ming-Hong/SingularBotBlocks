@@ -1,0 +1,48 @@
+name: Checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  deployment:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s scripts -p 'test_*.py' -v
+  neoforge:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: editor/package-lock.json
+      - uses: gradle/actions/setup-gradle@v4
+      - run: npm ci --prefix editor --ignore-scripts
+      - run: npm test --prefix editor
+      - run: ./gradlew build runGameplayTests -PgameplayTests --no-daemon
+      - name: Headless server without browser runtime
+        run: python scripts/server_smoke.py
+      - name: Gameplay data across a real server restart
+        run: python scripts/persistence_smoke.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: neoforge-development-tests
+          path: |
+            build/libs/*.jar
+            build/reports/tests/test/**
+            run-gameplay-tests/logs/latest.log
+            run-server-1.21.1/server-smoke.json
+            run-server-1.21.1/server-smoke.log
+            run-persistence-1.21.1/persistence-*.json
+            run-persistence-1.21.1/persistence-*.log
+          retention-days: 30

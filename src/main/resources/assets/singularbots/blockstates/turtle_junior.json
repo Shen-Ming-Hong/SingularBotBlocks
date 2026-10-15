@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=east": {"model": "singularbots:block/turtle_junior", "y": 90},
+    "facing=north": {"model": "singularbots:block/turtle_junior", "y": 0},
+    "facing=south": {"model": "singularbots:block/turtle_junior", "y": 180},
+    "facing=west": {"model": "singularbots:block/turtle_junior", "y": 270}
+  }
+}

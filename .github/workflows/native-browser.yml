@@ -1,0 +1,57 @@
+name: Native browser
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'native/**'
+      - 'scripts/native_browser.py'
+      - '.github/workflows/native-browser.yml'
+permissions:
+  contents: read
+jobs:
+  build:
+    name: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04, platform: linux_amd64 }
+          - { os: windows-2022, platform: windows_amd64 }
+          - { os: macos-15-intel, platform: macos_amd64 }
+          - { os: macos-15, platform: macos_arm64 }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build tools
+        run: python -m pip install cmake==3.31.6 ninja==1.11.1.4
+      - name: Linux libraries
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libx11-dev
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+      - name: Compile pinned JCEF
+        run: python scripts/native_browser.py build --platform ${{ matrix.platform }}
+      - name: Package runtime
+        run: python scripts/native_browser.py package --platform ${{ matrix.platform }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.platform }}
+          path: native-artifacts/*
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-evidence-${{ matrix.platform }}
+          path: |
+            native-build/build-source.json
+            native-build/jcef_build/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 30

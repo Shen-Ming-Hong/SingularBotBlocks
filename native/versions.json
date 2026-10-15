@@ -1,0 +1,29 @@
+{
+  "jcef_commit": "a78e832f9f13c2c688caea3d04d8b84fcd238d94",
+  "cef_version": "116.0.27+gd8c85ac+chromium-116.0.5845.190",
+  "cef_base_url": "https://cef-builds.spotifycdn.com",
+  "platforms": {
+    "windows_amd64": {
+      "cef": "windows64",
+      "sha1": "b19ccd2d193aa4f1eb6a8409172c3df9ec4e4aca"
+    },
+    "linux_amd64": {
+      "cef": "linux64",
+      "sha1": "36b7865a009a7cbfd8741c84320dcc73bc4fd490"
+    },
+    "macos_amd64": {
+      "cef": "macosx64",
+      "sha1": "3ef1256bfb9aa4dfad59c94de262ca9657414d02"
+    },
+    "macos_arm64": {
+      "cef": "macosarm64",
+      "sha1": "ea5ed147800c9347524495880b09a2a08d325b55"
+    }
+  },
+  "mcef": {
+    "version": "2.1.6-1.21.1",
+    "modrinth_version_id": "euXLgkSB",
+    "url": "https://cdn.modrinth.com/data/TObQ0HxZ/versions/euXLgkSB/mcef-neoforge-2.1.6-1.21.1.jar",
+    "sha512": "8b45e271ca3b40dd714a2e6389ac460cff476b85b5cc7b57993f0cf0e0c0727d99768757c7ec0ab10600ccc75cb7e95f603c2b3fe77a9bb6c9492da4cb857ccb"
+  }
+}

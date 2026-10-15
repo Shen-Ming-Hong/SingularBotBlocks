@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "org.singularbots.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "OfflineChecksumMixin",
+    "PreinstalledRuntimeMixin",
+    "JuniorBodyRendererMixin",
+    "EditorWorldRenderMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "TeachingFuelMixin",
+    "TeachingMoveMixin",
+    "TeachingBuildMixin",
+    "TeachingJournalMixin",
+    "TeachingEntityJournalMixin",
+    "TeachingDamageJournalMixin",
+    "TeachingLuaPauseMixin",
+    "TeachingInventoryPermissionMixin",
+    "JuniorEquipMixin",
+    "JuniorMiningMixin"
+  ]
+}

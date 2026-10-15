@@ -1,0 +1,116 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+group = 'org.singularbots'
+version = mod_version
+base { archivesName = "singularbots-${minecraft_version}-neoforge" }
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+// A separate runtime source set lets the mod loader scan MCEF only for clients.
+sourceSets {
+    client { runtimeClasspath += sourceSets.main.runtimeClasspath }
+    gametest {
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+        runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+    }
+}
+
+def clientGameDir = providers.gradleProperty('gameDir').getOrElse('run-1.21.1')
+neoForge {
+    version = neo_version
+    addModdingDependenciesTo(sourceSets.client)
+    addModdingDependenciesTo(sourceSets.gametest)
+    runs {
+        configureEach {
+            gameDirectory = project.file(clientGameDir)
+            logLevel = org.slf4j.event.Level.INFO
+        }
+        client {
+            client()
+            sourceSet = sourceSets.client
+            systemProperty 'mcef.libraries.path', project.file(clientGameDir + '/mods/mcef-libraries').absolutePath
+            if (System.getenv('CCEDU_OPENGL_LIBRARY')) systemProperty 'org.lwjgl.opengl.libname', System.getenv('CCEDU_OPENGL_LIBRARY')
+            if (providers.gradleProperty('browserSmoke').isPresent()) {
+                systemProperty 'ccedu.browserSmoke', 'true'
+                systemProperty 'ccedu.sourceCommit', providers.gradleProperty('sourceCommit').getOrElse(System.getenv('GITHUB_SHA') ?: 'working-tree')
+            }
+        }
+        server {
+            server()
+            if(providers.gradleProperty('persistenceSmoke').isPresent()) {
+                sourceSet = sourceSets.gametest
+                systemProperty 'ccedu.persistenceSmoke', providers.gradleProperty('persistenceSmoke').get()
+                systemProperty 'ccedu.persistenceOutput', project.file(clientGameDir).absolutePath
+            }
+            gameDirectory = project.file(providers.gradleProperty('gameDir').getOrElse('run-server-1.21.1'))
+            programArgument '--nogui'
+        }
+        gameplayTests {
+            type = 'gameTestServer'
+            sourceSet = sourceSets.gametest
+            gameDirectory = project.file(providers.gradleProperty('gameplayGameDir').getOrElse('run-gameplay-tests'))
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'singularbots'
+            // ClassroomLoadGameTests only measure when asked: ./gradlew runGameplayTests -PgameplayTests -PloadTest
+            if (providers.gradleProperty('loadTest').isPresent()) systemProperty 'ccedu.loadTest', 'true'
+        }
+    }
+    mods { singularbots {
+        sourceSet(sourceSets.main)
+        if (providers.gradleProperty('gameplayTests').isPresent() || providers.gradleProperty('persistenceSmoke').isPresent()) sourceSet(sourceSets.gametest)
+    } }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.squiddev.cc'; content { includeGroup 'cc.tweaked' } }
+    maven { url = 'https://api.modrinth.com/maven'; content { includeGroup 'maven.modrinth' } }
+}
+
+dependencies {
+    // Upstream retains the "forge" artifact name for its 1.21.1 NeoForge build.
+    compileOnly "cc.tweaked:cc-tweaked-${minecraft_version}-forge-api:${cc_version}"
+    // Pinned implementation references are confined to compat/cct and Mixins.
+    compileOnly "cc.tweaked:cc-tweaked-${minecraft_version}-forge:${cc_version}"
+    runtimeOnly "cc.tweaked:cc-tweaked-${minecraft_version}-forge:${cc_version}"
+    compileOnly "maven.modrinth:mcef:${mcef_version_id}"
+    // Only the client run loads MCEF. A dedicated server has no browser dependency.
+    clientRuntimeOnly "maven.modrinth:mcef:${mcef_version_id}"
+    // Storage tests run without launching Minecraft or any browser classes.
+    testImplementation 'com.google.code.gson:gson:2.10.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.3'
+}
+test { useJUnitPlatform() }
+
+tasks.register('buildEditor', Exec) {
+    workingDir 'editor'
+    if (System.getProperty('os.name').toLowerCase(java.util.Locale.ROOT).contains('windows')) {
+        commandLine 'cmd', '/d', '/c', 'npm.cmd', 'run', 'build'
+    } else {
+        commandLine 'npm', 'run', 'build'
+    }
+    inputs.files(fileTree('editor') { exclude 'node_modules/**' })
+    outputs.dir layout.buildDirectory.dir('generated/editor/assets/singularbots/html')
+}
+sourceSets.main.resources.srcDir layout.buildDirectory.dir('generated/editor')
+processResources {
+    dependsOn 'buildEditor'
+    def pins = [mod_version: mod_version, minecraft_version: minecraft_version,
+                neo_version: neo_version, cc_version: cc_version, mcef_version: mcef_version]
+    inputs.properties pins
+    filesMatching('META-INF/neoforge.mods.toml') { expand pins }
+}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+jar {
+    manifest { attributes 'Implementation-Version': mod_version }
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+// Forward the development server console for bounded smoke tests and local use.
+tasks.named('runServer', JavaExec) { standardInput = System.in }

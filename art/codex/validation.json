@@ -1,0 +1,3005 @@
+{
+  "ok": true,
+  "files": [
+    {
+      "file": "button_moveforward.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_moveback.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_turnleft.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_turnright.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_moveup.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_movedown.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_dig.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_place.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_show_turtle_view.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_show_normal_view.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_run.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_step.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_pause.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_stop.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_abort.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_recall.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_previous.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_next.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20608,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "button_close.png",
+      "target": [
+        10,
+        10
+      ],
+      "size": [
+        80,
+        80
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 6272,
+      "fully_opaque": false,
+      "isolated_raw": 17,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            1,
+            1
+          ],
+          "reason": "\u56db\u89d2\u925a\u91d8\uff0f\u8b77\u89d2"
+        },
+        {
+          "xy": [
+            6,
+            2
+          ],
+          "reason": "\u523b\u610f\u5c0f\u7d05X\u7b46\u756b"
+        },
+        {
+          "xy": [
+            7,
+            2
+          ],
+          "reason": "\u56db\u89d2\u925a\u91d8\uff0f\u8b77\u89d2"
+        },
+        {
+          "xy": [
+            3,
+            3
+          ],
+          "reason": "\u523b\u610f\u5c0f\u7d05X\u7b46\u756b"
+        },
+        {
+          "xy": [
+            4,
+            3
+          ],
+          "reason": "\u523b\u610f\u5c0f\u7d05X\u7b46\u756b"
+        },
+        {
+          "xy": [
+            7,
+            3
+          ],
+          "reason": "\u523b\u610f\u5c0f\u7d05X\u7b46\u756b"
+        },
+        {
+          "xy": [
+            3,
+            4
+          ],
+          "reason": "\u523b\u610f\u5c0f\u7d05X\u7b46\u756b"
+        },
+        {
+          "xy": [
+            2,
+            6
+          ],
+          "reason": "\u523b\u610f\u5c0f\u7d05X\u7b46\u756b"
+        },
+        {
+          "xy": [
+            3,
+            6
+          ],
+          "reason": "\u523b\u610f\u5c0f\u7d05X\u7b46\u756b"
+        },
+        {
+          "xy": [
+            6,
+            6
+          ],
+          "reason": "\u523b\u610f\u5c0f\u7d05X\u7b46\u756b"
+        },
+        {
+          "xy": [
+            7,
+            6
+          ],
+          "reason": "\u523b\u610f\u5c0f\u7d05X\u7b46\u756b"
+        },
+        {
+          "xy": [
+            2,
+            7
+          ],
+          "reason": "\u56db\u89d2\u925a\u91d8\uff0f\u8b77\u89d2"
+        },
+        {
+          "xy": [
+            3,
+            7
+          ],
+          "reason": "\u523b\u610f\u5c0f\u7d05X\u7b46\u756b"
+        },
+        {
+          "xy": [
+            6,
+            7
+          ],
+          "reason": "\u523b\u610f\u5c0f\u7d05X\u7b46\u756b"
+        },
+        {
+          "xy": [
+            1,
+            8
+          ],
+          "reason": "\u56db\u89d2\u925a\u91d8\uff0f\u8b77\u89d2"
+        },
+        {
+          "xy": [
+            8,
+            8
+          ],
+          "reason": "\u56db\u89d2\u925a\u91d8\uff0f\u8b77\u89d2"
+        }
+      ],
+      "isolated_counted": 1,
+      "isolated_ratio": 0.01020408163265306,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "panel.png",
+      "target": [
+        36,
+        36
+      ],
+      "size": [
+        288,
+        288
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 82176,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "tab_selected.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 36096,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "tab_normal.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 36096,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "slot.png",
+      "target": [
+        18,
+        18
+      ],
+      "size": [
+        144,
+        144
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 20480,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "field.png",
+      "target": [
+        36,
+        12
+      ],
+      "size": [
+        288,
+        96
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 26944,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "tab_program.png",
+      "target": [
+        16,
+        16
+      ],
+      "size": [
+        128,
+        128
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 13824,
+      "fully_opaque": false,
+      "isolated_raw": 2,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            3,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            3,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "tab_customise.png",
+      "target": [
+        16,
+        16
+      ],
+      "size": [
+        128,
+        128
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 11456,
+      "fully_opaque": false,
+      "isolated_raw": 1,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            3,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "tab_inventory.png",
+      "target": [
+        16,
+        16
+      ],
+      "size": [
+        128,
+        128
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 15104,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "tab_remote.png",
+      "target": [
+        16,
+        16
+      ],
+      "size": [
+        128,
+        128
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 6784,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "body_top.png",
+      "target": [
+        24,
+        22
+      ],
+      "size": [
+        192,
+        176
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 33792,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": 0.7924528301886793,
+      "ok": true
+    },
+    {
+      "file": "body_bottom.png",
+      "target": [
+        24,
+        22
+      ],
+      "size": [
+        192,
+        176
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 33792,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": 0.7272727272727273,
+      "ok": true
+    },
+    {
+      "file": "body_front.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 36864,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": 0.6586826347305389,
+      "ok": true
+    },
+    {
+      "file": "body_back.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 36864,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": 0.6620370370370371,
+      "ok": true
+    },
+    {
+      "file": "body_left.png",
+      "target": [
+        22,
+        24
+      ],
+      "size": [
+        176,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 33792,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": 0.7848101265822784,
+      "ok": true
+    },
+    {
+      "file": "body_right.png",
+      "target": [
+        22,
+        24
+      ],
+      "size": [
+        176,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 33792,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": 0.6441717791411042,
+      "ok": true
+    },
+    {
+      "file": "pack_back.png",
+      "target": [
+        20,
+        14
+      ],
+      "size": [
+        160,
+        112
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 17920,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "pack_top.png",
+      "target": [
+        20,
+        4
+      ],
+      "size": [
+        160,
+        32
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5120,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "pack_side.png",
+      "target": [
+        4,
+        14
+      ],
+      "size": [
+        32,
+        112
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 3584,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_3dglasses.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 9600,
+      "fully_opaque": false,
+      "isolated_raw": 1,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            16,
+            11
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_bandana_blue.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 8128,
+      "fully_opaque": false,
+      "isolated_raw": 1,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            1,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_bandana_purple.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 8128,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_bandana_red.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 8128,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_bandana_yellow.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 8128,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_creeper.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 36480,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_crown.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 9728,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_elf.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 13824,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_flames.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 16576,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_frown.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 1792,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_moustache.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 6400,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_smile.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 2048,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_snorkel.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 19072,
+      "fully_opaque": false,
+      "isolated_raw": 3,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            23,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            22,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            22,
+            16
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_strawhat.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 12160,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_sunglasses.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 10624,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_teeth.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 4800,
+      "fully_opaque": false,
+      "isolated_raw": 1,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            10,
+            21
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "deco_tuxedo.png",
+      "target": [
+        24,
+        24
+      ],
+      "size": [
+        192,
+        192
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 12544,
+      "fully_opaque": false,
+      "isolated_raw": 2,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            22,
+            13
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            20,
+            14
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "turtle_preview.png",
+      "target": [
+        36,
+        36
+      ],
+      "size": [
+        288,
+        288
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 82944,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "remote_item.png",
+      "target": [
+        16,
+        16
+      ],
+      "size": [
+        128,
+        128
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 6784,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "body_sheet.png",
+      "target": [
+        95,
+        62
+      ],
+      "size": [
+        760,
+        496
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 235520,
+      "fully_opaque": false,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "body_check.png",
+      "target": [
+        72,
+        64
+      ],
+      "size": [
+        576,
+        512
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 166080,
+      "fully_opaque": false,
+      "isolated_raw": 33,
+      "isolated_exceptions": [],
+      "isolated_counted": 33,
+      "isolated_ratio": 0.012716763005780347,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_open.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_half.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 2,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            2,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            8,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_closed.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 6,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            1,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            3,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            7,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            8,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            9,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_look_left.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 2,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            9,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            9,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_look_right.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 1,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            7,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_happy.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 6,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            2,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            8,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            3,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            7,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            9,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_wink.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 4,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            1,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            3,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            8,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_surprised.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 4,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            2,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            8,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            8,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_sleepy.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 8,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            1,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            3,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            7,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            8,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            9,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            8,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_sad.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 5,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            7,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            8,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            9,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_love.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_confused.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 2,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            2,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_cursor.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 0,
+      "isolated_exceptions": [],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_type_1.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 5,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            0,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            0,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_type_2.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 7,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            0,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            4,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            4,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            0,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_type_3.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 9,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            0,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            6,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            4,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            4,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            0,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            6,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_type_heart_1.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 5,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            2,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            0,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_type_heart_2.png",
+      "target": [
+        11,
+        8
+      ],
+      "size": [
+        88,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 5632,
+      "fully_opaque": true,
+      "isolated_raw": 8,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            2,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            6,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            0,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            5,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            1,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            6,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            2,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "eyes_sheet.png",
+      "target": [
+        215,
+        8
+      ],
+      "size": [
+        1720,
+        64
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 101376,
+      "fully_opaque": false,
+      "isolated_raw": 74,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            86,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            92,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            156,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            168,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            180,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            186,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            194,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            206,
+            1
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            45,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            55,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            134,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            157,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            169,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            172,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            181,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            184,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            193,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            205,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            210,
+            2
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            14,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            20,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            25,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            26,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            27,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            31,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            32,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            33,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            45,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            62,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            68,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            73,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            74,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            75,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            97,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            98,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            99,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            103,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            104,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            105,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            115,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            116,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            158,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            170,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            182,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            192,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            204,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            209,
+            3
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            61,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            63,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            67,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            69,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            98,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            104,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            109,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            110,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            117,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            157,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            169,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            172,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            181,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            184,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            193,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            205,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            210,
+            4
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            80,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            86,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            92,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            134,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            156,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            168,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            180,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            186,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            194,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            206,
+            5
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 0,
+      "isolated_ratio": 0.0,
+      "paint_dominant_ratio": null,
+      "ok": true
+    },
+    {
+      "file": "controller_check.png",
+      "target": [
+        182,
+        132
+      ],
+      "size": [
+        1456,
+        1056
+      ],
+      "grid_8x8": true,
+      "palette": true,
+      "binary_alpha": true,
+      "nontransparent_pixels": 1490432,
+      "fully_opaque": false,
+      "isolated_raw": 21,
+      "isolated_exceptions": [
+        {
+          "xy": [
+            80,
+            13
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            80,
+            15
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        },
+        {
+          "xy": [
+            80,
+            39
+          ],
+          "reason": "\u773c\u775b\uff0f\u5b57\u5143\u7b46\u756b\u6216\u767c\u5149\u9ad8\u5149"
+        }
+      ],
+      "isolated_counted": 18,
+      "isolated_ratio": 0.0007729302645139127,
+      "paint_dominant_ratio": null,
+      "ok": true
+    }
+  ],
+  "structural_checks": {
+    "moveforward_flight_same_shape": true,
+    "moveback_flight_same_shape": true,
+    "brick_visible_light_mortar": true,
+    "button_common_base": true,
+    "body_faces_exact_sheet_crops": true,
+    "body_sheet_gaps_transparent": true,
+    "love_two_separate_hearts": true,
+    "front_screen_matches_open": true,
+    "eyes_sheet_order_and_1px_gaps": true,
+    "remote_item_matches_tab_remote": true,
+    "panel_seamless_center": true
+  }
+}

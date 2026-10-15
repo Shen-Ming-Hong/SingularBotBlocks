@@ -1,0 +1,35 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+[[mods]]
+modId="singularbots"
+version="${mod_version}"
+displayName="Singular Bot Blocks"
+authors="Shen-Ming-Hong"
+description='''Program robots with blocks: a classroom mod with a Blockly editor, built on CC: Tweaked.
+Unofficial work inspired by ComputerCraftEdu; not affiliated with or endorsed by TeacherGaming, Daniel Ratcliffe, the CC: Tweaked team, Mojang or Microsoft.'''
+[[dependencies.singularbots]]
+modId="minecraft"
+type="required"
+versionRange="[${minecraft_version}]"
+side="BOTH"
+[[dependencies.singularbots]]
+modId="neoforge"
+type="required"
+versionRange="[${neo_version}]"
+side="BOTH"
+[[dependencies.singularbots]]
+modId="computercraft"
+type="required"
+versionRange="[${cc_version}]"
+ordering="AFTER"
+side="BOTH"
+[[dependencies.singularbots]]
+modId="mcef"
+type="required"
+versionRange="[${mcef_version}]"
+ordering="AFTER"
+side="CLIENT"
+
+[[mixins]]
+config="singularbots.mixins.json"
