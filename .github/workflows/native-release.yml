@@ -1,0 +1,52 @@
+name: Native release
+on:
+  workflow_dispatch:
+    inputs:
+      native_run:
+        description: Successful Native browser run id whose artifacts to keep
+        required: true
+      tag:
+        description: Release tag (default native-cef116-run<id>)
+        required: false
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NATIVE_RUN: ${{ inputs.native_run }}
+      TAG: ${{ inputs.tag || format('native-cef116-run{0}', inputs.native_run) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check the build run
+        run: |
+          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$NATIVE_RUN")
+          test "$(jq -r .path <<<"$run")" = .github/workflows/native-browser.yml || { echo 'Not a Native browser run'; exit 1; }
+          test "$(jq -r .conclusion <<<"$run")" = success || { echo 'Native browser run did not succeed'; exit 1; }
+          sha=$(jq -r .head_sha <<<"$run")
+          # Archives must come from the same native inputs as this tree.
+          git diff --quiet "$sha" HEAD -- native/versions.json 'native/patches/*.patch' scripts/native_browser.py .github/workflows/native-browser.yml \
+            || { echo "Native inputs changed since $sha; rebuild first"; exit 1; }
+          echo "SOURCE_SHA=$sha" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: native-*
+          path: dist
+          run-id: ${{ inputs.native_run }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify artifacts
+        run: python scripts/native_release.py --dist dist --output release-assets --run-id "$NATIVE_RUN" --source-commit "$SOURCE_SHA"
+      - name: Publish prerelease
+        run: |
+          cd release-assets
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" --prerelease \
+            --title "Native browser runtime (CEF 116, run $NATIVE_RUN)" --notes-file release-notes.md \
+            *.tar.gz *.sha256 *-build-source.json SHA256SUMS

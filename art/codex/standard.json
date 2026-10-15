@@ -1,0 +1,375 @@
+{
+  "target_pixel_scale": 8,
+  "alpha": {
+    "source_threshold": 128,
+    "output_values": [
+      0,
+      255
+    ],
+    "transparent_rgb": [
+      0,
+      0,
+      0
+    ],
+    "method": "Generated RGBA alpha; threshold at 128, then grid-area majority. No chroma key."
+  },
+  "palette": {
+    "outline": [
+      "#111419"
+    ],
+    "paint_gray": [
+      "#606060",
+      "#888888",
+      "#b0b0b0",
+      "#d8d8d8"
+    ],
+    "brass": [
+      "#654321",
+      "#a36c32",
+      "#c9964e",
+      "#f0ce83"
+    ],
+    "gunmetal": [
+      "#20252b",
+      "#303840",
+      "#46515b",
+      "#626f79"
+    ],
+    "screen_blue": [
+      "#1851a5",
+      "#269cdb",
+      "#a5ecf5"
+    ],
+    "movement_green": [
+      "#24683d",
+      "#4caa50",
+      "#91d96b"
+    ],
+    "flight_yellow": [
+      "#cf9e28",
+      "#ffe06c"
+    ],
+    "red": [
+      "#923337",
+      "#df5651"
+    ],
+    "orange": [
+      "#bf682d",
+      "#f4a34f"
+    ],
+    "purple": [
+      "#684580",
+      "#ac78c7"
+    ],
+    "teal": [
+      "#287b79",
+      "#65c6b5"
+    ],
+    "wood_leather": [
+      "#61412c",
+      "#a17447"
+    ],
+    "steel_white": [
+      "#a8bdc5",
+      "#edf1e8"
+    ]
+  },
+  "quantization": "AREA downsample premultiplied RGBA to target pixels; alpha >=128 opaque; nearest palette RGB by squared sRGB distance; NEAREST enlarge 8x.",
+  "body_sheet_target_size": [
+    95,
+    62
+  ],
+  "body_sheet_layout": {
+    "body_top": [
+      0,
+      0,
+      24,
+      22
+    ],
+    "body_bottom": [
+      25,
+      0,
+      24,
+      22
+    ],
+    "body_front": [
+      0,
+      23,
+      24,
+      24
+    ],
+    "body_back": [
+      25,
+      23,
+      24,
+      24
+    ],
+    "body_left": [
+      50,
+      23,
+      22,
+      24
+    ],
+    "body_right": [
+      73,
+      23,
+      22,
+      24
+    ],
+    "pack_back": [
+      0,
+      48,
+      20,
+      14
+    ],
+    "pack_top": [
+      21,
+      48,
+      20,
+      4
+    ],
+    "pack_side": [
+      42,
+      48,
+      4,
+      14
+    ]
+  },
+  "groups": {
+    "buttons": {
+      "cols": 4,
+      "rows": 5,
+      "names": [
+        "button_moveforward",
+        "button_moveback",
+        "button_turnleft",
+        "button_turnright",
+        "button_moveup",
+        "button_movedown",
+        "button_dig",
+        "button_place",
+        "button_show_turtle_view",
+        "button_show_normal_view",
+        "button_run",
+        "button_step",
+        "button_pause",
+        "button_stop",
+        "button_abort",
+        "button_recall",
+        "button_previous",
+        "button_next",
+        "button_close",
+        "button_base"
+      ]
+    },
+    "ui": {
+      "cols": 3,
+      "rows": 3,
+      "names": [
+        "panel",
+        "tab_selected",
+        "tab_normal",
+        "slot",
+        "field",
+        "tab_program",
+        "tab_customise",
+        "tab_inventory",
+        "tab_remote"
+      ]
+    },
+    "body": {
+      "cols": 3,
+      "rows": 3,
+      "names": [
+        "body_front",
+        "body_back",
+        "body_left",
+        "body_right",
+        "body_top",
+        "body_bottom",
+        "pack_back",
+        "pack_side",
+        "pack_top"
+      ]
+    },
+    "deco": {
+      "cols": 4,
+      "rows": 5,
+      "names": [
+        "deco_3dglasses",
+        "deco_bandana_blue",
+        "deco_bandana_purple",
+        "deco_bandana_red",
+        "deco_bandana_yellow",
+        "deco_creeper",
+        "deco_crown",
+        "deco_elf",
+        "deco_flames",
+        "deco_frown",
+        "deco_moustache",
+        "deco_smile",
+        "deco_snorkel",
+        "deco_strawhat",
+        "deco_sunglasses",
+        "deco_teeth",
+        "deco_tuxedo"
+      ]
+    }
+  },
+  "palette_roles": {
+    "paint_gray": "\u4e2d\u6027\u70e4\u6f06\uff1a\u6697\u908a\uff0f\u6b21\u6697\uff0f\u4e3b\u8272\uff0f\u4eae\u908a",
+    "brass": "\u6696\u9ec3\u9285\uff1a\u6697\u908a\uff0f\u6b21\u6697\uff0f\u4e3b\u8272\uff0f\u4eae\u908a",
+    "gunmetal": "\u85cd\u7070\u69cd\u9435\uff1a\u6697\u908a\uff08\u4ea6\u87a2\u5e55\u5e95\u8272\uff09\uff0f\u6b21\u6697\uff0f\u4e3b\u8272\uff0f\u4eae\u908a",
+    "screen_blue": "\u87a2\u5e55\u85cd\uff1a\u6697\uff0f\u4e2d\uff0f\u4eae",
+    "steel_white": "\u6dfa\u92fc\u8207\u7070\u767d\u7070\u7e2b\uff1b#edf1e8\u4e5f\u70ba\u53ef\u9078\u87a2\u5e55\u767c\u5149\u9ad8\u5149"
+  },
+  "eyes": {
+    "target_size": [
+      11,
+      8
+    ],
+    "front_screen_box": [
+      7,
+      9,
+      11,
+      8
+    ],
+    "sheet_gap_target_pixels": 1,
+    "allowed_palette_roles": [
+      "gunmetal_darkest",
+      "screen_blue"
+    ],
+    "optional_glow_highlight": "#edf1e8",
+    "names": [
+      "open",
+      "half",
+      "closed",
+      "look_left",
+      "look_right",
+      "happy",
+      "wink",
+      "surprised",
+      "sleepy",
+      "sad",
+      "love",
+      "confused",
+      "cursor",
+      "type_1",
+      "type_2",
+      "type_3",
+      "type_heart_1",
+      "type_heart_2"
+    ]
+  },
+  "v3_quality": {
+    "isolated_pixel_limit": 0.03,
+    "paint_dominant_minimum": 0.55,
+    "light_direction": "upper_left",
+    "body_and_pack_fully_opaque": true,
+    "flight_arrows": "same source geometry as ground arrows; yellow palette replacement only"
+  },
+  "decoration_attachment_boxes": {
+    "3dglasses": [
+      0,
+      7,
+      24,
+      8
+    ],
+    "bandana_blue": [
+      0,
+      0,
+      24,
+      10
+    ],
+    "bandana_purple": [
+      0,
+      0,
+      24,
+      10
+    ],
+    "bandana_red": [
+      0,
+      0,
+      24,
+      10
+    ],
+    "bandana_yellow": [
+      0,
+      0,
+      24,
+      10
+    ],
+    "creeper": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "crown": [
+      0,
+      0,
+      24,
+      8
+    ],
+    "elf": [
+      0,
+      0,
+      24,
+      14
+    ],
+    "flames": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "frown": [
+      6,
+      16,
+      12,
+      4
+    ],
+    "moustache": [
+      1,
+      16,
+      22,
+      6
+    ],
+    "smile": [
+      5,
+      16,
+      14,
+      4
+    ],
+    "snorkel": [
+      0,
+      0,
+      24,
+      20
+    ],
+    "strawhat": [
+      0,
+      0,
+      24,
+      10
+    ],
+    "sunglasses": [
+      0,
+      7,
+      24,
+      8
+    ],
+    "teeth": [
+      5,
+      16,
+      14,
+      7
+    ],
+    "tuxedo": [
+      0,
+      12,
+      24,
+      12
+    ]
+  }
+}

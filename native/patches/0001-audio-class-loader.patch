@@ -1,0 +1,32 @@
+diff --git a/native/audio_handler.cpp b/native/audio_handler.cpp
+--- a/native/audio_handler.cpp
++++ b/native/audio_handler.cpp
+@@ -5,6 +5,7 @@
+ #include "audio_handler.h"
+ 
+ #include "jni_util.h"
++#include "jni_scoped_helpers.h"
+ 
+ //#include <iostream>
+ 
+@@ -12,7 +13,9 @@ AudioHandler::AudioHandler(JNIEnv* env, jobject handler)
+     : handle_(env, handler) {}
+ 
+ jobject jniParams(ScopedJNIEnv env, const CefAudioParameters& params) {
+-  jclass cls = env->FindClass("org/cef/misc/CefChannelLayout");
++  // Native callbacks must use JCEF's registered loader, not the JVM system loader.
++  ScopedJNIClass channelLayout(env, "org/cef/misc/CefChannelLayout");
++  jclass cls = channelLayout;
+   if (cls == nullptr) {
+ //    std::cout << "Could not find class 0";
+     return nullptr;
+@@ -24,7 +27,8 @@ jobject jniParams(ScopedJNIEnv env, const CefAudioParameters& params) {
+   }
+   jobject layout = env->CallStaticObjectMethod(cls, getLayout, (int) params.channel_layout);
+ 
+-  cls = env->FindClass("org/cef/misc/CefAudioParameters");
++  ScopedJNIClass audioParameters(env, "org/cef/misc/CefAudioParameters");
++  cls = audioParameters;
+   if (cls == nullptr) {
+ //    std::cout << "Could not find class 1";
+     return nullptr;

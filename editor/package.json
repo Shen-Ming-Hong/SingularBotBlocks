@@ -1,0 +1,12 @@
+{
+  "name": "singularbots-editor",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": { "blockly": "11.2.2" },
+  "devDependencies": { "esbuild": "0.25.10" }
+}

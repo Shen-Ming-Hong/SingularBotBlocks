@@ -1,0 +1,6 @@
+{
+  "parent": "singularbots:block/robot_body",
+  "textures": {
+    "texture": "singularbots:block/turtle_junior_pink"
+  }
+}

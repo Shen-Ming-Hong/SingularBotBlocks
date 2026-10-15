@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "singularbots:block/build_deny"
+    }
+  }
+}

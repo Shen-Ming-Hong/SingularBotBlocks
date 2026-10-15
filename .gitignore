@@ -1,0 +1,14 @@
+.gradle/
+build/
+run/
+native-build/
+native-artifacts/
+node_modules/
+.idea/
+*.iml
+*.log
+__pycache__/
+.DS_Store
+libs/
+
+run-*/

@@ -1,0 +1,36 @@
+/* Light look for the workbench. The dark look in style.css stays the default; theme.js sets html[data-theme] and
+   switches Blockly's own theme, so these rules only recolour the page around it. Shapes, icons and layout are unchanged. */
+[data-icon=sun]{--icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M5 5h6v6H5zM7 1h2v3H7zM7 12h2v3H7zM1 7h3v2H1zM12 7h3v2h-3zM3 3h2v2H3zM11 3h2v2h-2zM3 11h2v2H3zM11 11h2v2h-2z'/%3E%3C/svg%3E")}[data-icon=moon]{--icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M6 1h5v1H9v1H8v2H7v6h1v2h1v1h2v1H6v-1H4v-1H3v-2H2V5h1V3h1V2h2z'/%3E%3C/svg%3E")}
+html[data-theme=light]{color-scheme:light;--ink:#1f2a22;--edge:#5c6660;--muted:#5d6b58}
+html[data-theme=light],html[data-theme=light] body{color:var(--ink);background:#e9ede3}
+html[data-theme=light] header{background:linear-gradient(#83bc55 0 5px,#dfe5d6 5px);border-bottom-color:#9aa596;box-shadow:inset 0 -1px #fff}
+html[data-theme=light] :is(button,select,input,textarea){color:var(--ink)}
+html[data-theme=light] :is(button,select){background-color:#d4d9cf;box-shadow:inset 2px 2px #fff,inset -2px -2px #9aa39a}
+html[data-theme=light] button:hover{background-color:#e6eae1;color:#000}html[data-theme=light] button:active{box-shadow:inset 2px 2px #9aa39a}
+html[data-theme=light] button.primary{background-color:#5f9a3c;color:#fff;box-shadow:inset 2px 2px #9bcf72,inset -2px -2px #3a6625}html[data-theme=light] button.primary:hover{background-color:#6dab47}
+html[data-theme=light] button.danger{background-color:#c4695b;color:#fff;box-shadow:inset 2px 2px #e7a194,inset -2px -2px #8a3d32}html[data-theme=light] button.danger:hover{background-color:#d17a6c}
+html[data-theme=light] :is(button,select,input,textarea):focus-visible{outline-color:#4f7f2c}
+html[data-theme=light] :is(input,textarea){background:#fff;box-shadow:inset 2px 2px #c9cfc3}
+html[data-theme=light] select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231f2a22' stroke-width='2'/%3E%3C/svg%3E")}
+html[data-theme=light] :is(#programbar,#transferbar){background:#dde3d5;border-bottom-color:#a9b3a3}html[data-theme=light] #runtimebar{background:#d3dacb;border-bottom-color:#a9b3a3}
+html[data-theme=light] aside{background:#e4e9dd;border-left-color:#a9b3a3;box-shadow:inset 1px 0 #fff}
+html[data-theme=light] h2,html[data-theme=light] #moreDialog h2{color:#4c6a37}html[data-theme=light] pre{color:#2f5a1f}
+html[data-theme=light] #status{color:#2a3329;background:#f6f8f2;border-left-color:#5f9a3c}html[data-theme=light] #status[data-error=true]{color:#a3321f;border-color:#c95b46}
+html[data-theme=light] .hint{color:#5d6b58}html[data-theme=light] #variables{color:#7a5a00;border-top-color:#b9c2b3}
+html[data-theme=light] footer{background:#dde3d5;color:#5d6b58;border-top-color:#a9b3a3}
+html[data-theme=light] #visualDisabled{background:#e4e9ddeb}
+html[data-theme=light] #codePane{background:#fff}html[data-theme=light] #luaLineHighlight>.error-line{background:#f4b4a8}
+html[data-theme=light] #modeTag{color:#2f5a1f;background:#eef3e6;border-color:#5f9a3c}html[data-theme=light] #modeTag[data-mode=lua]{color:#2a4a8a;border-color:#6a84c0}
+html[data-theme=light] #runtimeLamp{background:#f6f8f2;box-shadow:inset 1px 1px #0002}html[data-theme=light] #runtimeStatus{color:var(--ink)}
+html[data-theme=light] #runtimeLamp[data-status=running] #runtimeStatus{color:#2e7d1d}html[data-theme=light] #runtimeLamp[data-status=paused] #runtimeStatus{color:#8a5a00}html[data-theme=light] #runtimeLamp[data-status=error] #runtimeStatus{color:#a3321f}
+html[data-theme=light] .menu{background:#e4e9dd;box-shadow:3px 3px #0003}
+html[data-theme=light] .pick-list button{background:transparent;box-shadow:none}html[data-theme=light] .pick-list button:hover,html[data-theme=light] .pick-list button:focus-visible{background:#c9d1c0}
+html[data-theme=light] .pick-list button.chosen{background:#a7c97f;color:#1f2a22}
+/* Editor dialogs: robot settings and Blockly's name/confirm questions (the history window already uses the light game panel). */
+html[data-theme=light] :is(#moreDialog,#askDialog){background:#e4e9dd;color:var(--ink);border-color:#6f7a6c;box-shadow:3px 3px #0003}
+html[data-theme=light] #askMessage{color:var(--ink)}html[data-theme=light] #askError{color:#a3321f}html[data-theme=light] dialog::backdrop{background:#0005}
+html[data-theme=light] ::-webkit-scrollbar-track,html[data-theme=light] ::-webkit-scrollbar-corner{background:#e4e9dd}html[data-theme=light] ::-webkit-scrollbar-thumb{background:#9aa596;border-color:#e4e9dd}html[data-theme=light] ::-webkit-scrollbar-thumb:hover{background:#7f8b7b}
+/* Blockly parts that style.css pins with !important. */
+html[data-theme=light] .blocklyToolboxDiv{background:#e2e7da!important;border-right-color:#a9b3a3}html[data-theme=light] .blocklyTreeLabel{color:#1f2a22}html[data-theme=light] .blocklyTreeSelected{background:#b8d39b!important}html[data-theme=light] .blocklyTreeSelected .blocklyTreeLabel{color:#13200f}
+html[data-theme=light] .blocklyFlyoutBackground{fill:#d9e0cf!important}html[data-theme=light] .blocklyMainBackground{stroke:#c3cbbd!important}html[data-theme=light] .blocklyScrollbarHandle{fill:#9aa596!important}
+html[data-theme=light] pattern[id^=blocklyGridPattern] line{stroke:#d0d8c8}

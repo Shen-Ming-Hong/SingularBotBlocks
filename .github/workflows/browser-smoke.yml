@@ -1,0 +1,88 @@
+name: In-game browser smoke
+on:
+  workflow_dispatch:
+    inputs:
+      native_run:
+        description: Successful pinned native build run id
+        required: true
+        default: '37120043444'
+      platform:
+        description: Runtime target (hosted macOS runners lack OpenGL; use local hardware)
+        type: choice
+        default: all
+        options: [all, linux_amd64, windows_amd64, macos_amd64, macos_arm64]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON(inputs.platform == 'all' && '["linux_amd64","windows_amd64","macos_amd64","macos_arm64"]' || format('["{0}"]', inputs.platform)) }}
+    runs-on: ${{ fromJSON('{"linux_amd64":"ubuntu-22.04","windows_amd64":"windows-2022","macos_amd64":"macos-15-intel","macos_arm64":"macos-15"}')[matrix.platform] }}
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: native-${{ matrix.platform }}
+          path: native-artifacts
+          run-id: ${{ inputs.native_run }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Linux display and libraries
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgtk-3-0 libasound2 libgl1-mesa-dri
+      - name: Windows software OpenGL (CI only)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest 'https://github.com/pal1000/mesa-dist-win/releases/download/26.2.3/mesa3d-26.2.3-release-msvc.7z' -OutFile mesa.7z
+          if ((Get-FileHash mesa.7z -Algorithm SHA256).Hash.ToLower() -ne '3f3613adb43cfd0f2e665ce2400b130c275f0b3317cb3a05566320a3a67589ed') { throw 'Mesa checksum mismatch' }
+          7z x mesa.7z -omesa
+          $dll = Get-ChildItem mesa -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
+          if (-not $dll) { throw 'Missing x64 software OpenGL' }
+          # GLFW loads opengl32 through Windows DLL search, independently of LWJGL.
+          # Deploy only desktop OpenGL dependencies beside this disposable CI Java.
+          # Keep Mesa EGL/GLES out of the Java directory to preserve CEF's ANGLE DLLs.
+          $javaBin = Join-Path $env:JAVA_HOME 'bin'
+          foreach ($name in @('opengl32.dll', 'opengl32sw.dll', 'libgallium_wgl.dll', 'libglapi.dll', 'dxil.dll')) {
+            $source = Join-Path $dll.DirectoryName $name
+            $destination = Join-Path $javaBin $name
+            if (Test-Path $destination) { throw "Refusing to replace existing Java DLL: $name" }
+            if (Test-Path $source) { Copy-Item $source $destination }
+          }
+          New-Item -ItemType File -Path (Join-Path $javaBin 'java.exe.local') | Out-Null
+          "CCEDU_OPENGL_LIBRARY=$(Join-Path $javaBin 'opengl32.dll')" >> $env:GITHUB_ENV
+          $dll.DirectoryName >> $env:GITHUB_PATH
+          'GALLIUM_DRIVER=llvmpipe' >> $env:GITHUB_ENV
+      - run: npm ci --prefix editor --ignore-scripts
+      - name: Install verified native runtime
+        run: python scripts/install_smoke_native.py native-artifacts run-1.21.1
+      - name: Launch actual Minecraft with embedded Blockly
+        run: python scripts/browser_smoke.py
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-evidence-${{ matrix.platform }}
+          path: |
+            run-1.21.1/browser-smoke.json
+            run-1.21.1/browser-launch.log
+            run-1.21.1/screenshots/browser-smoke.png
+            run-1.21.1/logs/**
+            run-1.21.1/crash-reports/**
+            run-1.21.1/hs_err_pid*.log
+          retention-days: 30

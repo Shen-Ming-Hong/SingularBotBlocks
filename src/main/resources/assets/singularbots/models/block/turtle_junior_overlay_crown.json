@@ -1,0 +1,6 @@
+{
+  "parent": "singularbots:block/robot_decoration",
+  "textures": {
+    "texture": "singularbots:block/turtle_junior_overlay_crown"
+  }
+}
