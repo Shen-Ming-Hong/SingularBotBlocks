@@ -6,6 +6,8 @@ modId="singularbots"
 version="${mod_version}"
 displayName="Singular Bot Blocks"
 authors="Shen-Ming-Hong"
+logoFile="logo.png"
+logoBlur=false
 description='''Program robots with blocks: a classroom mod with a Blockly editor, built on CC: Tweaked.
 Unofficial work inspired by ComputerCraftEdu; not affiliated with or endorsed by TeacherGaming, Daniel Ratcliffe, the CC: Tweaked team, Mojang or Microsoft.'''
 [[dependencies.singularbots]]
@@ -16,7 +18,7 @@ side="BOTH"
 [[dependencies.singularbots]]
 modId="neoforge"
 type="required"
-versionRange="[${neo_version}]"
+versionRange="[${neo_version},21.2)"
 side="BOTH"
 [[dependencies.singularbots]]
 modId="computercraft"

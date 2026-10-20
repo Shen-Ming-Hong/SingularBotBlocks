@@ -1,17 +1,24 @@
 name: Checks
-on: [push, pull_request, workflow_dispatch]
+# Every step here also runs in a cloud or local session, so CI is only the
+# final confirmation before merging: ready (non-draft) PRs and manual runs.
+# Pushes to main and draft PRs are verified locally first; docs-only changes
+# skip CI. A newer push cancels the run it supersedes.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/skills/**'
+  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
-  deployment:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: python -m unittest discover -s scripts -p 'test_*.py' -v
   neoforge:
+    if: github.event_name == 'workflow_dispatch' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     steps:
@@ -25,24 +32,28 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: editor/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Deployment scripts
+        run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
       - run: npm ci --prefix editor --ignore-scripts
       - run: npm test --prefix editor
       - run: ./gradlew build runGameplayTests -PgameplayTests --no-daemon
       - name: Headless server without browser runtime
-        run: python scripts/server_smoke.py
+        run: python3 scripts/server_smoke.py
       - name: Gameplay data across a real server restart
-        run: python scripts/persistence_smoke.py
+        run: python3 scripts/persistence_smoke.py
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: neoforge-development-tests
           path: |
-            build/libs/*.jar
             build/reports/tests/test/**
             run-gameplay-tests/logs/latest.log
             run-server-1.21.1/server-smoke.json
             run-server-1.21.1/server-smoke.log
             run-persistence-1.21.1/persistence-*.json
             run-persistence-1.21.1/persistence-*.log
-          retention-days: 30
+          retention-days: 14

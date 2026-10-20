@@ -1,0 +1,105 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "#edges",
+    "edges": "singularbots:block/turtle_junior_edges",
+    "body": "singularbots:block/turtle_junior_white"
+  },
+  "elements": [
+    {
+      "from": [
+        1.95,
+        1.95,
+        1.95
+      ],
+      "to": [
+        14.05,
+        14.05,
+        13.05
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            0.0,
+            3.0,
+            8.0
+          ],
+          "texture": "#edges"
+        },
+        "south": {
+          "uv": [
+            3.0,
+            0.0,
+            6.0,
+            8.0
+          ],
+          "texture": "#edges"
+        },
+        "west": {
+          "uv": [
+            6.0,
+            0.0,
+            8.75,
+            8.0
+          ],
+          "texture": "#edges"
+        },
+        "east": {
+          "uv": [
+            8.75,
+            0.0,
+            11.5,
+            8.0
+          ],
+          "texture": "#edges"
+        },
+        "up": {
+          "uv": [
+            11.5,
+            0.0,
+            14.5,
+            7.3333
+          ],
+          "texture": "#edges"
+        },
+        "down": {
+          "uv": [
+            0.0,
+            8.0,
+            3.0,
+            15.3333
+          ],
+          "texture": "#edges"
+        }
+      },
+      "neoforge_data": {
+        "block_light": 15,
+        "sky_light": 15
+      }
+    },
+    {
+      "from": [
+        5.0,
+        6.0,
+        1.97
+      ],
+      "to": [
+        10.5,
+        10.0,
+        1.97
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.875,
+            1.0,
+            2.25,
+            2.0
+          ],
+          "texture": "#body"
+        }
+      }
+    }
+  ]
+}

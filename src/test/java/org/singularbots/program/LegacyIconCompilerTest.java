@@ -177,8 +177,18 @@ class LegacyIconCompilerTest {
         assertTrue(lua(ws(b("ccedu_transfer").shadow("SLOT",num(5)).shadow("COUNT",num(10)))).contains("assert(turtle.transferTo(5.0, 10.0))"));
         assertEquals("Invalid turtle query",rejected(ws(query("forward"))).getMessage());
     }
+    @Test void lookAroundAndSlotBlocksCompileToTurtleCalls(){
+        for(var s:new String[][]{{"","forward"},{"Up","up"},{"Down","down"}}){
+            assertTrue(lua(ws(side("ccedu_detect",s[1]))).contains("turtle.detect"+s[0]+"()"),s[1]);
+            assertTrue(lua(ws(side("ccedu_compare",s[1]))).contains("turtle.compare"+s[0]+"()"),s[1]);
+        }
+        assertTrue(lua(ws(b("controls_if").input("IF0",side("ccedu_detect","down")).input("DO0",cmd("dig")))).contains("if turtle.detectDown() then"));
+        assertTrue(lua(ws(b("ccedu_item_count").shadow("SLOT",num(3)))).contains("turtle.getItemCount(3.0)"));
+        assertTrue(lua(ws(b("ccedu_item_space").shadow("SLOT",num(16)))).contains("turtle.getItemSpace(16.0)"));
+        assertTrue(lua(ws(b("ccedu_selected_slot"))).contains("turtle.getSelectedSlot()"));
+    }
     @Test void sidesAreLimitedToFrontUpAndDown(){
-        for(var type:List.of("ccedu_inspect","ccedu_redstone_query","ccedu_redstone_set"))assertEquals("Invalid SIDE",rejected(ws(side(type,"left"))).getMessage(),type);
+        for(var type:List.of("ccedu_inspect","ccedu_detect","ccedu_compare","ccedu_redstone_query","ccedu_redstone_set"))assertEquals("Invalid SIDE",rejected(ws(side(type,"left"))).getMessage(),type);
         assertTrue(lua(ws(side("ccedu_redstone_set","down"))).contains("turtleedu.setRedstoneDown(false)"),"an empty value turns the signal off");
     }
     @Test void registryIdsMustBeNamespacedLowercaseIds(){

@@ -28,13 +28,17 @@ public final class TeachingContent {
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>,net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer<JuniorConversionRecipe>> CONVERSION=
         RECIPES.register("junior_conversion",()->new net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer<>(JuniorConversionRecipe::new));
     public static final DeferredHolder<net.minecraft.world.level.block.Block,JuniorTurtleBlock> JUNIOR=BLOCKS.register("turtle_junior",
-        () -> new JuniorTurtleBlock(BlockBehaviour.Properties.of().strength(2.5f),new RegistryEntry<>() {
+        () -> new JuniorTurtleBlock(BlockBehaviour.Properties.of().strength(2.5f).lightLevel(state -> 15), // the glowing eyes light the robot's surroundings
+            new RegistryEntry<>() {
             public BlockEntityType<TurtleBlockEntity> get() { return JUNIOR_ENTITY.get(); }
             public ResourceLocation id() { return ResourceLocation.fromNamespaceAndPath(MOD,"turtle_junior"); }
         }));
     public static final DeferredHolder<BlockEntityType<?>,BlockEntityType<TurtleBlockEntity>> JUNIOR_ENTITY=ENTITIES.register("turtle_junior",
         () -> BlockEntityType.Builder.<TurtleBlockEntity>of(JuniorTurtleEntity::new,JUNIOR.get()).build(null));
-    public static final DeferredHolder<Item,TurtleItem> JUNIOR_ITEM=ITEMS.register("turtle_junior",() -> new TurtleItem(JUNIOR.get(),new Item.Properties().stacksTo(64)));
+    public static final DeferredHolder<Item,TurtleItem> JUNIOR_ITEM=ITEMS.register("turtle_junior",() -> new TurtleItem(JUNIOR.get(),new Item.Properties().stacksTo(64)){
+        // Robot items saved with the built-in pickaxe by an older version load without it, so they stack with new ones.
+        @Override public void verifyComponentsAfterLoad(ItemStack stack){super.verifyComponentsAfterLoad(stack);JuniorMining.strip(stack);}
+    });
     public static final DeferredHolder<Item,RemoteItem> REMOTE=ITEMS.register("remote",() -> new RemoteItem(new Item.Properties().stacksTo(1)));
     public static final DeferredHolder<net.minecraft.world.level.block.Block,PermissionBlock> BUILD_ALLOW=permission("build_allow",PermissionBlock.Rule.ALLOW_BUILD);
     public static final DeferredHolder<net.minecraft.world.level.block.Block,PermissionBlock> BUILD_DENY=permission("build_deny",PermissionBlock.Rule.DENY_BUILD);
@@ -48,7 +52,7 @@ public final class TeachingContent {
         .icon(()->new ItemStack(JUNIOR_ITEM.get()))
         .withTabsBefore(ResourceLocation.fromNamespaceAndPath("computercraft","tab"))
         .displayItems((parameters,output)->{
-            output.accept(JuniorMining.item(parameters.holders()));
+            output.accept(JuniorMining.item());
         }).build());
     public static void register(IEventBus bus) {
         BLOCKS.register(bus); ENTITIES.register(bus); ITEMS.register(bus); TABS.register(bus); MENUS.register(bus); RECIPES.register(bus);

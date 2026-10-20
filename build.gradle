@@ -77,6 +77,8 @@ dependencies {
     compileOnly "maven.modrinth:mcef:${mcef_version_id}"
     // Only the client run loads MCEF. A dedicated server has no browser dependency.
     clientRuntimeOnly "maven.modrinth:mcef:${mcef_version_id}"
+    // Optional: JEI finds our plugin only when it is installed; without JEI the plugin class is never loaded.
+    compileOnly "maven.modrinth:jei:${jei_version_id}"
     // Storage tests run without launching Minecraft or any browser classes.
     testImplementation 'com.google.code.gson:gson:2.10.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'

@@ -4,7 +4,7 @@
 // The word list and old/new comparison live in docs/classroom-wording.md.
 export const CLASSROOM_ZH=Object.freeze({
  // Workspace and block menus
- DUPLICATE_BLOCK:'複製',
+ DUPLICATE_BLOCK:'複製一份',
  ADD_COMMENT:'加上註解',
  DELETE_BLOCK:'刪除積木',
  DELETE_X_BLOCKS:'刪除 %1 個積木',

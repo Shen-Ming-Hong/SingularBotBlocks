@@ -24,8 +24,8 @@ public final class TeachingGameTests {
         h.setBlock(pos,TeachingContent.JUNIOR.get());return (JuniorTurtleEntity)h.getBlockEntity(pos);
     }
     @GameTest(template="empty")
-    public static void itemAppearanceSurvivesNetworkComponents(GameTestHelper h){
-        var t=place(h,new BlockPos(2,2,2));
+    public static void robotItemsCarryNoLookForAnyColourOrDecoration(GameTestHelper h){
+        var t=place(h,new BlockPos(2,2,2));t.setLabel("任何名字");var fresh=new ItemStack(TeachingContent.JUNIOR_ITEM.get());
         for(var decoration:org.singularbots.turtle.Appearance.DECORATIONS){
             t.decorate(decoration);
             for(int colour:org.singularbots.turtle.Appearance.COLOURS){
@@ -35,10 +35,7 @@ public final class TeachingGameTests {
                 var buffer=new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),h.getLevel().registryAccess());
                 try{
                     ItemStack.STREAM_CODEC.encode(buffer,item);var received=ItemStack.STREAM_CODEC.decode(buffer);
-                    var dye=received.get(DataComponents.DYED_COLOR);
-                    h.assertTrue(dye!=null&&dye.rgb()==colour,"Item RGB component lost after network encoding");
-                    var overlay=dan200.computercraft.shared.turtle.items.TurtleItem.getOverlay(received);
-                    h.assertTrue(decoration.equals("none")?overlay==null:overlay!=null&&overlay.model().getPath().equals("block/turtle_junior_overlay_"+decoration),"Item renderer cannot resolve decoration "+decoration);
+                    h.assertTrue(ItemStack.isSameItemSameComponents(received,fresh),"Robot item carries a look ("+decoration+", "+colour+"): "+received.getComponentsPatch());
                 }finally{buffer.release();}
             }
         }
@@ -152,6 +149,28 @@ public final class TeachingGameTests {
             var moved=(JuniorTurtleEntity)h.getLevel().getBlockEntity(second);
             h.assertTrue(moved.runtime().json().get("status").getAsString().equals("stopped"),"Program did not finish");
         }).thenExecute(()->h.getLevel().getServer().getPlayerList().remove(owner)).thenSucceed();
+    }
+    @GameTest(template="empty",timeoutTicks=200)
+    public static void edgeLightFollowsTheProgramAcrossMovesAndReturnsToIdle(GameTestHelper h)throws Exception {
+        var owner=h.makeMockServerPlayerInLevel();NetworkRegistry.configureMockConnection(owner.connection.getConnection());
+        var t=place(h,new BlockPos(5,2,5));var origin=t.getBlockPos();var pos=origin.getCenter();owner.teleportTo(pos.x,pos.y,pos.z);
+        ((dan200.computercraft.shared.turtle.core.TurtleBrain)t.getAccess()).setOwningPlayer(owner.getGameProfile());RemoteService.open(owner,t);
+        var program=com.google.gson.JsonParser.parseString("""
+            {"name":"light","mode":"blocks","workspace":{"blocks":{"blocks":[{"type":"ccedu_turtle_command","id":"light-up1","fields":{"COMMAND":"up"},"next":{"block":{"type":"ccedu_turtle_command","id":"light-up2","fields":{"COMMAND":"up"}}}}]}}}
+            """).getAsJsonObject();
+        var id=UUID.randomUUID();ProgramService.store(h.getLevel()).save(t.libraryId(),id,0,program);operation(owner,t,id,"programRun");
+        // Each move makes a new block entity. It used to start with an idle light, so the change back to idle after the last
+        // move was never sent and clients kept the running light.
+        var runningAfterMove=new boolean[1];
+        h.succeedWhen(()->{
+            var current=RemoteService.resolve(h.getLevel(),t.identity());
+            if(current!=null&&!current.getBlockPos().equals(origin)&&current.runtime().json().get("status").getAsString().equals("running")&&current.signal().equals("running"))runningAfterMove[0]=true;
+            h.assertTrue(current!=null&&current.getBlockPos().equals(origin.above(2))&&current.runtime().json().get("status").getAsString().equals("stopped"),"Program has not finished");
+            h.assertTrue(runningAfterMove[0],"The moved robot never showed the running light");
+            h.assertTrue(current.signal().isEmpty(),"The light did not return to idle: "+current.signal());
+            h.assertTrue(current.getUpdateTag(h.getLevel().registryAccess()).getCompound("SingularBots").getString("signal").isEmpty(),"Clients would still get the running light");
+            h.getLevel().getServer().getPlayerList().remove(owner);
+        });
     }
     @GameTest(template="empty",timeoutTicks=200)
     public static void blockStatementsKeepOneBeatAndWaitForTheRobotsMove(GameTestHelper h)throws Exception {
@@ -277,7 +296,7 @@ public final class TeachingGameTests {
     }
     @GameTest(template="empty")
     public static void creativeRobotsStackToSixtyFour(GameTestHelper h){
-        var first=JuniorMining.item(h.getLevel().registryAccess());var second=JuniorMining.item(h.getLevel().registryAccess());
+        var first=JuniorMining.item();var second=JuniorMining.item();
         h.assertTrue(first.getMaxStackSize()==64,"Robot item max stack size is "+first.getMaxStackSize());
         h.assertTrue(ItemStack.isSameItemSameComponents(first,second),"Fresh creative robots do not merge");
         var inventory=new net.minecraft.world.SimpleContainer(1);first.setCount(63);inventory.setItem(0,first);second.setCount(2);var rest=inventory.addItem(second);

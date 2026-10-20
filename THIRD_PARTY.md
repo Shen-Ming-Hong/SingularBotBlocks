@@ -13,7 +13,7 @@
 Bundled font SHA-256: `864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f`.
 Blockly's npm tarball omits LICENSE; the bundled Apache license comes from the exact upstream `blockly-v11.2.2` tag.
 
-Do not package CC: Tweaked inside this mod. Native archives contain their original notices and a source manifest. 
+Do not package CC: Tweaked inside this mod. Native archives contain their original notices and a source manifest.
 
 ## Artwork
 
@@ -25,6 +25,12 @@ pixel grid and shared palette (`art/codex/standard.json`; process and checks in
 robot paint for the 16 colours and places each face on the robot model UVs. Nothing is copied,
 traced or recoloured from ComputerCraftEdu, ComputerCraft, CC: Tweaked, Minecraft, Create or any
 other mod. Rebuild with `python3 scripts/generate_textures.py` (Pillow).
+
+The cover art in `art/branding/` (Modrinth and CurseForge icons, cover, GitHub social preview) and
+the mod list logo `src/main/resources/logo.png` are drawn by `scripts/generate_branding.py` from
+the same robot faces, so they match the game. The word mark uses the Jersey 10 font by The Soft
+Type Project Authors, included as `art/branding/Jersey10-Regular.ttf` under the SIL Open Font
+License 1.1 (`art/branding/OFL.txt`). No Minecraft logo, font, texture or screenshot is used.
 
 The robot models `models/block/robot_body.json` and `robot_decoration.json` and their texture
 layout were written for this project. New Java implementations are written for this addon; the

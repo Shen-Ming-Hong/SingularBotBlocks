@@ -18,8 +18,8 @@ root = pathlib.Path(__file__).resolve().parents[1]
 INCLUDE = [
     '.gitattributes', '.gitignore', 'LICENSE', 'build.gradle', 'settings.gradle', 'gradle.properties',
     'gradlew', 'gradlew.bat', 'gradle/*', 'src/*', 'editor/*', 'art/*', 'native/*', '.github/workflows/*',
-    'docs/install.md', 'docs/gameplay-guide.md', 'docs/classroom-wording.md',
-    'scripts/generate_textures.py', 'scripts/native_browser.py', 'scripts/native_release.py',
+    'docs/install.md', 'docs/gameplay-guide.md', 'docs/classroom-wording.md', 'docs/images/*',
+    'scripts/generate_textures.py', 'scripts/generate_branding.py', 'scripts/native_browser.py', 'scripts/native_release.py',
     'scripts/install_smoke_native.py', 'scripts/browser_smoke.py', 'scripts/server_smoke.py',
     'scripts/persistence_smoke.py', 'scripts/export_public.py', 'scripts/fixtures/*',
     'scripts/test_native_browser.py', 'scripts/test_native_release.py', 'scripts/test_native_patches.py',
@@ -36,6 +36,9 @@ ALLOWED = [
     re.compile(r'^\| `[a-z_.]+` \| ComputerCraftEdu '),  # classroom-wording: the "before" column
     re.compile(r'from ComputerCraftEdu, ComputerCraft, CC: Tweaked'),  # THIRD_PARTY: what the art is not copied from
 ]
+
+# Relative Markdown links, which must point at an exported file.
+LINK = re.compile(r'\]\((?!https?:|mailto:|#)([^)\s]+)\)')
 
 
 def exported():
@@ -55,6 +58,10 @@ def scan(out):
         for number, line in enumerate(text.splitlines(), 1):
             if FORBIDDEN.search(line) and not any(a.search(line) for a in ALLOWED):
                 hits.append(f'{path.relative_to(out)}:{number}: {line.strip()[:160]}')
+            if path.suffix == '.md':
+                for target in LINK.findall(line):
+                    if not (path.parent / target.split('#')[0]).exists():
+                        hits.append(f'{path.relative_to(out)}:{number}: link to unexported {target}')
     return hits
 
 

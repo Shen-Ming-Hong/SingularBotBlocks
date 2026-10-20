@@ -38,6 +38,7 @@ public final class ProgramService {
     public static JsonObject handle(ServerPlayer player,JuniorTurtleEntity t,JsonObject request)throws Exception{
         if(!RemoteService.session(player,t.identity())||!RemoteService.authorized(player,t))throw new IllegalArgumentException("Control permission expired");
         var s=store(player.serverLevel());var result=new JsonObject();String op=request.get("op").getAsString();
+        TeacherTakeover.program(player,t,op);
         var settings=TeachingSettings.get(player.getServer());
         if(!settings.visualEditor()&&op.equals("programSave")&&request.getAsJsonObject("program").get("mode").getAsString().equals("blocks"))throw new IllegalArgumentException("Teacher disabled Blockly editing; Lua programs remain available");
         boolean lua=settings.luaAllowed();
@@ -46,6 +47,7 @@ public final class ProgramService {
         if(!settings.sharing()&&java.util.Set.of("programTargets","programShare").contains(op))throw new IllegalArgumentException("Teacher disabled program sharing in this world");
         if(!settings.allowed()&&java.util.Set.of("programRun","programStep","programResume").contains(op))throw new IllegalArgumentException("Teacher stopped or disabled turtles");
         switch(op){
+            case "programTakeover" -> {if(request.get("enabled").getAsBoolean())TeacherTakeover.start(player,t);else TeacherTakeover.release(player,t);}
             case "programHistory" -> result.add("records",StudentPrograms.history(player.serverLevel()).list(t.libraryId()));
             case "programList" -> {result.add("programs",visible(s.list(t.libraryId()),lua));policy(result,settings,player);result.addProperty("selected",t.selectedProgram()==null?"":t.selectedProgram().toString());result.addProperty("visualEditor",settings.visualEditor());}
             case "programLoad" -> {result.add("program",visible(s.load(t.libraryId(),id(request)),lua));t.selectProgram(id(request));}
@@ -60,10 +62,14 @@ public final class ProgramService {
             case "programPause" -> t.runtime().pause();
             case "programResume" -> {t.runtime().running();wake(t);}
             case "programStop" -> stop(t);
+            case "programRobots" -> result=RobotFleet.list(player,t);
+            case "programLocate" -> result=RobotFleet.locate(player,t,request);
+            case "programRecall" -> result=RobotFleet.recall(player,t,request);
             case "programState" -> {result.add("runtime",t.runtime().json());result.addProperty("selected",t.selectedProgram()==null?"":t.selectedProgram().toString());if(request.has("id")){var revision=REVISIONS.get(t.libraryId()+"/"+request.get("id").getAsString());if(revision!=null)result.addProperty("revision",revision);}result.addProperty("suggestions",settings.suggestions());policy(result,settings,player);}
             default -> result=ProgramTransfer.handle(player,t,request);
         }
         if(java.util.Set.of("programSave","programDelete","programRun","programStep","programShare").contains(op))StudentPrograms.record(t,op,request.has("id")?request.get("id").getAsString():"");
+        result.addProperty("library",t.libraryId().toString());result.add("takeover",TeacherTakeover.state(player,t));
         result.addProperty("historyDiagnostic",t.historyDiagnostic());
         return result;
     }
@@ -81,5 +87,5 @@ public final class ProgramService {
     /** Lets GameTests confirm that a disconnect discards a partial upload. */
     static boolean uploading(UUID player){return UPLOADS.containsKey(player);}
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent e){UPLOADS.remove(e.getEntity().getUUID());REQUEST_RATE.remove(e.getEntity().getUUID());}
-    @SubscribeEvent public static void stopped(ServerStoppedEvent e){UPLOADS.clear();REQUEST_RATE.clear();REVISIONS.clear();ProgramStore.clearCache();}
+    @SubscribeEvent public static void stopped(ServerStoppedEvent e){UPLOADS.clear();REQUEST_RATE.clear();REVISIONS.clear();ProgramStore.clearCache();org.singularbots.program.HistoryStore.clearCache();StudentPrograms.clearRecentSaves();}
 }

@@ -16,9 +16,14 @@ public final class JuniorTurtleBlock extends TurtleBlock {
     @Override public void setPlacedBy(Level level,BlockPos pos,BlockState state,net.minecraft.world.entity.LivingEntity entity,net.minecraft.world.item.ItemStack stack){
         super.setPlacedBy(level,pos,state,entity,stack);
         if(!level.isClientSide&&entity instanceof Player player&&level.getBlockEntity(pos) instanceof JuniorTurtleEntity turtle){
-            var data=stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
-            turtle.placedBy(player,data==null||!data.contains("SingularBots"));
+            turtle.placedBy(player);
         }
+    }
+    /** A broken robot always becomes an ownerless robot item, even in classrooms that turn block drops off (doTileDrops false). */
+    @Override public void playerDestroy(Level level,Player player,BlockPos pos,BlockState state,net.minecraft.world.level.block.entity.BlockEntity entity,net.minecraft.world.item.ItemStack tool){
+        if(level instanceof net.minecraft.server.level.ServerLevel server&&!server.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOBLOCKDROPS)&&!JuniorMining.collecting(level))
+            for(var drop:getDrops(state,server,pos,entity,player,tool))net.minecraft.world.Containers.dropItemStack(level,pos.getX()+.5,pos.getY()+.5,pos.getZ()+.5,drop);
+        super.playerDestroy(level,player,pos,state,entity,tool);
     }
     @Override protected InteractionResult useWithoutItem(BlockState state,Level level,BlockPos pos,Player player,BlockHitResult hit) {
         if (!level.isClientSide && player instanceof ServerPlayer server && level.getBlockEntity(pos) instanceof JuniorTurtleEntity turtle)

@@ -10,7 +10,7 @@ robot models (models/block/robot_body.json and robot_decoration.json). Requires 
 
     python3 scripts/generate_textures.py
 """
-import colorsys, json, pathlib
+import colorsys, json, math, pathlib
 from PIL import Image
 
 root = pathlib.Path(__file__).resolve().parents[1]
@@ -29,7 +29,7 @@ COLOURS = {'white': 0xf0f0f0, 'orange': 0xf2b233, 'magenta': 0xe57fd8, 'light_bl
 DECORATIONS = ['3dglasses', 'bandana_blue', 'bandana_purple', 'bandana_red', 'bandana_yellow', 'creeper', 'crown',
                'elf', 'flames', 'frown', 'moustache', 'smile', 'snorkel', 'strawhat', 'sunglasses', 'teeth', 'tuxedo']
 BUTTONS = ['abort', 'dig', 'moveback', 'movedown', 'moveforward', 'moveup', 'next', 'pause', 'place', 'previous',
-           'recall', 'run', 'show_normal_view', 'show_turtle_view', 'step', 'stop', 'turnleft', 'turnright', 'close']
+           'recall', 'run', 'show_normal_view', 'show_turtle_view', 'step', 'stop', 'turnleft', 'turnright', 'close', 'take_all']
 TABS = ['program', 'customise', 'inventory', 'remote']
 
 
@@ -80,17 +80,121 @@ def realign_left(img, start):
 
 
 OUTLINE = (0x11, 0x14, 0x19, 255)
+# Screen blue from the shared palette (the eyes): the robots' edge line and its passing signal.
+EDGE, SIGNAL = (tuple(int(h[i:i + 2], 16) for i in (1, 3, 5)) + (255,) for h in standard['palette']['screen_blue'][1:])
 
 
-def outline(img):
+def ring(w, h):
+    """Every border texel once, clockwise from the top left corner."""
+    return ([(x, 0) for x in range(w)] + [(w - 1, y) for y in range(1, h)] +
+            [(x, h - 1) for x in range(w - 2, -1, -1)] + [(0, y) for y in range(h - 2, 0, -1)])
+
+
+def outline(img, colour=OUTLINE):
     """Ring the face with the palette outline. Codex drew the dark edge on some sides of some faces
     only, so on the cube a side without it looked cut off; every face edge is a cube edge."""
     img = img.copy()
+    for xy in ring(*img.size):
+        img.putpixel(xy, colour)
+    return img
+
+
+CORNER = 6  # texels from each face corner kept for the drawn brass corner brackets
+
+
+def plain(img):
+    """The robot's sides and top, in every colour: at 22 texels the drawn gear and brass plate read as
+    noise. They become a raised plain panel with the paint's own shadow and highlight tones, inside the
+    face's drawn frame, shading bands and corner brackets."""
+    out = img.copy()
     w, h = img.size
-    for x in range(w):
-        img.putpixel((x, 0), OUTLINE); img.putpixel((x, h - 1), OUTLINE)
-    for y in range(h):
-        img.putpixel((0, y), OUTLINE); img.putpixel((w - 1, y), OUTLINE)
+    x0, y0, x1, y1 = 5, 5, w - 6, h - 6
+    for y in range(3, h - 3):
+        for x in range(3, w - 3):
+            corner = min(x, w - 1 - x) < CORNER and min(y, h - 1 - y) < CORNER
+            if x0 <= x <= x1 and y0 <= y <= y1:
+                tone = PAINT[3] if x == x0 or y == y0 else PAINT[1] if x == x1 or y == y1 else PAINT[2]
+                out.putpixel((x, y), tone + (255,))
+            elif not corner and out.getpixel((x, y))[:3] not in PAINT:
+                out.putpixel((x, y), PAINT[1] + (255,))
+    return out
+
+
+# The robot's edge signal, on every body colour: one pulse of light runs like current over all twelve
+# edges of the cube and round again. A cube corner has three edges, so no loop covers every edge once;
+# this one runs four edges (two front verticals, the top and bottom back edges) a second time, always in
+# the same direction, so the light never turns back on its own trail. The outline rests dark; only where
+# the pulse has just passed does it light up, then fade out slowly like a breath. Every path texel gets
+# its distances along the path from its place on the cube, so the two faces that share an edge light it
+# together.
+EDGE_SPEED = 3  # texels per tick
+FADE = 200  # texels the light takes to fade out behind the pulse: over half the loop lit, a darker stretch ahead of it
+REST = .3  # brightness of the dark outline after the light has faded
+EDGE_HEIGHT = 48  # the edge sheet uses only the top 48 rows of the body layout, so its frames are 128 x 48
+TRAIL = [(0xe6, 0xfb, 0xff), SIGNAL[:3], (0x7c, 0xd4, 0xee), (0x55, 0xbb, 0xe6), (0x3c, 0xab, 0xe0)]  # head, then fading to EDGE
+
+
+def hexes(name):
+    return [tuple(int(h[i:i + 2], 16) for i in (1, 3, 5)) for h in standard['palette'][name]]
+
+
+def mix(a, b, t):
+    return tuple(round(x + (y - x) * t) for x, y in zip(a, b))
+
+
+def signal_colours(edge, light):
+    """Edge colour and trail (head first) for a signal in the palette's edge and light tones."""
+    return edge + (255,), [mix(light, (255, 255, 255), .6), light] + [mix(light, edge, t) for t in (.4, .7, .85)]
+
+
+# Signal colour by program state, as JuniorTurtleEntity.signal() names it: idle in the eyes' screen blue,
+# running in movement green, an error in red.
+SIGNALS = {'': (EDGE, TRAIL),
+           'running': signal_colours(hexes('movement_green')[1], hexes('movement_green')[2]),
+           'error': signal_colours(hexes('red')[1], mix(hexes('red')[1], (255, 255, 255), .45))}
+
+
+def cube_texel(face, u, v):
+    """Body texel (X along x, Y up, Z along z; 24 x 24 x 22) under texel (u, v) of a face, by the
+    block model's UV convention for each face."""
+    return {'north': (23 - u, 23 - v, 0), 'south': (u, 23 - v, 21), 'west': (0, 23 - v, u),
+            'east': (23, 23 - v, 21 - u), 'up': (u, 23, v), 'down': (u, 0, 21 - v)}[face]
+
+
+def signal_path():
+    """Edge path length and body texel -> distances along it (body corners at X 0/23, Y 0/23, Z 0/21)."""
+    corners = [(0, 0, 21), (0, 0, 0), (0, 23, 0), (0, 23, 21), (23, 23, 21), (23, 0, 21), (0, 0, 21), (0, 23, 21),
+               (23, 23, 21), (23, 23, 0), (23, 0, 0), (0, 0, 0), (0, 23, 0), (23, 23, 0), (23, 0, 0), (23, 0, 21)]
+    path = []
+    for a, b in zip(corners, corners[1:] + corners[:1]):
+        steps = max(abs(q - p) for p, q in zip(a, b))
+        path += [tuple(p + (q - p) * i // steps for p, q in zip(a, b)) for i in range(steps)]
+    assert len(path) % EDGE_SPEED == 0, len(path)
+    along = {}
+    for i, texel in enumerate(path):
+        along.setdefault(texel, []).append(i)
+    assert len(along) == 4 * (24 + 24 + 22) - 2 * 8, 'every edge texel'  # all twelve edges, corners counted once
+    return len(path), along
+
+
+EDGE_PATH, SIGNAL_PATH = signal_path()
+EDGE_FRAMES = EDGE_PATH // EDGE_SPEED
+
+
+def edge_signal(face, w, h, frame, edge=EDGE, trail=TRAIL):
+    """One frame of a face's edge ring (the rest transparent), drawn on a shell just outside the body."""
+    rest = tuple(round(x * REST) for x in edge[:3])
+    # Behind the head the pulse's colours give way to the edge colour, while the light eases out to rest
+    # along a half cosine; a little glow runs ahead of the head.
+    tones = trail + [edge[:3]] * FADE
+    colours = {d: mix(rest, tones[d], (1 + math.cos(math.pi * d / FADE)) / 2) + (255,) for d in range(FADE)}
+    for d in range(1, EDGE_SPEED + 1):
+        colours[EDGE_PATH - d] = mix(rest, trail[1], .45 / d) + (255,)
+    head = frame * EDGE_SPEED
+    img = Image.new('RGBA', (w, h))
+    for xy in ring(w, h):
+        behind = min(((head - a) % EDGE_PATH for a in SIGNAL_PATH.get(cube_texel(face, *xy), [])), default=None)
+        img.putpixel(xy, colours.get(behind, rest + (255,)))
     return img
 
 
@@ -198,7 +302,9 @@ def robot_textures():
     body['south'] = realign_left(body['south'], MISALIGNED['body_back'])
     body = {k: symmetric(v, vertical=True) for k, v in body.items()}
     body['east'] = body['west']  # body_right is cut low too; the symmetric left side serves for both
-    body = {k: outline(solid(v)) for k, v in body.items()}
+    body = {k: solid(v) for k, v in body.items()}
+    faces = {k: outline(plain(v) if k in ('west', 'east', 'up') else v, EDGE) for k, v in body.items()}
+    body = {k: outline(v) for k, v in body.items()}
     pack = {k: outline(solid(v)) for k, v in pack.items()}
     eyes = {name: load(f'eyes_{name}') for name in EYES}
     x, y, w, h = EYES_BOX
@@ -207,7 +313,7 @@ def robot_textures():
                               'frames': [{'index': EYES.index(name), 'time': ticks} for name, ticks in EYE_TIMELINE]}}
     for name, colour in COLOURS.items():
         tones = ramp(colour)
-        painted = {k: recolour(v, tones) for k, v in body.items()}
+        painted = {k: recolour(v, tones) for k, v in faces.items()}
         # Animated texture: one 128 x 128 frame per eye drawing, stacked vertically.
         strip = Image.new('RGBA', (128, 128 * len(EYES)))
         for i, eye in enumerate(EYES):
@@ -218,9 +324,43 @@ def robot_textures():
             strip.paste(sheet, (0, 128 * i))
         strip.save(blocks / f'turtle_junior_{name}.png')
         (blocks / f'turtle_junior_{name}.png.mcmeta').write_text(json.dumps(timeline, indent=1) + '\n')
+    edges()
     paint, trim = split_paint(body['north'])
     x3 = lambda img: img.resize((img.width * 3, img.height * 3), Image.NEAREST)  # 72 x 72, drawn at 36 x 36
     x3(paint).save(gui / 'turtle.png'); x3(trim).save(gui / 'turtle_overlay.png')
+
+
+def edges():
+    """The robot's animated edge signals, one per program state: a texture and a model of a shell a hair
+    outside the body (JuniorBodyRendererMixin draws it at full brightness over every body colour, so the
+    edges glow)."""
+    shell = json.loads((assets / 'models/block/robot_body.json').read_text())['elements'][0]
+    shell['from'] = [n - .05 for n in shell['from']]
+    shell['to'] = [n + .05 for n in shell['to']]
+    shell['neoforge_data'] = {'block_light': 15, 'sky_light': 15}  # glows as an item too, where the renderer uses the model's own light
+    for face in shell['faces'].values():
+        face['texture'] = '#edges'
+        face['uv'] = [round(c * 128 / EDGE_HEIGHT, 4) if i % 2 else c for i, c in enumerate(face['uv'])]  # v in 128 x 48 frames
+    # The eye screen again, a hair in front of the body, so it is drawn at full brightness too and the
+    # eyes glow at night. Every colour's screen is the same, so the white texture serves them all. Body north face: texel (u, v) is at x = 14 - u / 2, y = 14 - v / 2.
+    x, y, w, h = EYES_BOX
+    u0, v0, _, _, _ = BODY['north']
+    screen = {'from': [14 - (x + w) / 2, 14 - (y + h) / 2, 1.97], 'to': [14 - x / 2, 14 - y / 2, 1.97],
+              'faces': {'north': {'uv': [(u0 + x) / 8, (v0 + y) / 8, (u0 + x + w) / 8, (v0 + y + h) / 8], 'texture': '#body'}}}
+    for state, (edge, trail) in SIGNALS.items():
+        name = 'turtle_junior_edges' + (f'_{state}' if state else '')
+        strip = Image.new('RGBA', (128, EDGE_HEIGHT * EDGE_FRAMES))
+        for frame in range(EDGE_FRAMES):
+            sheet = Image.new('RGBA', (128, EDGE_HEIGHT))
+            paste(sheet, BODY, {k: edge_signal(k, w, h, frame, edge, trail) for k, (_, _, w, h, _) in BODY.items()})
+            strip.paste(sheet, (0, EDGE_HEIGHT * frame))
+        strip.save(blocks / f'{name}.png')
+        (blocks / f'{name}.png.mcmeta').write_text(json.dumps({'animation': {'frametime': 1, 'width': 128, 'height': EDGE_HEIGHT}}, indent=1) + '\n')
+        model = {'parent': 'minecraft:block/block',
+                 'textures': {'particle': '#edges', 'edges': f'singularbots:block/{name}',
+                              'body': 'singularbots:block/turtle_junior_white'},
+                 'elements': [shell, screen]}
+        (assets / f'models/block/{name}.json').write_text(json.dumps(model, indent=2) + '\n')
 
 
 def decorations():

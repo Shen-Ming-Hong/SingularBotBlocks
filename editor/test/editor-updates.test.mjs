@@ -35,7 +35,7 @@ test('a burst of block changes generates one preview per animation frame without
 
 test('the loaded program becomes ready before the optional transfer list and item catalog finish',async()=>{
  const elements=new Map(),requests=[];let status,finishTransfers,optionalTask;
- const context={ready:false,connected:false,Blockly:{VERSION:'11.2.2'},tr:(_,en)=>en,
+ const context={takeover:{controlBlocked:false},ready:false,connected:false,Blockly:{VERSION:'11.2.2'},tr:(_,en)=>en,
   $:id=>{if(!elements.has(id))elements.set(id,{replaceChildren(){}});return elements.get(id);},
   request:async op=>{requests.push(op);return op==='ready'?{turtle:true}:op==='programLoad'?{program:{id:'saved'}}:{items:[]};},
   setItemCatalog:data=>context.catalog=data,rerenderItemFields:()=>context.rerendered=true,
@@ -52,15 +52,15 @@ test('the loaded program becomes ready before the optional transfer list and ite
 });
 
 test('runtime lamp follows the state and only offers the pause or resume that applies',()=>{
- const el={};const context={connected:true,$:id=>(el[id]??={dataset:{}})};
+ const el={},layouts=[];const context={connected:true,tr:zh=>zh,request:async(op,data)=>layouts.push(data.compact),document:{body:{classList:{toggle(){}}}},workspace:{getToolbox:()=>null},$:id=>(el[id]??={dataset:{},setAttribute(){}})};
  runInNewContext(section('function runtimeControls(','async function state()')+';this.controls=runtimeControls;',context);
  context.controls('stopped');
  assert.equal(el.runtimeLamp.dataset.status,'stopped');assert.equal(el.pause.hidden,false);assert.equal(el.pause.disabled,true);assert.equal(el.resume.hidden,true);assert.equal(el.stop.disabled,true);
  context.controls('running');
  assert.equal(el.pause.disabled,false);assert.equal(el.stop.disabled,false);assert.equal(el.resume.hidden,true);
  context.controls('paused');
- assert.equal(el.pause.hidden,true);assert.equal(el.resume.hidden,false);assert.equal(el.stop.disabled,false);
- context.controls('error');
+ assert.equal(el.pause.hidden,true);assert.equal(el.resume.hidden,false);assert.equal(el.stop.disabled,false);assert.deepEqual(layouts,[true]);
+ context.controls('error');assert.deepEqual(layouts,[true,false]);
  assert.equal(el.runtimeLamp.dataset.status,'error');assert.equal(el.pause.disabled,true);assert.equal(el.stop.disabled,false);
 });
 
@@ -138,7 +138,7 @@ test('continuous runs return to the remote page without forcing the robot camera
 
 test('an idle editor follows saved edits and program switches made from another editor on the same robot',async()=>{
  const loads=[],shown=[];let scrolled;
- const context={program:{id:'a',revision:2,mode:'blocks'},dirty:false,saving:false,loading:false,tr:a=>a,setStatus:()=>{},library:async()=>[],
+ const context={program:{id:'a',revision:2,mode:'blocks'},inspecting:null,dirty:false,saving:false,loading:false,tr:a=>a,setStatus:()=>{},library:async()=>[],
   workspace:{scrollX:5,scrollY:6,scale:1.2,setScale(v){this.scale=v;},scroll(x,y){scrolled=[x,y];}},
   request:async(op,data)=>{loads.push(data.id);return {program:{id:data.id,revision:9,mode:'blocks'}};},
   display:p=>{shown.push(p.id);context.program=p;},$:()=>({})};
@@ -148,6 +148,10 @@ test('an idle editor follows saved edits and program switches made from another 
  await context.follow({selected:'b'});assert.deepEqual(shown,['a','b']);
  context.dirty=true;await context.follow({selected:'c',revision:99});assert.deepEqual(loads,['a','b']);
  context.dirty=false;context.saving=true;await context.follow({selected:'b',revision:99});assert.deepEqual(loads,['a','b']);
+ // Looking at the program the robot is running (x, called from b) is not pulled back to b; another switch still is.
+ context.saving=false;context.program={id:'x',revision:1,mode:'blocks'};context.inspecting={id:'x',from:'b'};
+ await context.follow({selected:'b',revision:1});assert.deepEqual(loads,['a','b']);
+ await context.follow({selected:'c',revision:1});assert.deepEqual(loads,['a','b','c']);
 });
 
 test('a double click on New creates only one program',async()=>{
@@ -213,9 +217,9 @@ test('the side panel has no fixed hint text and folds away when it has nothing t
 test('runtime polling speeds up only while a program runs so the highlight keeps pace with the robot',()=>{
  const context={};
  runInNewContext(section("let pollStatus=","(function poll()")+';this.delay=pollDelay;this.set=v=>{pollStatus=v;};',context);
- assert.equal(context.delay(),700);
+ assert.equal(context.delay(),300);
  context.set('running');assert.ok(context.delay()<=150);
- for(const status of ['paused','stopped','error']){context.set(status);assert.equal(context.delay(),700);}
+ for(const status of ['paused','stopped','error']){context.set(status);assert.equal(context.delay(),300);}
 });
 
 test('input-method text stays visible above an open editor dialog',()=>{
@@ -267,4 +271,90 @@ test('input-method text is composed inside the focused text field and replaced b
  context.window.cceduComposition('ㄕ');context.window.cceduComposition('');assert.equal(field.value,'礦');
  assert.ok(reports.length>0&&reports.every(r=>r.op==='imeCaret'));
  assert.deepEqual(reports.at(-1),{op:'imeCaret',x:31,y:20,height:30});
+});
+
+test('automatic saving waits until a dragged block is dropped',()=>{
+ const timers=[];let saves=0,dragging=true;
+ const context={loading:false,editVersion:0,dirty:false,ready:true,smokeTesting:false,timer:0,
+  workspace:{isDragging:()=>dragging},save:()=>{saves++;return Promise.resolve();},
+  requestAnimationFrame:()=>1,refreshPreview:()=>{},syncSave:()=>{},clearTimeout:()=>{},setTimeout:fn=>{timers.push(fn);return timers.length;}};
+ runInNewContext(section('let previewFrame=','function suggest()')+';this.change=changed;',context);
+ context.change();timers.shift()();
+ assert.equal(saves,0);assert.equal(timers.length,1,'checks again later');
+ dragging=false;timers.shift()();
+ assert.equal(saves,1);
+});
+
+test('stepping or opening the editor while the program runs shrinks the workbench beside the robot without the block categories and stopping restores it, unless the student expands it',()=>{
+ const elements={},requests=[],classes=new Set(),toolbox={visible:true,resized:0,cleared:0,clearSelection(){this.cleared++;},setVisible(on){this.visible=on;}};
+ const context={connected:true,tr:(zh)=>zh,request:async(op,data)=>{requests.push([op,data.compact]);return {};},
+  document:{body:{classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)}}},
+  workspace:{getToolbox:()=>toolbox},Blockly:{svgResize:()=>toolbox.resized++},$:id=>(elements[id]??={dataset:{},setAttribute(name,value){this[name]=value;}})};
+ runInNewContext(section('let compact=false','// The narrow workbench')+';this.layout=stepLayout;',context);
+ context.layout('stopped');
+ assert.equal(requests.length,0);assert.equal(elements.compact.hidden,true);
+ context.layout('paused');
+ assert.deepEqual(requests.at(-1),['layout',true]);assert.ok(classes.has('compact'));assert.equal(elements.compact.hidden,false);
+ assert.equal(toolbox.visible,false);assert.equal(toolbox.cleared,1);assert.equal(toolbox.resized,1);
+ context.layout('paused');assert.equal(requests.length,1);
+ context.pollStatus='paused';elements.compact.onclick();
+ assert.deepEqual(requests.at(-1),['layout',false]);assert.ok(!classes.has('compact'));assert.equal(toolbox.visible,true);
+ assert.equal(elements.compact.dataset.icon,'shrink');assert.equal(elements.compact.dataset.tip,'縮小編輯器');assert.equal(elements.compact['aria-label'],'縮小編輯器');
+ context.layout('paused');context.layout('running');assert.equal(requests.length,2);assert.equal(elements.compact.hidden,false);
+ context.pollStatus='running';elements.compact.onclick();
+ assert.deepEqual(requests.at(-1),['layout',true]);assert.equal(elements.compact.dataset.icon,'expand');assert.equal(elements.compact.dataset.tip,'放大編輯器');assert.equal(elements.compact['aria-label'],'放大編輯器');
+ context.layout('stopped');assert.deepEqual(requests.at(-1),['layout',false]);
+ context.layout('running');
+ assert.deepEqual(requests.at(-1),['layout',true]);
+ context.layout('error');
+ assert.deepEqual(requests.at(-1),['layout',false]);assert.equal(elements.compact.hidden,true);
+});
+
+test('the editor follows the running program into a called library program and back out level by level',async()=>{
+ const programs={main:{id:'main',name:'主程式'},sub:{id:'sub',name:'子程式'},deep:{id:'deep',name:'更深'},other:{id:'other',name:'別的'}};
+ const shown=[],inspected=[],select={};
+ const context={program:programs.main,dirty:false,saving:false,loading:false,inspecting:null,runtimeError:'',tr:zh=>zh,
+  $:()=>select,setStatus(){},display(p){shown.push(p.id);context.program=p;},
+  request:async(op,{id})=>{inspected.push(op);return {program:programs[id]};}};
+ runInNewContext(section('let lastRun=null;','async function state()')+';this.followCall=followCall;this.reopen=()=>{lastRun=null;};',context);
+ const poll=(status,stack)=>context.followCall({status,programId:stack.at(-1),callStack:stack},{selected:'main'});
+ await poll('running',['main']);assert.deepEqual(shown,[]);
+ await poll('running',['main','sub']);assert.equal(context.program.id,'sub');
+ await poll('paused',['main','sub','deep']);assert.equal(context.program.id,'deep');
+ await poll('running',['main','sub']);assert.equal(context.program.id,'sub');
+ await poll('running',['main']);assert.equal(context.program.id,'main');assert.equal(context.inspecting,null);
+ assert.ok(inspected.every(op=>op==='programInspect'));
+ // Unsaved edits are never replaced, and a program the student opened on purpose is left alone.
+ context.dirty=true;await poll('running',['main','sub']);assert.equal(context.program.id,'main');context.dirty=false;
+ context.program=programs.other;await poll('running',['main','sub']);assert.equal(context.program.id,'other');
+ // Stopping inside a called program returns to the program the robot started.
+ context.program=programs.main;await poll('running',['main','sub']);assert.equal(context.program.id,'sub');
+ await poll('stopped',['main','sub']);assert.equal(context.program.id,'main');
+ // An error inside the called program is shown there, but looking back at the caller afterwards is allowed.
+ await poll('running',['main']);await poll('error',['main','sub']);assert.equal(context.program.id,'sub');
+ context.program=programs.main;await poll('error',['main','sub']);assert.equal(context.program.id,'main');
+ // Opening the editor again always goes to the failed block, even when it first showed the caller.
+ context.reopen();await poll('error',['main','sub']);assert.equal(context.program.id,'sub');
+ // A poll before any program is loaded does not forget that the editor was just opened.
+ context.reopen();context.program=null;await poll('error',['main','sub']);context.program=programs.main;await poll('error',['main','sub']);assert.equal(context.program.id,'sub');
+});
+
+test('the full editor returns to the start block when the program ends inside a function',()=>{
+ const centered=[],blocks={start:{id:'start',type:'ccedu_start'},def:{id:'def',type:'procedures_defnoreturn'},inner:{id:'inner',getRootBlock:()=>blocks.def}};
+ const workspace={getBlockById:id=>blocks[id]||null,getTopBlocks:()=>[blocks.def,blocks.start],centerOnBlock:id=>centered.push(id),
+  getMetricsManager:()=>({getViewMetrics:()=>({left:0,top:0,width:100,height:100})})};
+ blocks.inner.getBoundingRectangleWithoutChildren=()=>({left:500,top:500,right:520,bottom:520});
+ const context={workspace,compact:false,FUNCTION_DEFINITIONS:['procedures_defnoreturn','procedures_defreturn']};
+ runInNewContext(section("let shownBlock=''","// A teacher guiding")+';this.keepInView=keepInView;',context);
+ context.keepInView('inner');assert.deepEqual(centered,['inner']);
+ context.keepInView(null);assert.deepEqual(centered,['inner','start']);
+ context.keepInView(null);assert.deepEqual(centered,['inner','start']);
+});
+
+
+test('releasing a takeover opens an existing program even when the teacher deleted the old selection',async()=>{
+ const shown=[],loads=[];const context={program:{id:'deleted'},savedSelection:'deleted',library:async()=>[{id:'remaining'}],request:async(op,data)=>{loads.push([op,data.id]);return {program:{id:data.id}};},display:p=>shown.push(p?.id||null)};
+ runInNewContext(section('async function reloadAfterTakeover()','const takeover=installTakeover')+';this.reload=reloadAfterTakeover;',context);
+ await context.reload();assert.deepEqual(loads,[['programInspect','remaining']]);assert.deepEqual(shown,['remaining']);
+ context.library=async()=>[];await context.reload();assert.equal(shown.at(-1),null);assert.equal(loads.length,1);
 });

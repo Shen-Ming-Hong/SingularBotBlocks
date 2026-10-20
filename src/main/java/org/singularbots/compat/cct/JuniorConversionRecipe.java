@@ -22,7 +22,7 @@ public final class JuniorConversionRecipe extends CustomRecipe {
     @Override public boolean matches(CraftingInput input,Level level){return !original(input).isEmpty();}
     @Override public ItemStack assemble(CraftingInput input,HolderLookup.Provider lookup){
         var original=original(input);if(original.isEmpty())return ItemStack.EMPTY;
-        var result=new ItemStack(TeachingContent.JUNIOR_ITEM.get());result.applyComponents(original.getComponentsPatch());return result;
+        var result=new ItemStack(TeachingContent.JUNIOR_ITEM.get());result.applyComponents(original.getComponentsPatch());JuniorMining.strip(result);return result;
     }
     @Override public boolean canCraftInDimensions(int width,int height){return width*height>=2;}
     @Override public RecipeSerializer<?> getSerializer(){return TeachingContent.CONVERSION.get();}

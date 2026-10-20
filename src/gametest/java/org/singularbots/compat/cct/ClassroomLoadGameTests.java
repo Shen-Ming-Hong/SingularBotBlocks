@@ -18,12 +18,12 @@ import java.util.*;
 @PrefixGameTestTemplate(false)
 public final class ClassroomLoadGameTests {
     private static final org.slf4j.Logger LOG=com.mojang.logging.LogUtils.getLogger();
-    private static final int STUDENTS=30,TICKS=200,SAVE_EVERY=14,POLL_EVERY=3,LIST_EVERY=100;
+    private static final int STUDENTS=30,TICKS=200,SAVE_EVERY=6,POLL_EVERY=3,LIST_EVERY=100;
     private static boolean enabled(){return System.getProperty("ccedu.loadTest")!=null;}
     private static ServerPlayer player(GameTestHelper h){var player=h.makeMockServerPlayerInLevel();NetworkRegistry.configureMockConnection(player.connection.getConnection());return player;}
     private static JuniorTurtleEntity robot(GameTestHelper h,BlockPos pos,ServerPlayer owner){
         h.setBlock(pos,TeachingContent.JUNIOR.get());var t=(JuniorTurtleEntity)h.getBlockEntity(pos);
-        ((dan200.computercraft.shared.turtle.core.TurtleBrain)t.getAccess()).setOwningPlayer(owner.getGameProfile());t.placedBy(owner,true);
+        ((dan200.computercraft.shared.turtle.core.TurtleBrain)t.getAccess()).setOwningPlayer(owner.getGameProfile());t.placedBy(owner);
         var center=t.getBlockPos().getCenter();owner.teleportTo(center.x,center.y,center.z);RemoteService.track(t);return t;
     }
     /** Loose comment stacks are drafts that never run; they give a saved program a realistic size. */
@@ -58,13 +58,16 @@ public final class ClassroomLoadGameTests {
         }catch(Exception e){throw new GameTestAssertException("Classroom setup failed: "+e);}
         // Built before measuring: in a real server the request arrives already parsed, so only the mod's handling is timed.
         var draftProgram=filler("作業",bytes);
+        var rates=new org.singularbots.program.RequestRate[STUDENTS];for(int i=0;i<STUDENTS;i++)rates[i]=new org.singularbots.program.RequestRate(0);
         var costs=new ArrayList<Long>();var saves=new int[1];var tick=new int[1];var tickNanos=new ArrayList<Long>();var server=h.getLevel().getServer();
         h.onEachTick(()->{
             if(tick[0]>=TICKS)return;int now=tick[0]++;long start=System.nanoTime();
             for(int i=0;i<STUDENTS;i++){
                 var owner=players.get(i);var t=robots.get(i);
+                int requests=((now+i)%SAVE_EVERY==0?2:0)+((now+i)%POLL_EVERY==0?1:0)+((now+i*3)%LIST_EVERY==0?1:0);
+                for(int n=0;n<requests;n++)h.assertTrue(rates[i].allow(now*50L),"300ms editor traffic exceeded the per-player request budget");
                 try{
-                    // An editor auto-saves 0.7 s after the student stops typing, then refreshes its library.
+                    // An editor auto-saves 0.3 s after the student stops typing, then refreshes its library.
                     if((now+i)%SAVE_EVERY==0){var save=op("programSave",drafts.get(i));save.addProperty("revision",revisions[i]);save.add("program",draftProgram);
                         revisions[i]=ProgramService.handle(owner,t,save).getAsJsonObject("program").get("revision").getAsLong();ProgramService.handle(owner,t,op("programList",drafts.get(i)));saves[0]++;}
                     if((now+i)%POLL_EVERY==0)ProgramService.handle(owner,t,op("programState",drafts.get(i)));
