@@ -5,6 +5,7 @@ import java.util.*;
 
 /** Shared across turtle moves; accessed by the Lua worker and server thread. */
 public final class ProgramRuntime {
+    private static final Gson GSON=new Gson();
     public enum Status { STOPPED,RUNNING,PAUSED,ERROR }
     private Status status=Status.STOPPED;
     private String source,blockId="",error="";
@@ -54,5 +55,5 @@ public final class ProgramRuntime {
     public synchronized void clearVariables(){variables.clear();}
     public synchronized void slot(int value){currentSlot=value;}
     public synchronized int slot(){return currentSlot;}
-    public synchronized JsonObject json(){var j=new JsonObject();j.addProperty("status",status.name().toLowerCase(Locale.ROOT));j.addProperty("debugMode",instrumented?"blocks":"actions");j.addProperty("blockId",blockId);j.addProperty("programId",context.id);j.addProperty("programName",context.name);j.addProperty("callDepth",frames.size());j.addProperty("error",error);j.addProperty("errorLine",errorLine);j.add("variables",new Gson().toJsonTree(variables));return j;}
+    public synchronized JsonObject json(){var j=new JsonObject();j.addProperty("status",status.name().toLowerCase(Locale.ROOT));j.addProperty("debugMode",instrumented?"blocks":"actions");j.addProperty("blockId",blockId);j.addProperty("programId",context.id);j.addProperty("programName",context.name);j.addProperty("callDepth",frames.size());var stack=new JsonArray();for(var it=frames.descendingIterator();it.hasNext();)stack.add(it.next().context.id);stack.add(context.id);j.add("callStack",stack);j.addProperty("error",error);j.addProperty("errorLine",errorLine);j.add("variables",GSON.toJsonTree(variables));return j;}
 }

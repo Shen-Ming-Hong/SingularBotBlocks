@@ -27,7 +27,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.*;
 
 /** Legacy icon controls and four side tabs, with a live server-authorized inventory. */
-public final class RemoteScreen extends AbstractContainerScreen<RemoteMenu> {
+public final class RemoteScreen extends AbstractContainerScreen<RemoteMenu> implements org.singularbots.client.ScreenWalking.Walkable {
     private enum Page { REMOTE, CUSTOMISE, INVENTORY }
     private record Control(AbstractWidget widget,Page page,int x,int y) { }
     private final List<Control> controls=new ArrayList<>();
@@ -36,7 +36,7 @@ public final class RemoteScreen extends AbstractContainerScreen<RemoteMenu> {
     private Page page=Page.REMOTE;
     private EditBox name;
     private IconButton cameraButton;
-    private IconButton runtimeLeft,runtimeMiddle,runtimeRight;
+    private IconButton runtimeLeft,runtimeMiddle,runtimeRight,takeAll;
     private final List<IconButton> movement=new ArrayList<>();
     private boolean updatingName,nameDirty;
     private int nameChangedAt;
@@ -82,6 +82,8 @@ public final class RemoteScreen extends AbstractContainerScreen<RemoteMenu> {
         icon("next_decoration","button_next",Page.CUSTOMISE,69,29,()->cycleDecoration(1));
         icon("previous_colour","button_previous",Page.CUSTOMISE,7,51,()->cycleColour(-1));
         icon("next_colour","button_next",Page.CUSTOMISE,69,51,()->cycleColour(1));
+        // A small bar in the free space under the robot's slots 13-16: the server moves the whole backpack to the player.
+        takeAll=icon("take_all","button_take_all",Page.INVENTORY,192,92,()->minecraft.gameMode.handleInventoryButtonClick(menu.containerId,RemoteMenu.TAKE_ALL));takeAll.setSize(34,14);
         String[] tabImages={"tab_program","tab_customise","tab_inventory","tab_remote"};
         String[] tabLabels={"program","customise","inventory","controls"};
         for(int i=0;i<tabImages.length;i++){
@@ -115,9 +117,10 @@ public final class RemoteScreen extends AbstractContainerScreen<RemoteMenu> {
     }
     private void saveName(){if(nameDirty&&name!=null){nameDirty=false;action("name",0,name.getValue());}}
     private void cycleColour(int delta){
-        int current=state.has("colour")?state.get("colour").getAsInt():-1,index=13;
+        int current=state.has("colour")?state.get("colour").getAsInt():-1,index=0; // an uncoloured robot is drawn white
         for(int i=0;i<Appearance.COLOURS.length;i++)if(Appearance.COLOURS[i]==current)index=i;
-        action("colour",Math.floorMod(index-delta,Appearance.COLOURS.length),"");
+        // The owner chose (2026-10-16) that the colour arrows step the same way as the decoration arrows: right is the next colour.
+        action("colour",Math.floorMod(index+delta,Appearance.COLOURS.length),"");
     }
     private void cycleDecoration(int delta){String current=state.has("decoration")?state.get("decoration").getAsString():"none";action("decoration",Math.floorMod(Appearance.DECORATIONS.indexOf(current)+delta,Appearance.DECORATIONS.size()),"");}
     private void layout(){
@@ -130,6 +133,12 @@ public final class RemoteScreen extends AbstractContainerScreen<RemoteMenu> {
         for(var c:controls){c.widget.visible=c.page==null||c.page==page;c.widget.setPosition(leftPos+(c.page==null?imageWidth-10:c.x),topPos+c.y);}
         for(int i=0;i<tabs.size();i++){var tab=tabs.get(i);tab.setPosition(leftPos+imageWidth-3,topPos+imageHeight-93+i*23);tab.selected=i==(page==Page.REMOTE?3:page==Page.CUSTOMISE?1:2);}
     }
+    /** The side tabs stick out past the panel; item-list mods such as JEI must keep their own buttons off them. */
+    public List<net.minecraft.client.renderer.Rect2i> sideAreas(){
+        var areas=new ArrayList<net.minecraft.client.renderer.Rect2i>();
+        for(var tab:tabs)if(tab.visible)areas.add(new net.minecraft.client.renderer.Rect2i(tab.getX(),tab.getY(),tab.getWidth(),tab.getHeight()));
+        return areas;
+    }
     public void selectPage(int index){if(index<1||index>3)throw new IllegalArgumentException("Unknown remote page");page=index==1?Page.CUSTOMISE:index==2?Page.INVENTORY:Page.REMOTE;if(name!=null)name.setFocused(false);setFocused(null);hoveredSlot=null;layout();}
     private static Component errorText(String error){
         var message=org.singularbots.turtle.RemoteDiagnostics.describe(error);
@@ -139,16 +148,20 @@ public final class RemoteScreen extends AbstractContainerScreen<RemoteMenu> {
         // This robot's own 16 slots, already synced into the open menu, for the editor's slot picker.
         var inventory=new com.google.gson.JsonArray();for(int i=0;i<16;i++){var item=menu.getSlot(i).getItem();var slot=new com.google.gson.JsonArray();if(!item.isEmpty()){slot.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item.getItem()).toString());slot.add(item.getCount());}inventory.add(slot);}
         copy.add("inventory",inventory);return copy;}
+    public void takeover(org.singularbots.network.ProgramNetwork.TakeoverNotice notice){if(!state.has("takeover")||!state.getAsJsonObject("takeover").get("library").getAsString().equals(notice.library().toString()))return;state.add("takeover",JsonParser.parseString(notice.json()));applyTakeover();}
+    private boolean controlBlocked(){return state.has("takeover")&&state.getAsJsonObject("takeover").has("controlBlocked")&&state.getAsJsonObject("takeover").get("controlBlocked").getAsBoolean();}
+    private void applyTakeover(){boolean blocked=controlBlocked();for(var c:controls)if(c.page!=null&&c.widget!=cameraButton&&!movement.contains(c.widget)&&c.widget!=runtimeLeft&&c.widget!=runtimeMiddle&&c.widget!=runtimeRight)c.widget.active=!blocked;if(blocked){if(name!=null)name.setFocused(false);for(var b:movement)b.active=false;if(runtimeLeft!=null){runtimeLeft.active=false;runtimeMiddle.active=false;runtimeRight.active=false;}}}
     public void receive(RemoteNetwork.State message){
         if(!message.turtle().equals(menu.turtleId))return;state=JsonParser.parseString(message.json()).getAsJsonObject();
         if(!state.get("error").getAsString().isEmpty())diagnostic=errorText(state.get("error").getAsString());
         else if(state.has("historyDiagnostic")&&!state.get("historyDiagnostic").getAsString().isEmpty())diagnostic=errorText(state.get("historyDiagnostic").getAsString());
         if(name!=null&&!name.isFocused()&&!nameDirty){updatingName=true;name.setValue(state.get("name").getAsString());updatingName=false;}
-        String status=runtimeStatus();boolean running=status.equals("running"),paused=status.equals("paused"),error=status.equals("error");
+        runtimeLeft.active=true;runtimeRight.active=true;String status=runtimeStatus();boolean running=status.equals("running"),paused=status.equals("paused"),error=status.equals("error");
         runtimeLeft.visible=page==Page.REMOTE&&(paused||status.equals("stopped")&&hasSnapshot());runtimeLeft.image=paused?"button_stop":"button_recall";runtimeLeft.setMessage(text(paused?"stop":"restore"));runtimeLeft.setTooltip(Tooltip.create(runtimeLeft.getMessage()));
         runtimeMiddle.image=running?"button_stop":"button_step";runtimeMiddle.setMessage(text(running?"stop":"step"));runtimeMiddle.setTooltip(Tooltip.create(runtimeMiddle.getMessage()));runtimeMiddle.active=!error;
         runtimeRight.image=running?"button_pause":error?"button_abort":"button_run";runtimeRight.setMessage(text(running?"pause":paused?"resume":error?"stop":"run"));runtimeRight.setTooltip(Tooltip.create(runtimeRight.getMessage()));
         for(var b:movement)b.active=status.equals("stopped");
+        applyTakeover();
         updateCamera();
     }
     @Override protected void containerTick(){super.containerTick();ProgramClient.tick();
@@ -200,19 +213,24 @@ public final class RemoteScreen extends AbstractContainerScreen<RemoteMenu> {
     public boolean isCameraView(){return camera!=null;}
     private void updateCameraButton(){if(cameraButton!=null){cameraButton.image=camera==null?"button_show_turtle_view":"button_show_normal_view";cameraButton.setMessage(text(camera==null?"camera":"player_view"));cameraButton.setTooltip(Tooltip.create(cameraButton.getMessage()));}}
     private void restoreCamera(){if(camera==null)return;minecraft.setCameraEntity(previousCamera==null||previousCamera.isRemoved()?minecraft.player:previousCamera);if(previousCameraType!=null)minecraft.options.setCameraType(previousCameraType);camera=null;robotPos=null;previousCamera=null;previousCameraType=null;updateCameraButton();}
-    @Override public void removed(){restoreCamera();if(warmEditor!=null){warmEditor.dispose();warmEditor=null;}super.removed();}
+    @Override public void removed(){org.singularbots.client.ScreenWalking.releaseAll();restoreCamera();if(warmEditor!=null){warmEditor.dispose();warmEditor=null;}super.removed();}
     @Override public void onClose(){saveName();super.onClose();}
     @Override public boolean keyPressed(int key,int scan,int modifiers){
-        if(name!=null&&name.visible&&name.isFocused()&&key!=GLFW.GLFW_KEY_ESCAPE&&key!=GLFW.GLFW_KEY_TAB){if(key==GLFW.GLFW_KEY_ENTER){saveName();setFocused(null);}else name.keyPressed(key,scan,modifiers);return true;}
+        if(!controlBlocked()&&name!=null&&name.visible&&name.isFocused()&&key!=GLFW.GLFW_KEY_ESCAPE&&key!=GLFW.GLFW_KEY_TAB){if(key==GLFW.GLFW_KEY_ENTER){saveName();setFocused(null);}else name.keyPressed(key,scan,modifiers);return true;}
+        // The movement keys walk the player while the controller stays open; Space would otherwise press the last clicked button.
+        if(org.singularbots.client.ScreenWalking.press(key,scan,modifiers))return true;
+        if(controlBlocked()&&page==Page.INVENTORY&&key!=GLFW.GLFW_KEY_ESCAPE)return true;
         return super.keyPressed(key,scan,modifiers);
     }
+    @Override public boolean keyReleased(int key,int scan,int modifiers){return org.singularbots.client.ScreenWalking.release(key,scan)||super.keyReleased(key,scan,modifiers);}
+    @Override public boolean letsPlayerWalk(){return name==null||!name.isFocused();}
     @Override public boolean mouseClicked(double x,double y,int button){
         // Container screens process outside-slot clicks even when a widget handled them.
         // Consume tabs first so a rejected page change cannot drop the carried stack.
         widgetMouseButton=-1;
-        if(page==Page.INVENTORY&&button==2){for(int i=0;i<16;i++){var slot=menu.getSlot(i);if(x>=leftPos+slot.x&&x<leftPos+slot.x+16&&y>=topPos+slot.y&&y<topPos+slot.y+16){widgetMouseButton=button;action("select",i,"");return true;}}}
+        if(page==Page.INVENTORY&&!controlBlocked()&&button==2){for(int i=0;i<16;i++){var slot=menu.getSlot(i);if(x>=leftPos+slot.x&&x<leftPos+slot.x+16&&y>=topPos+slot.y&&y<topPos+slot.y+16){widgetMouseButton=button;action("select",i,"");return true;}}}
         for(var child:children())if(child instanceof AbstractWidget w&&w.visible&&w.mouseClicked(x,y,button)){widgetMouseButton=button;setFocused(w);return true;}
-        if(page==Page.INVENTORY)return super.mouseClicked(x,y,button);
+        if(page==Page.INVENTORY)return controlBlocked()||super.mouseClicked(x,y,button);
         setFocused(null);return false;
     }
     @Override public boolean mouseReleased(double x,double y,int button){
@@ -221,7 +239,7 @@ public final class RemoteScreen extends AbstractContainerScreen<RemoteMenu> {
     }
     @Override public boolean mouseDragged(double x,double y,int button,double dx,double dy){
         if(widgetMouseButton==button)return getFocused()!=null&&getFocused().mouseDragged(x,y,button,dx,dy);
-        return page==Page.INVENTORY&&super.mouseDragged(x,y,button,dx,dy);
+        return page==Page.INVENTORY&&!controlBlocked()&&super.mouseDragged(x,y,button,dx,dy);
     }
     @Override public void renderBackground(GuiGraphics g,int x,int y,float partial){
         // AbstractContainerScreen renders its container through this method in 1.21.1.
@@ -232,7 +250,7 @@ public final class RemoteScreen extends AbstractContainerScreen<RemoteMenu> {
         LegacyGui.panel(g,leftPos,topPos,imageWidth,imageHeight);
         if(page==Page.INVENTORY){for(var slot:menu.slots)slotWell(g,leftPos+slot.x,topPos+slot.y);if(state.has("slot")){int index=state.get("slot").getAsInt();if(index>=0&&index<16){var slot=menu.getSlot(index);g.renderOutline(leftPos+slot.x-1,topPos+slot.y-1,18,18,0xffeeeeee);}}}
         if(page==Page.CUSTOMISE){
-            int colour=state.has("colour")?state.get("colour").getAsInt():0x57a64e;if(colour<0)colour=0x57a64e;
+            int colour=state.has("colour")?state.get("colour").getAsInt():Appearance.COLOURS[0];if(colour<0)colour=Appearance.COLOURS[0];
             RenderSystem.setShaderColor((colour>>16&255)/255f,(colour>>8&255)/255f,(colour&255)/255f,1);g.blit(texture("turtle"),leftPos+29,topPos+31,0,0,36,36,36,36);RenderSystem.setShaderColor(1,1,1,1);
             g.blit(texture("turtle_overlay"),leftPos+29,topPos+31,0,0,36,36,36,36);
             String decoration=state.has("decoration")?state.get("decoration").getAsString():"none";
@@ -241,15 +259,24 @@ public final class RemoteScreen extends AbstractContainerScreen<RemoteMenu> {
     }
     private static void slotWell(GuiGraphics g,int x,int y){LegacyGui.slot(g,x-1,y-1);}
     @Override protected void renderLabels(GuiGraphics g,int x,int y){
-        if(page==Page.INVENTORY){g.drawString(font,text("player_inventory"),7,7,LegacyGui.TEXT,false);g.drawString(font,text("hotbar"),7,78,LegacyGui.TEXT,false);String label=state.has("name")?state.get("name").getAsString():"";g.drawString(font,font.plainSubstrByWidth((label.isEmpty()?text("robot_backpack"):Component.translatable("remote.singularbots.robot_backpack_named",label)).getString(),74),173,7,LegacyGui.TEXT,false);g.fill(171,4,172,imageHeight-4,0xff60451f);g.fill(172,4,173,imageHeight-4,0xffc69b4d);for(int i=0;i<16;i++){var slot=menu.getSlot(i);if(!slot.hasItem()){String number=String.valueOf(i+1);g.drawString(font,number,slot.x+8-font.width(number)/2,slot.y+4,LegacyGui.SLOT_NUMBER,false);}}}
+        if(page==Page.INVENTORY){g.drawString(font,text("player_inventory"),7,7,LegacyGui.TEXT,false);g.drawString(font,text("hotbar"),7,78,LegacyGui.TEXT,false);g.drawString(font,backpackTitle(state.has("name")?state.get("name").getAsString():""),173,7,LegacyGui.TEXT,false);g.fill(171,4,172,imageHeight-4,0xff60451f);g.fill(172,4,173,imageHeight-4,0xffc69b4d);for(int i=0;i<16;i++){var slot=menu.getSlot(i);if(!slot.hasItem()){String number=String.valueOf(i+1);g.drawString(font,number,slot.x+8-font.width(number)/2,slot.y+4,LegacyGui.SLOT_NUMBER,false);}}}
+    }
+    /** A long robot name is shortened with an ellipsis so "'s backpack" still fits above the 16 slots. */
+    private String backpackTitle(String label){
+        if(label.isEmpty())return font.plainSubstrByWidth(text("robot_backpack").getString(),74);
+        String title=Component.translatable("remote.singularbots.robot_backpack_named",label).getString();
+        for(int end=label.length();font.width(title)>74&&end>0;end--)title=Component.translatable("remote.singularbots.robot_backpack_named",label.substring(0,end-1)+"…").getString();
+        return font.plainSubstrByWidth(title,74);
     }
     @Override public void render(GuiGraphics g,int x,int y,float partial){
         runtimeLeft.visible=page==Page.REMOTE&&(runtimeStatus().equals("paused")||runtimeStatus().equals("stopped")&&hasSnapshot());
         runtimeMiddle.visible=page==Page.REMOTE&&!runtimeStatus().equals("error");
+        boolean robotHasItems=false;for(int i=0;i<16;i++)robotHasItems|=menu.getSlot(i).hasItem();takeAll.active=robotHasItems&&!controlBlocked();
         if(page==Page.INVENTORY){super.render(g,x,y,partial);renderTooltip(g,x,y);}
         else{hoveredSlot=null;renderBg(g,partial,x,y);g.pose().pushPose();g.pose().translate(leftPos,topPos,0);renderLabels(g,x,y);g.pose().popPose();for(var r:renderables)r.render(g,x,y,partial);}
         if(camera!=null&&state.has("x"))g.drawString(font,state.get("x").getAsInt()+", "+state.get("y").getAsInt()+", "+state.get("z").getAsInt(),8,8,0xffffff);
-        if(!diagnostic.getString().isEmpty()){int available=Math.max(80,leftPos-16);g.fill(6,height-40,8+available,height-8,0xe0202020);g.drawWordWrap(font,diagnostic,8,height-38,available,0xffffaaaa);}
+        var shown=controlBlocked()?Component.translatable("remote.singularbots.teacher_demonstrating",state.getAsJsonObject("takeover").get("teacher").getAsString()):diagnostic;
+        if(!shown.getString().isEmpty()){int available=Math.max(80,leftPos-16);g.fill(6,height-40,8+available,height-8,0xe0202020);g.drawWordWrap(font,shown,8,height-38,available,0xffffaaaa);}
     }
     private boolean hasSnapshot(){return state.has("hasSnapshot")&&state.get("hasSnapshot").getAsBoolean();}
 }

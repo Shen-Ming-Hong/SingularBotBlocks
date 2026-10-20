@@ -22,20 +22,46 @@ public final class StudentPrograms {
                 case "decoration" -> store.setDecoration(owner,turtle.decoration());
                 default -> throw new IllegalArgumentException("Unknown appearance field");
             }
+            var player=level.getServer().getPlayerList().getPlayer(owner);if(player!=null)shareLook(player);
         }catch(java.io.IOException error){turtle.historyDiagnostic("Default robot appearance could not be saved: "+error.getMessage());}
     }
-    /** Fresh items only fill what they do not already carry, e.g. an anvil name wins over the saved name. */
+    /** The placer's saved look replaces whatever the robot had; a field they never set falls back to the plain robot, except that an item's own (e.g. anvil) name stays when they have no saved name. */
     static void applyLook(JuniorTurtleEntity turtle,java.util.UUID owner){
         if(!(turtle.getLevel() instanceof ServerLevel level))return;
         try{
             var look=appearance(level).get(owner);
-            if(look.label()!=null&&turtle.getLabel()==null)turtle.setLabel(look.label());
-            if(look.colour()!=null&&turtle.getAccess().getColour()==-1)turtle.getAccess().setColour(look.colour());
-            if(look.decoration()!=null&&turtle.decoration().equals("none"))turtle.decorate(look.decoration());
+            if(look.label()!=null)turtle.setLabel(look.label());
+            turtle.getAccess().setColour(look.colour()==null?-1:look.colour());
+            turtle.decorate(look.decoration()==null?"none":look.decoration());
         }catch(Exception error){turtle.historyDiagnostic("Default robot appearance could not be applied: "+error.getMessage());}
     }
+    /** Robot items carry no look, so clients draw one held by a player with that player's saved look; every client learns every online player's look. */
+    private static org.singularbots.network.RemoteNetwork.Look look(net.minecraft.server.level.ServerPlayer player){
+        var look=org.singularbots.program.AppearanceStore.Look.NONE;
+        try{look=appearance(player.serverLevel()).get(player.getUUID());}catch(Exception ignored){/* An unreadable file shows the plain robot; placement reports the error. */}
+        return new org.singularbots.network.RemoteNetwork.Look(player.getUUID(),look.label()==null?"":look.label(),look.colour()==null?-1:look.colour(),look.decoration()==null?"none":look.decoration());
+    }
+    private static void send(net.minecraft.server.level.ServerPlayer to,org.singularbots.network.RemoteNetwork.Look look){
+        if(to.connection.hasChannel(org.singularbots.network.RemoteNetwork.Look.TYPE))net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(to,look);
+    }
+    /** Tells every online player about this player's look. */
+    public static void shareLook(net.minecraft.server.level.ServerPlayer player){
+        var look=look(player);for(var to:player.server.getPlayerList().getPlayers())send(to,look);
+    }
+    /** A joining player shares their look and learns everyone else's. */
+    public static void joined(net.minecraft.server.level.ServerPlayer player){
+        shareLook(player);for(var other:player.server.getPlayerList().getPlayers())if(other!=player)send(player,look(other));
+    }
+    /** Auto-save writes several times a second while a student edits; one save entry per program and robot each minute keeps the bounded history for real activity. */
+    private static final java.util.Map<String,Long> RECENT_SAVES=new java.util.concurrent.ConcurrentHashMap<>();
+    static final long SAVE_RECORD_MILLIS=60_000;
+    static void clearRecentSaves(){RECENT_SAVES.clear();}
     static void record(JuniorTurtleEntity turtle,String kind,String message){
         if(!(turtle.getLevel() instanceof ServerLevel level)||turtle.getAccess().getOwningPlayer()==null)return;
+        if(kind.equals("programSave")){
+            long now=System.currentTimeMillis();var key=turtle.libraryId()+"/"+turtle.identity()+"/"+message;var last=RECENT_SAVES.get(key);
+            if(last!=null&&now-last<SAVE_RECORD_MILLIS)return;RECENT_SAVES.put(key,now);
+        }
         try{
             var entry=new JsonObject();entry.addProperty("time",java.time.Instant.now().toString());entry.addProperty("kind",kind);
             entry.addProperty("robot",turtle.identity().toString());entry.addProperty("name",java.util.Objects.toString(turtle.getLabel(),""));

@@ -1,15 +1,23 @@
 name: Native browser
+# JCEF builds for the supported platforms (macOS minutes bill at 10x;
+# unsupported macOS Intel is no longer built), so this runs only as
+# the final check on ready (non-draft) PRs that change the native sources, or
+# by hand. Changes to this workflow itself are verified with a manual run.
 on:
   workflow_dispatch:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - 'native/**'
       - 'scripts/native_browser.py'
-      - '.github/workflows/native-browser.yml'
 permissions:
   contents: read
+concurrency:
+  group: native-browser-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch' || !github.event.pull_request.draft
     name: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -17,7 +25,6 @@ jobs:
         include:
           - { os: ubuntu-22.04, platform: linux_amd64 }
           - { os: windows-2022, platform: windows_amd64 }
-          - { os: macos-15-intel, platform: macos_amd64 }
           - { os: macos-15, platform: macos_arm64 }
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45

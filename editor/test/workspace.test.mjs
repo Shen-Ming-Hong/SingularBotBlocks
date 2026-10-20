@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as Blockly from 'blockly';
-import {ACTION_BLOCKS,migrateActionBlocks,registerTurtleBlocks,loadWorkspace,preview,TURTLE_COMMANDS,toolbox,searchItems,setItemCatalog,catalogItems,setItemIdText,ensureStartBlock,markLooseStacks,variableFlyout,functionFlyout} from '../src/blocks.js';
+import {ACTION_BLOCKS,migrateActionBlocks,registerTurtleBlocks,loadWorkspace,preview,TURTLE_COMMANDS,toolbox,searchItems,setItemCatalog,catalogItems,setItemIdText,ensureStartBlock,markLooseStacks,variableFlyout,functionFlyout,dropInsertionMarkers,setProgramLibrary,programCallOptions,refreshProgramCalls} from '../src/blocks.js';
 registerTurtleBlocks();
 
 test('all foundation turtle commands generate distinct Lua calls',()=>{
@@ -58,6 +58,34 @@ test('all offered blocks produce Lua and the loop toolbox only offers break',()=
   const offered=toolbox('en_us').contents.flatMap(c=>c.contents||[]).map(b=>b.type);
   assert.ok(offered.includes('ccedu_break'));assert.ok(!offered.includes('controls_flow_statements'));
   for(const type of offered){const w=new Blockly.Workspace();try{const block=w.newBlock(type);if(type==='controls_for')block.setFieldValue(w.createVariable('i').getId(),'VAR');assert.equal(typeof preview(w),'string',type);}finally{w.dispose();}}
+});
+test('robot blocks sit once in the category for what they give back, and the comparison takes any two values',()=>{
+  const cat=name=>toolbox('zh_tw').contents.find(c=>c.name===name).contents.map(b=>b.type);
+  // The robot category holds only actions; questions go to logic and IDs to the inventory category.
+  assert.deepEqual(cat('機器人動作'),Object.keys(ACTION_BLOCKS));
+  for(const type of ['ccedu_detect','ccedu_turtle_result','logic_compare'])assert.ok(cat('判斷').includes(type),type);
+  assert.ok(cat('物品欄').includes('ccedu_inspect'));
+  const all0=toolbox('zh_tw').contents.flatMap(c=>(c.contents||[]).map(b=>b.type));
+  for(const type of ['ccedu_turtle_query','ccedu_compare'])assert.ok(!all0.includes(type),type);
+  const all=toolbox('zh_tw').contents.flatMap(c=>(c.contents||[]).map(b=>b.type));
+  assert.deepEqual(all.filter((t,i)=>all.indexOf(t)!==i),[],'no block is offered twice');
+  const compare=toolbox('zh_tw').contents.find(c=>c.name==='判斷').contents.find(b=>b.type==='logic_compare');
+  assert.equal(compare.inputs,undefined,'both sides start empty');
+  const w=new Blockly.Workspace();
+  try{
+   assert.deepEqual(w.newBlock('ccedu_detect').outputConnection.getCheck(),['Boolean']);
+   assert.deepEqual(w.newBlock('ccedu_inspect').outputConnection.getCheck(),['String']);
+   for(const type of ['ccedu_item_count','ccedu_item_space','ccedu_selected_slot'])assert.deepEqual(w.newBlock(type).outputConnection.getCheck(),['Number'],type);
+   loadWorkspace(w,{blocks:{blocks:[{type:'controls_if',id:'branch',inputs:{IF0:{block:{type:'ccedu_detect',id:'look',fields:{SIDE:'up'}}}}}]}});
+   assert.ok(preview(w).includes('if turtle.detectUp() then'));
+   // Different types stay connected: Blockly would normally pop one side out.
+   w.clear();const cmp=w.newBlock('logic_compare'),block=w.newBlock('ccedu_inspect'),count=w.newBlock('ccedu_item_count');
+   cmp.getInput('A').connection.connect(block.outputConnection);cmp.getInput('B').connection.connect(count.outputConnection);
+   cmp.onchange?.(new Blockly.Events.BlockMove(count));
+   assert.equal(cmp.getInputTargetBlock('A'),block);assert.equal(cmp.getInputTargetBlock('B'),count);
+   w.clear();loadWorkspace(w,{blocks:{blocks:[{type:'logic_compare',id:'c',fields:{OP:'EQ'},inputs:{A:{block:{type:'ccedu_inspect',id:'i',fields:{SIDE:'forward'}}},B:{block:{type:'ccedu_registry_name',id:'r',fields:{NAME:'minecraft:stone'}}}}}]}});
+   assert.ok(preview(w).includes("turtleedu.inspect() == 'minecraft:stone'"),preview(w));
+  }finally{w.dispose();}
 });
 test('boolean action can be used as a condition without an assertion',()=>{
   const w=new Blockly.Workspace();try{loadWorkspace(w,{blocks:{blocks:[{type:'controls_if',id:'branch',inputs:{IF0:{block:{type:'ccedu_turtle_result',id:'action',fields:{COMMAND:'forward'}}}}}]}});assert.ok(preview(w).includes('if turtle.forward() then'));}finally{w.dispose();}
@@ -130,6 +158,11 @@ test('a program gets one fixed start block above its topmost stack and only that
     const lua=preview(w);assert.ok(lua.includes('turtle.forward()'));assert.ok(lua.includes('turtle.turnLeft()'));assert.ok(!lua.includes('turtle.back()'));
     w.getBlockById('then').nextConnection.connect(w.getBlockById('lower').previousConnection);markLooseStacks(w);
     assert.equal(w.getBlockById('lower').isEnabled(),true);assert.ok(preview(w).includes('turtle.back()'));
+    // A stack dragged away from the start block is greyed out as a whole, then restored when reattached.
+    w.getBlockById('upper').previousConnection.disconnect();markLooseStacks(w);
+    for(const id of ['upper','then','lower'])assert.equal(w.getBlockById(id).isEnabled(),false,id);
+    start.nextConnection.connect(w.getBlockById('upper').previousConnection);markLooseStacks(w);
+    for(const id of ['upper','then','lower']){assert.equal(w.getBlockById(id).isEnabled(),true,id);assert.doesNotMatch(w.getBlockById(id).getTooltip(),/not run/);}
     const saved=Blockly.serialization.workspaces.save(w);
     assert.equal(saved.blocks.blocks.length,1);assert.equal(saved.blocks.blocks[0].type,'ccedu_start');
   }finally{w.dispose();}
@@ -146,14 +179,16 @@ test('toolbox blocks come with editable default values for number and text input
   for(const locale of ['en_us','zh_tw']){
     const entries=toolbox(locale).contents.flatMap(c=>c.contents||[]);
     // Optional slot argument (detect/compare ignore it, item count defaults to the selected slot) stays empty on purpose.
-    const optional=new Set(['ccedu_turtle_query.SLOT']);
+    // The comparison's two sides start empty on purpose so any kind of value fits.
+    const optional=new Set(['ccedu_turtle_query.SLOT','logic_compare.A','logic_compare.B']);
     for(const entry of entries){const w=new Blockly.Workspace();try{
       const block=Blockly.serialization.blocks.append({type:entry.type,inputs:entry.inputs},w);
       if(entry.type==='controls_for')block.setFieldValue(w.createVariable('i').getId(),'VAR');
       for(const input of block.inputList){
         if(input.type!==Blockly.inputs.inputTypes.VALUE)continue;const check=input.connection.getCheck(),key=`${entry.type}.${input.name}`;
         const wantsValue=!check||check.includes('Number')||check.includes('String');
-        if(wantsValue&&!optional.has(key))assert.ok(input.connection.targetBlock()?.isShadow(),`${key} has a default value`);
+        // A ready-made block (the "what block is in front = stone" comparison) also counts as a default value.
+        if(wantsValue&&!optional.has(key))assert.ok(input.connection.targetBlock(),`${key} has a default value`);
       }
       assert.equal(typeof preview(w),'string',entry.type);
     }finally{w.dispose();}}
@@ -207,6 +242,29 @@ test('the Functions category calls every other saved program and offers Blockly 
     assert.equal(preview(w).trim(),"edu.callProgram('挖一條隧道')");call.dispose();
   }finally{w.dispose();}
 });
+test('the call block picks a library program from a dropdown and keeps a name the library no longer has',()=>{
+  const w=new Blockly.Workspace();
+  try{
+    setProgramLibrary([{id:'a',name:'砍樹'},{id:'me',name:'主程式'},{id:'b',name:'種樹'}],'me');
+    const fresh=w.newBlock('ccedu_call');
+    assert.equal(fresh.getFieldValue('NAME'),'砍樹','a new call block starts on the first other program');
+    assert.deepEqual(programCallOptions('砍樹'),[['砍樹','砍樹'],['種樹','種樹']],'the program being edited is not offered');
+    fresh.setFieldValue('種樹','NAME');assert.equal(preview(w).trim(),"edu.callProgram('種樹')");
+    // A saved call whose program was renamed elsewhere (or deleted) still loads with its name and says it is missing.
+    loadWorkspace(w,{blocks:{languageVersion:0,blocks:[{type:'ccedu_start',id:'s',next:{block:{type:'ccedu_call',id:'c',fields:{NAME:'挖隧道'}}}}]}});
+    const field=w.getBlockById('c').getField('NAME');
+    assert.equal(field.getValue(),'挖隧道');assert.match(field.getText(),/^(（找不到）|\(missing\) )挖隧道$/);
+    assert.deepEqual(field.getOptions(false).map(o=>o[1]),['挖隧道','砍樹','種樹']);
+    assert.equal(preview(w).trim(),"edu.callProgram('挖隧道')",'the saved name still compiles so the server can report it');
+    // Once the library lists it again (e.g. the other side renamed it back) the block shows the plain name.
+    setProgramLibrary([{id:'a',name:'砍樹'},{id:'me',name:'主程式'},{id:'t',name:'挖隧道'}],'me');refreshProgramCalls(w);
+    assert.equal(field.getText(),'挖隧道');
+    assert.deepEqual(JSON.parse(JSON.stringify(Blockly.serialization.workspaces.save(w))).blocks.blocks[0].next.block.fields,{NAME:'挖隧道'},'the field saves the program name as before');
+    // With nothing else in the library the block says so instead of failing to build.
+    setProgramLibrary([{id:'me',name:'主程式'}],'me');
+    const alone=w.newBlock('ccedu_call');assert.equal(alone.getFieldValue('NAME'),'');assert.match(alone.getField('NAME').getText(),/^(（還沒有其他程式）|\(no other programs yet\))$/);
+  }finally{w.dispose();setProgramLibrary([],'');}
+});
 test('function definitions are never greyed out as stray stacks, but their calls follow the start block',()=>{
   const w=new Blockly.Workspace();
   try{
@@ -219,4 +277,29 @@ test('function definitions are never greyed out as stray stacks, but their calls
     markLooseStacks(w);
     assert.ok(def.isEnabled()&&body.isEnabled()&&used.isEnabled());assert.ok(!loose.isEnabled());
   }finally{w.dispose();}
+});
+test('a save made while a block is dragged onto a connection stores no nulls and keeps the rest of the program',()=>{
+  const w=new Blockly.Workspace();
+  Blockly.Events.disable();
+  try{
+    const start=w.newBlock('ccedu_start');const go=w.newBlock('ccedu_move');start.nextConnection.connect(go.previousConnection);
+    const loop=w.newBlock('controls_repeat_ext');
+    // Blockly connects an insertion marker where the dragged block would land.
+    const marker=w.newBlock('ccedu_move');marker.setInsertionMarker(true);go.nextConnection.connect(marker.previousConnection);
+    const inner=w.newBlock('ccedu_move');inner.setInsertionMarker(true);loop.getInput('DO').connection.connect(inner.previousConnection);
+    const raw=Blockly.serialization.workspaces.save(w);
+    assert.match(JSON.stringify(raw),/"block":null/,'Blockly itself writes the marker as null');
+    const saved=dropInsertionMarkers(raw),text=JSON.stringify(saved);
+    assert.doesNotMatch(text,/null/);
+    const savedGo=saved.blocks.blocks.find(b=>b.type==='ccedu_start').next.block;
+    assert.equal(savedGo.type,'ccedu_move');assert.equal(savedGo.next,undefined);
+    assert.equal(saved.blocks.blocks.find(b=>b.type==='controls_repeat_ext').inputs.DO,undefined);
+    const again=new Blockly.Workspace();try{loadWorkspace(again,saved);assert.ok(preview(again).includes('turtle.forward()'));}finally{again.dispose();}
+    assert.deepEqual(dropInsertionMarkers({a:[1,null,{b:null}],extraState:{}}),{a:[1,null,{b:null}],extraState:{}},'other values are kept');
+  }finally{w.dispose();Blockly.Events.enable();}
+});
+
+test('a failed read-only load restores the lock and Blockly events',()=>{
+ const workspace=new Blockly.Workspace();workspace.options.readOnly=true;
+ try{assert.throws(()=>loadWorkspace(workspace,{blocks:{blocks:[{type:'missing_block_type'}]}}),/Invalid block definition/);assert.equal(workspace.options.readOnly,true);assert.equal(Blockly.Events.isEnabled(),true);}finally{workspace.dispose();}
 });

@@ -58,6 +58,7 @@ public final class RemoteService {
         if (t==null || !session(p,action.turtle()) || !authorized(p,t)) { p.displayClientMessage(Component.translatable("message.singularbots.denied"),true); return; }
         try {
             if (action.action().equals("state")) { send(p,t,""); return; }
+            TeacherTakeover.control(p,t);
             switch (action.action()) {
                 case "name" -> { t.setLabel(Appearance.label(action.text())); t.changed(); StudentPrograms.rememberLook(t,"name"); }
                 case "colour" -> { t.getAccess().setColour(Appearance.colour(action.value())); StudentPrograms.rememberLook(t,"colour"); }
@@ -87,7 +88,7 @@ public final class RemoteService {
         }
         @Override public TurtleCommandResult execute(ITurtleAccess access){
             var current=resolve(player.serverLevel(),identity);
-            if(current==null||!session(player,identity)||!authorized(player,current))return rejected("Control permission expired");
+            if(current==null||!session(player,identity)||!authorized(player,current)||!TeacherTakeover.canControl(player,current))return rejected("Control permission expired");
             var result=command.execute(access);current=resolve(player.serverLevel(),identity);
             if(current!=null)send(player,current,result.isSuccess()?"":result.getErrorMessage());return result;
         }
@@ -116,7 +117,7 @@ public final class RemoteService {
         j.addProperty("historyDiagnostic",t.historyDiagnostic());
         j.addProperty("program",t.selectedProgram()==null?"":t.selectedProgram().toString());
         j.addProperty("hasSnapshot",t.snapshot()!=null);
-        j.addProperty("runtimeStatus",t.runtime().json().get("status").getAsString());
+        j.addProperty("runtimeStatus",t.runtime().json().get("status").getAsString());j.add("takeover",TeacherTakeover.state(p,t));
         PacketDistributor.sendToPlayer(p,new RemoteNetwork.State(t.identity(),j.toString()));
     }
     public static void stopAll(net.minecraft.server.MinecraftServer server) {
@@ -124,5 +125,6 @@ public final class RemoteService {
             var t=ref.get();if(t!=null&&!t.isRemoved())ProgramService.stop(t);
         }
     }
+    @SubscribeEvent public static void loggedIn(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event){if(event.getEntity() instanceof ServerPlayer player)StudentPrograms.joined(player);}
     @SubscribeEvent public static void stopped(ServerStoppedEvent event) { TURTLES.clear(); }
 }

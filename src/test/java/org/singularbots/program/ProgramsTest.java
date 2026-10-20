@@ -50,6 +50,19 @@ class ProgramsTest {
         assertEquals("Unknown turtle command",assertThrows(WorkspaceCompiler.Invalid.class,()->WorkspaceCompiler.compile(json(one.formatted("ccedu_move","detect")))).getMessage());
         assertTrue(WorkspaceCompiler.compile(json(one.formatted("ccedu_drop","drop")),false).lua().contains("turtle.drop()\n"));
     }
+    @Test void repeatedSavesUseCachedRowsButNoticeFilesChangedElsewhere()throws Exception{
+        var turtle=UUID.randomUUID();var id=UUID.randomUUID();var store=new ProgramStore(dir);var p=json("{\"name\":\"快存\",\"mode\":\"lua\",\"source\":\"turtle.up()\"}");
+        for(int revision=0;revision<5;revision++)assertEquals(revision+1,store.save(turtle,id,revision,p).get("revision").getAsInt());
+        var row=store.list(turtle).get(0).getAsJsonObject();assertEquals(5,row.get("revision").getAsInt());assertEquals("快存",row.get("name").getAsString());
+        // A restored backup replaces the file behind the cache; its revision, not the cached one, decides conflicts.
+        var file=dir.resolve(turtle.toString()).resolve(id+".json");var restored=json(Files.readString(file));restored.addProperty("revision",9);restored.addProperty("name","備份");var before=Files.getLastModifiedTime(file);Files.writeString(file,restored.toString());
+        // Same length and inode as the cached file; a real restore lands seconds later, which coarse CI file clocks need to see.
+        Files.setLastModifiedTime(file,java.nio.file.attribute.FileTime.fromMillis(before.toMillis()+2000));
+        assertThrows(IllegalStateException.class,()->store.save(turtle,id,5,p));
+        assertEquals("備份",store.list(turtle).get(0).getAsJsonObject().get("name").getAsString());
+        p.addProperty("name","新名字");assertEquals(10,store.save(turtle,id,9,p).get("revision").getAsInt());
+        assertEquals("新名字",new ProgramStore(dir).list(turtle).get(0).getAsJsonObject().get("name").getAsString());
+    }
     @Test void separateLuaAndBlocksSurviveReloadWithConflictsAndRecoverableDelete()throws Exception{
         var turtle=UUID.randomUUID();var id=UUID.randomUUID();var store=new ProgramStore(dir);var p=json("{\"name\":\"中文程式\",\"mode\":\"lua\",\"source\":\"turtle.up()\"}");
         store.save(turtle,id,0,p);assertEquals("turtle.up()",new ProgramStore(dir).load(turtle,id).get("source").getAsString());
@@ -70,6 +83,33 @@ class ProgramsTest {
         var r=new ProgramRuntime();var compiled=new WorkspaceCompiler.Compiled("",Map.of(),Set.of("a"));r.prepare(compiled,false);
         assertEquals(0,r.beat(100));assertEquals(ProgramRuntime.BEAT_TICKS-3,r.beat(103));assertEquals(0,r.beat(100+3*ProgramRuntime.BEAT_TICKS));
         r.prepare(compiled,false);assertEquals(0,r.beat(101));
+    }
+    @Test void renamingAProgramRewritesEveryBlockProgramThatCallsIt()throws Exception{
+        var turtle=UUID.randomUUID();var store=new ProgramStore(dir);var helper=UUID.randomUUID();var caller=UUID.randomUUID();var lua=UUID.randomUUID();var unrelated=UUID.randomUUID();
+        store.save(turtle,helper,0,json("{\"name\":\"砍樹\",\"mode\":\"lua\",\"source\":\"turtle.dig()\"}"));
+        var calls=json("""
+            {"name":"主程式","mode":"blocks","workspace":{"blocks":{"languageVersion":0,"blocks":[{"type":"ccedu_start","id":"s","next":{"block":{"type":"controls_repeat_ext","id":"r","inputs":{"TIMES":{"shadow":{"type":"math_number","id":"n","fields":{"NUM":3}}},"DO":{"block":{"type":"ccedu_call","id":"c1","fields":{"NAME":"砍樹"},"next":{"block":{"type":"ccedu_call","id":"c2","fields":{"NAME":"種樹"}}}}}}}}}]}}}
+            """);
+        store.save(turtle,caller,0,calls);
+        store.save(turtle,unrelated,0,json("{\"name\":\"別的\",\"mode\":\"blocks\",\"workspace\":{\"blocks\":{\"blocks\":[{\"type\":\"ccedu_call\",\"id\":\"c3\",\"fields\":{\"NAME\":\"種樹\"}}]}}}"));
+        store.save(turtle,lua,0,json("{\"name\":\"Lua\",\"mode\":\"lua\",\"source\":\"edu.callProgram('砍樹')\"}"));
+        store.save(turtle,helper,1,json("{\"name\":\"砍樹加種樹\",\"mode\":\"lua\",\"source\":\"turtle.dig()\"}"));
+        var reloaded=new ProgramStore(dir);var rewritten=reloaded.load(turtle,caller);
+        assertEquals(2,rewritten.get("revision").getAsInt(),"the caller is saved as a new revision");
+        var text=rewritten.get("workspace").toString();assertTrue(text.contains("\"NAME\":\"砍樹加種樹\""),text);assertTrue(text.contains("\"NAME\":\"種樹\""),"other calls keep their names");assertFalse(text.contains("\"NAME\":\"砍樹\""),text);
+        assertTrue(ProgramStore.compile(rewritten).lua().contains("edu.callProgram(\"砍樹加種樹\")"));
+        assertEquals(1,reloaded.load(turtle,unrelated).get("revision").getAsInt(),"programs without the call are untouched");
+        assertEquals("edu.callProgram('砍樹')",reloaded.load(turtle,lua).get("source").getAsString(),"raw Lua keeps its text");
+        assertEquals("砍樹加種樹",reloaded.named(turtle,"砍樹加種樹").get("name").getAsString());
+        // Saving under the same name changes nothing else.
+        store.save(turtle,helper,2,json("{\"name\":\"砍樹加種樹\",\"mode\":\"lua\",\"source\":\"turtle.digUp()\"}"));
+        assertEquals(2,reloaded.load(turtle,caller).get("revision").getAsInt());
+    }
+    @Test void aCallBlockWithoutAChosenProgramIsSavedButReportsItsBlock()throws Exception{
+        var turtle=UUID.randomUUID();var id=UUID.randomUUID();var store=new ProgramStore(dir);
+        var p=json("{\"name\":\"空呼叫\",\"mode\":\"blocks\",\"workspace\":{\"blocks\":{\"blocks\":[{\"type\":\"ccedu_start\",\"id\":\"s\",\"next\":{\"block\":{\"type\":\"ccedu_call\",\"id\":\"empty-call\",\"fields\":{\"NAME\":\"\"}}}}]}}}");
+        var saved=store.save(turtle,id,0,p);
+        var error=assertThrows(WorkspaceCompiler.Invalid.class,()->ProgramStore.compile(saved));assertEquals("empty-call",error.blockId);
     }
     @Test void unfinishedWorkspaceIsSavedAndItsCompileErrorRetainsTheBlockId()throws Exception{
         var turtle=UUID.randomUUID();var id=UUID.randomUUID();var store=new ProgramStore(dir);
@@ -99,6 +139,24 @@ class ProgramsTest {
         var row=store.list(turtle).get(0).getAsJsonObject();assertEquals("丁",row.get("name").getAsString());assertEquals(9,row.get("revision").getAsLong());
         assertThrows(IllegalArgumentException.class,()->store.save(turtle,UUID.randomUUID(),0,json("{\"name\":\"丁\",\"mode\":\"lua\",\"source\":\"\"}")));
     }
+    @Test void libraryListsProgramsInCreationOrderAndKeepsItAcrossSaves()throws Exception{
+        var turtle=UUID.randomUUID();var store=new ProgramStore(dir);var ids=new ArrayList<UUID>();
+        for(var name:List.of("砍樹","來回走","爬梯子","西瓜")){var id=UUID.randomUUID();ids.add(id);store.save(turtle,id,0,json("{\"name\":\""+name+"\",\"mode\":\"lua\",\"source\":\"\"}"));}
+        // Renaming and re-saving the oldest program must not move it to the top.
+        store.save(turtle,ids.get(0),1,json("{\"name\":\"砍樹4格高\",\"mode\":\"lua\",\"source\":\"turtle.up()\"}"));
+        var names=new ArrayList<String>();for(var row:new ProgramStore(dir).list(turtle))names.add(row.getAsJsonObject().get("name").getAsString());
+        assertEquals(List.of("西瓜","爬梯子","來回走","砍樹4格高"),names);
+        // A program saved before creation stamps existed is placed by its file time, and keeps that place once re-saved.
+        var legacy=UUID.randomUUID();var file=dir.resolve(turtle.toString()).resolve(legacy+".json");
+        Files.writeString(file,"{\"version\":1,\"id\":\""+legacy+"\",\"name\":\"舊程式\",\"mode\":\"lua\",\"revision\":1,\"source\":\"\"}");
+        long before=created(store,turtle,"舊程式");
+        store.save(turtle,legacy,1,json("{\"name\":\"舊程式\",\"mode\":\"lua\",\"source\":\"turtle.up()\"}"));
+        assertEquals(before,created(store,turtle,"舊程式"));assertEquals(before,store.load(turtle,legacy).get("created").getAsLong());
+    }
+    private static long created(ProgramStore store,UUID turtle,String name)throws Exception{
+        for(var row:store.list(turtle))if(row.getAsJsonObject().get("name").getAsString().equals(name))return row.getAsJsonObject().get("created").getAsLong();
+        throw new AssertionError(name);
+    }
     @Test void variableTypeMetadataIsNotMistakenForABlock(){
         var ws=json("""
             {"variables":[{"id":"variable-id","name":"分數","type":""}],"blocks":{"blocks":[{"type":"variables_set","id":"set","fields":{"VAR":{"id":"variable-id"}},"inputs":{"VALUE":{"block":{"type":"math_number","id":"number","fields":{"NUM":4}}}}}]}}
@@ -117,8 +175,8 @@ class ProgramsTest {
     @Test void nestedLibraryDebugKeepsTheCorrectProgramAndVariableScope(){
         var runtime=new ProgramRuntime();var root=new WorkspaceCompiler.Compiled("",Map.of(3,"root-call"),Set.of("root-call"));var sub=new WorkspaceCompiler.Compiled("",Map.of(4,"sub-error"),Set.of("sub-error"));
         runtime.prepare(root,false,"root-id","main");runtime.visit("root-call",Map.of("分數",2));runtime.library("sub-id","library",sub);runtime.enterLibrary("library");runtime.visit("sub-block",Map.of("分數",9));
-        assertEquals("sub-id",runtime.json().get("programId").getAsString());assertEquals(9,runtime.json().getAsJsonObject("variables").get("分數").getAsInt());runtime.leaveLibrary();
-        assertEquals("root-id",runtime.json().get("programId").getAsString());assertEquals(2,runtime.json().getAsJsonObject("variables").get("分數").getAsInt());
+        assertEquals("[\"root-id\",\"sub-id\"]",runtime.json().get("callStack").toString());assertEquals("sub-id",runtime.json().get("programId").getAsString());assertEquals(9,runtime.json().getAsJsonObject("variables").get("分數").getAsInt());runtime.leaveLibrary();
+        assertEquals("[\"root-id\"]",runtime.json().get("callStack").toString());assertEquals("root-id",runtime.json().get("programId").getAsString());assertEquals(2,runtime.json().getAsJsonObject("variables").get("分數").getAsInt());
         runtime.enterLibrary("library");runtime.errored("edu:library:4: failure");assertEquals("sub-error",runtime.json().get("blockId").getAsString());
     }
     @Test void emojiSurvivesTransportAtTheFragmentBoundary(){
@@ -129,6 +187,13 @@ class ProgramsTest {
     }
     @Test void luaNativeBoundaryKeepsChineseAndEmoji(){
         var text="子程式與分數🐢";assertEquals(text,LuaText.decode(new String(LuaText.encode(text),java.nio.charset.StandardCharsets.ISO_8859_1)));assertEquals("plain ASCII",LuaText.decode("plain ASCII"));assertEquals("é",LuaText.decode("é"));
+    }
+    @Test void aMissingChineseProgramNameSurvivesTheLuaErrorBoundary()throws Exception{
+        var turtle=UUID.randomUUID();var store=new ProgramStore(dir);
+        var error=assertThrows(IllegalArgumentException.class,()->store.named(turtle,"種樹"));
+        // CC keeps one byte per char of a LuaException message; anything past U+00FF would turn into "?".
+        var wire=LuaText.error(error.getMessage());assertTrue(wire.chars().allMatch(c->c<=0xFF),wire);
+        assertEquals("Library program not found: 種樹",LuaText.decode(wire));assertEquals("Plain ASCII",LuaText.error("Plain ASCII"));assertNull(LuaText.error(null));
     }
     @Test void malformedNumericValueReportsItsOwnStableId(){
         var ws=json("{\"blocks\":{\"blocks\":[{\"type\":\"math_number\",\"id\":\"bad-number\",\"fields\":{\"NUM\":\"no-number\"}}]}}");

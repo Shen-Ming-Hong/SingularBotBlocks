@@ -1,6 +1,7 @@
 import hashlib
 import json
 import pathlib
+import shutil
 import tempfile
 import unittest
 
@@ -45,6 +46,19 @@ class NativeReleaseTests(unittest.TestCase):
         notes = (output / "release-notes.md").read_text()
         self.assertIn("run 123", notes)
         self.assertIn("marked macOS Intel unsupported", notes)
+
+    def test_stages_run_without_unsupported_platform(self):
+        shutil.rmtree(self.dist / "native-macos_amd64")
+        shutil.rmtree(self.dist / "native-evidence-macos_amd64")
+        output = self.root / "assets"
+        results = release.stage(self.dist, output, "123", "abc")
+        self.assertNotIn("macos_amd64", [r["platform"] for r in results])
+        self.assertFalse((output / "macos_amd64.tar.gz").exists())
+
+    def test_rejects_missing_supported_platform(self):
+        shutil.rmtree(self.dist / "native-macos_arm64")
+        with self.assertRaises(ValueError):
+            release.stage(self.dist, self.root / "assets", "123", "abc")
 
     def test_rejects_changed_archive(self):
         (self.dist / "native-linux_amd64/linux_amd64.tar.gz").write_bytes(b"tampered")

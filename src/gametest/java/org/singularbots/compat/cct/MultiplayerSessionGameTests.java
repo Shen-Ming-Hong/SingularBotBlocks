@@ -26,7 +26,7 @@ public final class MultiplayerSessionGameTests {
     }
     private static JuniorTurtleEntity robot(GameTestHelper h,BlockPos pos,ServerPlayer owner){
         h.setBlock(pos,TeachingContent.JUNIOR.get());var t=(JuniorTurtleEntity)h.getBlockEntity(pos);
-        ((dan200.computercraft.shared.turtle.core.TurtleBrain)t.getAccess()).setOwningPlayer(owner.getGameProfile());t.placedBy(owner,true);
+        ((dan200.computercraft.shared.turtle.core.TurtleBrain)t.getAccess()).setOwningPlayer(owner.getGameProfile());t.placedBy(owner);
         var center=t.getBlockPos().getCenter();owner.teleportTo(center.x,center.y,center.z);RemoteService.track(t);return t;
     }
     private static JsonObject program(String name){return program(name,"up");}

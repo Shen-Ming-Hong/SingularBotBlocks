@@ -24,7 +24,7 @@ public final class WorkspaceCompiler {
         "ccedu_equip",Set.of("equipLeft","equipRight"));
     // ccedu_turtle_command (every command in one dropdown) and ccedu_turtle_action (with an amount) are no longer
     // in the toolbox but stay valid so programs saved with them still load and run.
-    private static final Set<String> TYPES=withActionBlocks("ccedu_start","ccedu_turtle_command","ccedu_turtle_action","ccedu_turtle_result","ccedu_break","ccedu_registry_name","ccedu_select","ccedu_transfer","ccedu_redstone_set","ccedu_say","ccedu_sleep","ccedu_assert","ccedu_call","ccedu_comment","ccedu_snapshot","ccedu_random_boolean","variables_set","math_change","controls_if","controls_repeat_ext","controls_whileUntil","controls_for","controls_flow_statements","math_number","text","logic_boolean","logic_null","variables_get","logic_negate","math_arithmetic","logic_compare","logic_operation","math_modulo","math_random_int","math_random_float","text_length","text_join","ccedu_turtle_query","ccedu_inspect","ccedu_redstone_query","ccedu_item_name",
+    private static final Set<String> TYPES=withActionBlocks("ccedu_start","ccedu_turtle_command","ccedu_turtle_action","ccedu_turtle_result","ccedu_break","ccedu_registry_name","ccedu_select","ccedu_transfer","ccedu_redstone_set","ccedu_say","ccedu_sleep","ccedu_assert","ccedu_call","ccedu_comment","ccedu_snapshot","ccedu_random_boolean","variables_set","math_change","controls_if","controls_repeat_ext","controls_whileUntil","controls_for","controls_flow_statements","math_number","text","logic_boolean","logic_null","variables_get","logic_negate","math_arithmetic","logic_compare","logic_operation","math_modulo","math_random_int","math_random_float","text_length","text_join","ccedu_turtle_query","ccedu_inspect","ccedu_detect","ccedu_compare","ccedu_item_count","ccedu_item_space","ccedu_selected_slot","ccedu_redstone_query","ccedu_item_name",
         "procedures_defnoreturn","procedures_defreturn","procedures_callnoreturn","procedures_callreturn","procedures_ifreturn");
     private static final Set<String> DEFINITIONS=Set.of("procedures_defnoreturn","procedures_defreturn");
     private static Set<String> withActionBlocks(String... types){var all=new HashSet<>(List.of(types));all.addAll(ACTION_BLOCKS.keySet());return Set.copyOf(all);}
@@ -48,8 +48,7 @@ public final class WorkspaceCompiler {
         var vars=ws.has("variables")?ws.getAsJsonArray("variables"):new JsonArray();
         if(vars.size()>128)throw invalid("Too many variables");
         for(var v:vars){var j=v.getAsJsonObject();String id=str(j,"id"),name=str(j,"name"); if(id.isBlank()||name.isBlank()||id.length()>128||name.length()>128||variables.containsKey(id)||names.containsValue(name))throw invalid("Duplicate or invalid variable");variables.put(id,"v"+variables.size());names.put(id,name);}
-        var blocks=ws.has("blocks")?ws.getAsJsonObject("blocks").getAsJsonArray("blocks"):new JsonArray();
-        if(blocks==null)blocks=new JsonArray();
+        var top=object(ws,"blocks");var blocks=top!=null&&top.get("blocks") instanceof JsonArray a?a:new JsonArray();
         if(!variables.isEmpty())emit("local "+String.join(",",variables.values()));
         functions(blocks);
         // Only the stack under "when program starts" runs; loose stacks are drafts. Programs saved before the
@@ -68,7 +67,7 @@ public final class WorkspaceCompiler {
         for(var e:blocks){var b=e.getAsJsonObject();if(!DEFINITIONS.contains(type(b))||!enabled(b))continue;current=str(b,"id");
             String name=field(b,"NAME").trim();if(name.isEmpty()||name.length()>128||functions.containsKey(name))throw invalid("Duplicate or invalid function name");
             var params=new ArrayList<String>();
-            if(b.has("extraState")&&b.getAsJsonObject("extraState").has("params"))for(var p:b.getAsJsonObject("extraState").getAsJsonArray("params")){
+            var state=object(b,"extraState");if(state!=null&&state.get("params") instanceof JsonArray saved)for(var p:saved){
                 String id=str(p.getAsJsonObject(),"id");if(!variables.containsKey(id)||params.contains(id))throw invalid("Unknown or repeated function input");params.add(id);}
             if(functions.size()>=256)throw invalid("Too many functions");
             functions.put(name,new Function("f"+functions.size(),List.copyOf(params),type(b).equals("procedures_defreturn")));definitions.add(b);}
@@ -85,7 +84,7 @@ public final class WorkspaceCompiler {
         }
     }
     private String call(JsonObject b,int depth){
-        String name=b.has("extraState")&&b.getAsJsonObject("extraState").has("name")?str(b.getAsJsonObject("extraState"),"name"):"";
+        var state=object(b,"extraState");String name=state!=null&&state.has("name")?str(state,"name"):"";
         var f=functions.get(name.trim());if(f==null)throw invalid("Unknown function: "+name);
         var args=new ArrayList<String>();for(int i=0;i<f.params().size();i++)args.add(inputExpr(b,"ARG"+i,"nil",depth));
         return f.lua()+"("+String.join(", ",args)+")";
@@ -108,7 +107,7 @@ public final class WorkspaceCompiler {
         while(b!=null){
             current=str(b,"id");
             if(enabled(b))statement(b,depth);
-            b=b.has("next")?b.getAsJsonObject("next").getAsJsonObject("block"):null;
+            var next=object(b,"next");b=next==null?null:object(next,"block");
         }
     }
     /** Blockly 11 saves disabled blocks with disabledReasons; older saves used disabled. */
@@ -135,7 +134,7 @@ public final class WorkspaceCompiler {
             case "ccedu_say" -> emit("turtleedu.say("+input(b,"TEXT",quote(""))+")");
             case "ccedu_sleep" -> emit("sleep("+input(b,"SECONDS","1")+")");
             case "ccedu_assert" -> emit("assert("+input(b,"TEST","false")+", "+input(b,"MESSAGE",quote("Assertion failed"))+")");
-            case "ccedu_call" -> emit("edu.callProgram("+quote(field(b,"NAME"))+")");
+            case "ccedu_call" -> {String name=field(b,"NAME");if(name.isBlank())throw invalid("Choose a program to call");emit("edu.callProgram("+quote(name)+")");}
             case "ccedu_comment" -> emit("-- "+field(b,"TEXT").replace('\n',' ').replace('\r',' '));
             case "ccedu_snapshot" -> emit("assert(edu."+choice(b,"ACTION",Map.of("save","saveTurtleState","restore","restoreTurtleState"))+"())");
             case "variables_set" -> emit(variable(b)+" = "+input(b,"VALUE","0"));
@@ -201,13 +200,18 @@ public final class WorkspaceCompiler {
             case "ccedu_random_boolean" -> result="(math.random(1,2) == 1)";
             case "text_length" -> result="string.len(tostring("+inputExpr(b,"VALUE",quote(""),depth)+"))";
             case "text_join" -> {
-                var pieces=new ArrayList<String>();int count=b.has("extraState")?b.getAsJsonObject("extraState").get("itemCount").getAsInt():2;
+                var pieces=new ArrayList<String>();var state=object(b,"extraState");int count=state!=null&&state.has("itemCount")?state.get("itemCount").getAsInt():2;
                 if(count<0||count>128)throw invalid("Invalid text join size");for(int i=0;i<count;i++)pieces.add("tostring("+inputExpr(b,"ADD"+i,quote(""),depth)+")");
                 result=pieces.isEmpty()?quote(""):"("+String.join(" .. ",pieces)+")";
             }
             case "ccedu_turtle_query" -> {String method=field(b,"COMMAND");if(!QUERIES.contains(method))throw invalid("Invalid turtle query");result="turtle."+method+"("+inputExpr(b,"SLOT","",depth)+")";}
             case "ccedu_turtle_result" -> {String method=field(b,"COMMAND");if(!COMMANDS.contains(method)||Set.of("turnLeft","turnRight").contains(method))throw invalid("Invalid boolean turtle action");result="turtle."+method+"()";}
             case "ccedu_inspect" -> result="turtleedu."+sideMethod(b,"inspect")+"()";
+            case "ccedu_detect" -> result="turtle."+sideMethod(b,"detect")+"()";
+            case "ccedu_compare" -> result="turtle."+sideMethod(b,"compare")+"()";
+            case "ccedu_item_count" -> result="turtle.getItemCount("+inputExpr(b,"SLOT","",depth)+")";
+            case "ccedu_item_space" -> result="turtle.getItemSpace("+inputExpr(b,"SLOT","",depth)+")";
+            case "ccedu_selected_slot" -> result="turtle.getSelectedSlot()";
             case "ccedu_redstone_query" -> result="turtleedu."+sideMethod(b,"checkRedstone")+"()";
             case "ccedu_item_name" -> result="turtleedu.getItemName("+inputExpr(b,"SLOT","",depth)+")";
             case "procedures_callreturn" -> result=call(b,depth);
@@ -224,7 +228,12 @@ public final class WorkspaceCompiler {
     private String input(JsonObject b,String name,String fallback){return inputExpr(b,name,fallback,0);}
     private String inputExpr(JsonObject b,String name,String fallback,int depth){var j=child(b,name);return j==null?fallback:expression(j,depth+1);}
     private boolean hasInput(JsonObject b,String name){return child(b,name)!=null;}
-    private JsonObject child(JsonObject b,String name){if(!b.has("inputs"))return null;var i=b.getAsJsonObject("inputs").getAsJsonObject(name);if(i==null)return null;return i.has("block")?i.getAsJsonObject("block"):i.getAsJsonObject("shadow");}
+    private JsonObject child(JsonObject b,String name){var inputs=object(b,"inputs");var i=inputs==null?null:object(inputs,name);if(i==null)return null;var block=object(i,"block");return block!=null?block:object(i,"shadow");}
+    /**
+     * A member that is absent or JSON null reads as absent. Blockly saves {"block":null} for an insertion marker, the
+     * preview shown while a block is dragged near a connection, so a save made mid-drag carries those nulls.
+     */
+    private static JsonObject object(JsonObject j,String name){var v=j.get(name);return v!=null&&v.isJsonObject()?v.getAsJsonObject():null;}
     private String variable(JsonObject b){var f=b.getAsJsonObject("fields").get("VAR");String id=f.isJsonObject()?str(f.getAsJsonObject(),"id"):f.getAsString();var v=variables.get(id);if(v==null)throw invalid("Unknown variable ID");return v;}
     private String sideMethod(JsonObject b,String base){return base+choice(b,"SIDE",Map.of("forward","","up","Up","down","Down"));}
     private String choice(JsonObject b,String key,Map<String,String> options){var v=options.get(field(b,key));if(v==null)throw invalid("Invalid "+key);return v;}

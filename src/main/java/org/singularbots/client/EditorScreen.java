@@ -28,7 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /** Client-only browser with a bounded bridge to the current server-authorized turtle menu. */
-public final class EditorScreen extends Screen {
+public final class EditorScreen extends Screen implements ScreenWalking.Walkable {
     private final Screen parent;
     private final boolean smoke;
     private final DraftStore drafts;
@@ -45,17 +45,37 @@ public final class EditorScreen extends Screen {
     private JsonObject nativeManifest, nativeInstallation;
     private int browserX,browserY,browserWidth,browserHeight,surfaceWidth,surfaceHeight,browserMouseButton=-1;
     private final boolean connectedRemote;
+    /** Set when the editor closes its controller itself, which then cleans up on its own. */
+    private boolean leftToWorld;
     private long openedAt=System.nanoTime();
     /** When the last editor reported its workbench usable (System.nanoTime), for the QA timing probe. */
     static volatile long usableAt;
+    /** QA only, -Dsingularbots.inputTrace=true: logs what the game and the page receive from mouse and keys. */
+    private static final boolean INPUT_TRACE=Boolean.getBoolean("singularbots.inputTrace");
+    private final BackgroundClicks backgroundClicks=new BackgroundClicks();
+    private static void trace(String format,Object... values){if(INPUT_TRACE)LoggerFactory.getLogger("SingularBotBlocks").info("Input trace: "+format,values);}
+    private java.util.UUID library;
+    private org.singularbots.network.ProgramNetwork.TakeoverNotice pendingTakeover;
+    private boolean pendingPrepare;
+    public boolean takeover(org.singularbots.network.ProgramNetwork.TakeoverNotice notice,boolean prepare){
+        if(turtle==null||!attached||library!=null&&!library.equals(notice.library()))return false;
+        if(!ready||library==null){pendingTakeover=notice;pendingPrepare=prepare;return true;}
+        if(browser!=null)browser.executeJavaScript("window.cceduTakeoverNotice && window.cceduTakeoverNotice("+notice.json()+","+prepare+")",EditorOrigin.URL,0);
+        return true;
+    }
     private String locale;
     private String pageTheme;
     private boolean attached;
+    /** While running or stepping the page asks for a narrower workbench on the right so the robot stays visible beside it. */
+    private boolean compact;
+    private static final float COMPACT_WIDTH=0.44f;
     private String pendingReady;
     private char pendingHighSurrogate;
     private String composition = "";
     /** A native select list (for example the program library) is open over the page. */
     private volatile boolean nativePopup;
+    /** Whether a text field in the page has focus, so letters type instead of walking. */
+    private volatile boolean pageTyping;
     private CefQueryCallback pendingReadyCallback;
 
     public EditorScreen(Screen parent, boolean smoke) {
@@ -95,7 +115,7 @@ public final class EditorScreen extends Screen {
     }
 
     @Override protected void init() {
-        browserX=browserY=0;browserWidth=width;browserHeight=height;
+        layoutBrowser();
         if(!attached){attached=true;openedAt=System.nanoTime();MacIme.discard();}
         MacIme.install();
         if (error != null) { fail(error); return; }
@@ -190,11 +210,19 @@ public final class EditorScreen extends Screen {
         } catch (Exception | LinkageError e) { fail(e.toString()); }
     }
 
+    /** Whether the world behind the editor is fully hidden, so it need not be drawn. */
+    public boolean coversWorld() { return !compact || error != null; }
+    /** The full screen, or while running or stepping the right part of it; the camera's centre, where the robot usually is, stays uncovered. */
+    private void layoutBrowser() {
+        browserWidth=compact?Math.max(1,Math.round(width*COMPACT_WIDTH)):width;browserX=width-browserWidth;browserY=0;browserHeight=height;
+    }
     private void resizeBrowser() {
         var window=Minecraft.getInstance().getWindow();
         // CEF paints in window pixels; using Retina framebuffer pixels quadruples
         // the software paint/upload work and mismatches fixed layout dimensions.
-        surfaceWidth=Math.max(1,window.getScreenWidth());
+        // A prewarmed page has no screen size yet and always fills the window.
+        double share=width>0?(double)browserWidth/width:1;
+        surfaceWidth=Math.max(1,(int)Math.round(window.getScreenWidth()*share));
         surfaceHeight=Math.max(1,window.getScreenHeight());
         browser.resize(surfaceWidth,surfaceHeight);
         browser.setZoomLevel(0);
@@ -217,7 +245,7 @@ public final class EditorScreen extends Screen {
             JsonObject reply = new JsonObject();
             if(message.get("op").getAsString().startsWith("program")) {
                 if(turtle==null||!ready)throw new IllegalStateException("No turtle editor session");
-                org.singularbots.compat.cct.client.ProgramClient.request(turtle,message,callback::success,error->callback.failure(400,error));
+                org.singularbots.compat.cct.client.ProgramClient.request(turtle,message,answer->{var result=JsonParser.parseString(answer).getAsJsonObject();if(result.has("library"))library=java.util.UUID.fromString(result.get("library").getAsString());callback.success(localizeErrors(answer));},error->callback.failure(400,org.singularbots.turtle.RemoteDiagnostics.localized(error)));
                 return;
             }
             switch (message.get("op").getAsString()) {
@@ -228,25 +256,36 @@ public final class EditorScreen extends Screen {
                     if (draft != null) reply.add("draft", draft);
                     if(recovery!=null){var local=recovery.load();if(local!=null)reply.add("recovery",local);}
                     reply.addProperty("theme", theme.load());
+                    reply.addProperty("inputTrace", INPUT_TRACE);
                     reply.addProperty("smoke", smoke);reply.addProperty("turtle",turtle!=null); ready = true;
                     LoggerFactory.getLogger("SingularBotBlocks").info("Editor page ready after {} ms",(System.nanoTime()-openedAt)/1_000_000);
                     resizeBrowser();
                 }
+                case "takeoverAck" -> {if(!ready||library==null||Minecraft.getInstance().player==null||!library.equals(Minecraft.getInstance().player.getUUID()))throw new IllegalStateException("No student handoff session");org.singularbots.compat.cct.client.TakeoverClient.ack(java.util.UUID.fromString(message.get("token").getAsString()),message.get("saved").getAsBoolean());}
                 case "setTheme" -> { if (!ready) throw new IllegalStateException("Editor is not ready"); String chosen = message.get("theme").getAsString(); theme.save(chosen); pageTheme = chosen; }
                 case "saveDraft" -> { if (!ready||turtle!=null) throw new IllegalStateException("Local drafts require a local editor"); drafts.save(message.getAsJsonObject("draft")); }
                 case "saveRecovery" -> {if(!ready||recovery==null)throw new IllegalStateException("No turtle recovery session");recovery.save(message.getAsJsonObject("draft"));}
                 case "navigate" -> {if(!ready||!connectedRemote)throw new IllegalStateException("No remote editor session");int page=message.get("page").getAsInt();if(page<1||page>3)throw new IllegalArgumentException("Unknown remote page");callback.success("{}");Minecraft.getInstance().execute(()->{if(message.has("recovered")&&message.get("recovered").getAsBoolean()&&Minecraft.getInstance().player!=null)Minecraft.getInstance().player.displayClientMessage(Component.translatable("message.singularbots.local_recovery"),false);returnToPage(page);});return;}
                 case "remoteState" -> {if(!ready||!connectedRemote)throw new IllegalStateException("No remote editor session");reply=((org.singularbots.compat.cct.client.RemoteScreen)parent).editorState();}
                 case "remoteAction" -> {if(!ready||!connectedRemote)throw new IllegalStateException("No remote editor session");String action=message.get("action").getAsString();if(!java.util.Set.of("snapshot","restore","select","lock").contains(action))throw new IllegalArgumentException("Unknown editor remote action");int value=message.has("value")?message.get("value").getAsInt():0;net.neoforged.neoforge.network.PacketDistributor.sendToServer(new org.singularbots.network.RemoteNetwork.Action(turtle,action,value,""));}
+                // After pointing a robot out or fetching the robot this editor was opened from, both the editor and the robot's controller close.
+                case "exitToWorld" -> {if(!ready||!connectedRemote)throw new IllegalStateException("No remote editor session");callback.success("{}");Minecraft.getInstance().execute(()->{var mc=Minecraft.getInstance();if(mc.screen!=this)return;leftToWorld=true;mc.setScreen(parent);if(mc.screen==parent)parent.onClose();});return;}
                 case "close" -> { callback.success("{}"); Minecraft.getInstance().execute(() -> {if(message.has("recovered")&&message.get("recovered").getAsBoolean()&&Minecraft.getInstance().player!=null)Minecraft.getInstance().player.displayClientMessage(Component.translatable("message.singularbots.local_recovery"),false);Minecraft.getInstance().setScreen(parent);}); return; }
                 case "itemCatalog" -> {if(!ready)throw new IllegalStateException("Editor is not ready");
                     ItemCatalog.request(catalog->{if(browser!=null)callback.success(catalog.toString());},error->{if(browser!=null)callback.failure(500,error);});return;}
-                case "imeCaret" -> {
-                    // CSS pixels of the page map to window points through the surface the page is painted on.
-                    var window=Minecraft.getInstance().getWindow();double scale=(double)window.getScreenWidth()/Math.max(1,surfaceWidth);
-                    if(message.has("x"))MacIme.caret(message.get("x").getAsDouble()*scale,message.get("y").getAsDouble()*scale,message.get("height").getAsDouble()*scale);else MacIme.clearCaret();
+                case "layout" -> {
+                    if(!ready||turtle==null)throw new IllegalStateException("No turtle editor session");
+                    compact=message.get("compact").getAsBoolean();layoutBrowser();resizeBrowser();
                 }
-                case "opened" -> {usableAt=System.nanoTime();LoggerFactory.getLogger("SingularBotBlocks").info("Editor workbench usable after {} ms",(usableAt-openedAt)/1_000_000);}
+                case "imeCaret" -> {
+                    // CSS pixels of the page map to window points through the surface the page is painted on, offset by where it sits.
+                    var window=Minecraft.getInstance().getWindow();double points=(double)window.getScreenWidth()/Math.max(1,width);
+                    double scale=points*browserWidth/Math.max(1,surfaceWidth),left=browserX*points;
+                    pageTyping=message.has("x");
+                    if(message.has("x"))MacIme.caret(left+message.get("x").getAsDouble()*scale,message.get("y").getAsDouble()*scale,message.get("height").getAsDouble()*scale);else MacIme.clearCaret();
+                }
+                case "inputTrace" -> {if(!INPUT_TRACE)throw new IllegalStateException("Input trace is off");String event=message.get("event").getAsString();trace("page {}",event.length()>300?event.substring(0,300):event);}
+                case "opened" -> {if(pendingTakeover!=null){var notice=pendingTakeover;pendingTakeover=null;if(!takeover(notice,pendingPrepare)&&pendingPrepare)org.singularbots.compat.cct.client.TakeoverClient.ack(java.util.UUID.fromString(JsonParser.parseString(notice.json()).getAsJsonObject().get("token").getAsString()),true);}usableAt=System.nanoTime();LoggerFactory.getLogger("SingularBotBlocks").info("Editor workbench usable after {} ms",(usableAt-openedAt)/1_000_000);}
                 case "smokeResult" -> {
                     if (!smoke || !ready) throw new IllegalStateException("Smoke test not enabled");
                     fontLoaded = message.get("fontLoaded").getAsBoolean();
@@ -259,8 +298,25 @@ public final class EditorScreen extends Screen {
             callback.success(reply.toString());
         } catch (Exception e) {
             LoggerFactory.getLogger("SingularBotBlocks").warn("Editor request failed", e);
-            callback.failure(400, e.getMessage() == null ? e.toString() : e.getMessage());
+            callback.failure(400, e.getMessage() == null ? e.toString() : org.singularbots.turtle.RemoteDiagnostics.localized(e.getMessage()));
         }
+    }
+
+    /** The server reports turtle failures in CC's English; the editor shows them in the player's language. */
+    static String localizeErrors(String reply){
+        try{
+            var json=JsonParser.parseString(reply).getAsJsonObject();boolean changed=false;
+            if(json.has("ok")&&!json.get("ok").getAsBoolean()&&json.has("error")){json.addProperty("error",org.singularbots.turtle.RemoteDiagnostics.localized(json.get("error").getAsString()));changed=true;}
+            if(json.has("runtime")&&json.get("runtime").isJsonObject()){var runtime=json.getAsJsonObject("runtime");
+                if(runtime.has("error")&&!runtime.get("error").getAsString().isEmpty()){runtime.addProperty("error",org.singularbots.turtle.RemoteDiagnostics.localized(runtime.get("error").getAsString()));changed=true;}}
+            if(json.has("historyDiagnostic")&&!json.get("historyDiagnostic").getAsString().isEmpty()){json.addProperty("historyDiagnostic",org.singularbots.turtle.RemoteDiagnostics.localized(json.get("historyDiagnostic").getAsString()));changed=true;}
+            // Only runtime records carry a failure; other records carry a program id, which must not be matched against failures.
+            if(json.has("records")&&json.get("records").isJsonArray())for(var item:json.getAsJsonArray("records")){
+                if(!item.isJsonObject())continue;var record=item.getAsJsonObject();
+                if(record.has("kind")&&record.get("kind").getAsString().equals("runtime")&&record.has("message")&&!record.get("message").getAsString().isEmpty()){record.addProperty("message",org.singularbots.turtle.RemoteDiagnostics.localized(record.get("message").getAsString()));changed=true;}
+            }
+            return changed?json.toString():reply;
+        }catch(RuntimeException e){return reply;}
     }
 
     private String modVersion(String id) {
@@ -276,8 +332,9 @@ public final class EditorScreen extends Screen {
     }
 
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // The full-screen editor is opaque; a world blur behind it is wasted work.
-        graphics.fill(0,0,width,height,0xff171f23);
+        backgroundClicks.focus(Minecraft.getInstance().isWindowActive(),System.nanoTime());
+        // The full-screen editor is opaque; a world blur behind it is wasted work. While running or stepping the world stays visible beside it.
+        if(coversWorld())graphics.fill(0,0,width,height,0xff171f23);
         if (error != null) {
             graphics.drawWordWrap(font, Component.translatable("screen.singularbots.browser_error"), 20, 25, width - 40, 0xffffff);
             graphics.drawWordWrap(font, Component.literal(error), 20, 90, width - 40, 0xffaaaa);
@@ -339,14 +396,20 @@ public final class EditorScreen extends Screen {
         else Minecraft.getInstance().setScreen(parent);
     }
     @Override public void removed() {
-        MacIme.clearCaret();MacIme.uninstall();
+        ScreenWalking.releaseAll();MacIme.clearCaret();MacIme.uninstall();
         if(turtle!=null)org.singularbots.compat.cct.client.ProgramClient.close(turtle);
         dispose();
+        // The server can close the robot's controller while the editor is open (the robot was fetched or broken); the controller
+        // underneath then never hears it closed, so it is cleaned up here: its robot camera must not stay on.
+        if(connectedRemote&&!leftToWorld)Minecraft.getInstance().execute(()->{if(Minecraft.getInstance().screen==null)parent.removed();});
     }
     @Override public boolean isPauseScreen() { return false; }
     @Override public boolean mouseClicked(double x, double y, int button) {
         if (error != null || browser == null) return super.mouseClicked(x,y,button);
+        boolean active=Minecraft.getInstance().isWindowActive();long now=System.nanoTime();
+        if(backgroundClicks.press(x,y,button,active,now)){trace("ignored repeated press {} at {},{} windowActive={}",button,x,y,active);return true;}
         if(super.mouseClicked(x,y,button))return true;
+        trace("press {} at {},{} windowActive={} sinceInactiveMs={}",button,x,y,active,backgroundClicks.sinceInactive(now)/1_000_000);
         if(!inBrowser(x,y))return false;
         // Clicking elsewhere ends a composition, as in native text fields.
         MacIme.discard();
@@ -354,6 +417,8 @@ public final class EditorScreen extends Screen {
     }
     @Override public boolean mouseReleased(double x, double y, int button) {
         if (browser == null || error != null) return super.mouseReleased(x,y,button);
+        trace("release {} at {},{}",button,x,y);
+        if(backgroundClicks.release(x,y,button,Minecraft.getInstance().isWindowActive(),System.nanoTime()))return true;
         if(browserMouseButton!=button)return super.mouseReleased(x,y,button);
         browserMouseButton=-1;browser.sendMouseRelease(pixelX(x-browserX),pixelY(y-browserY),button); return true;
     }
@@ -382,16 +447,37 @@ public final class EditorScreen extends Screen {
             else onClose();
             return true;
         }
+        trace("key {} mods {} commandHeld={}",key,mods,Screen.hasControlDown());
+        // Beside a running program the movement keys walk the player, unless a text field is being typed in.
+        if (letsPlayerWalk() && ScreenWalking.press(key,scan,mods)) return true;
+        // Shift+F10, the menu key or Option+M opens the right-click menu, which background play cannot reach with a right
+        // click. The page opens it directly; offscreen CEF is not relied on to pass function keys through.
+        boolean menuKey=key==GLFW.GLFW_KEY_MENU||key==GLFW.GLFW_KEY_F10&&(mods&(GLFW.GLFW_MOD_SHIFT|GLFW.GLFW_MOD_CONTROL|GLFW.GLFW_MOD_ALT|GLFW.GLFW_MOD_SUPER))==GLFW.GLFW_MOD_SHIFT;
+        if (browser != null && ready && error == null && menuKey) {
+            browser.executeJavaScript("window.cceduContextMenu && window.cceduContextMenu()", EditorOrigin.URL, 0);
+            return true;
+        }
+        // Option+M is a key background play can send. It is still forwarded, so a text box being typed in gets its
+        // character; the page opens no menu while a text box has focus, and only one menu while one is open.
+        int modifiers=mods&(GLFW.GLFW_MOD_SHIFT|GLFW.GLFW_MOD_CONTROL|GLFW.GLFW_MOD_ALT|GLFW.GLFW_MOD_SUPER);
+        if (browser != null && ready && error == null && key == GLFW.GLFW_KEY_M && modifiers == GLFW.GLFW_MOD_ALT)
+            browser.executeJavaScript("window.cceduContextMenu && window.cceduContextMenu()", EditorOrigin.URL, 0);
         // Offscreen CEF on macOS ignores Cmd+V and Cmd+A in text fields, so the page applies them; the key is still
-        // forwarded below for Blockly's own block shortcuts on the workspace.
-        if (browser != null && Minecraft.ON_OSX && ready && error == null) {
-            if (Screen.isPaste(key)) browser.executeJavaScript("window.cceduEditCommand && window.cceduEditCommand('paste'," + new com.google.gson.Gson().toJson(Minecraft.getInstance().keyboardHandler.getClipboard()) + ")", EditorOrigin.URL, 0);
-            else if (Screen.isSelectAll(key)) browser.executeJavaScript("window.cceduEditCommand && window.cceduEditCommand('selectAll')", EditorOrigin.URL, 0);
+        // forwarded below for Blockly's own block shortcuts on the workspace. Command comes from the key event, the
+        // same modifiers CEF receives; Screen.isPaste instead asks GLFW whether Command is held at this moment, which
+        // can disagree with the event (for example a key sent to the window while the game is in the background).
+        boolean command=(mods&GLFW.GLFW_MOD_SUPER)!=0&&(mods&(GLFW.GLFW_MOD_SHIFT|GLFW.GLFW_MOD_ALT))==0;
+        if (browser != null && Minecraft.ON_OSX && ready && error == null && command) {
+            if (key == GLFW.GLFW_KEY_V) browser.executeJavaScript("window.cceduEditCommand && window.cceduEditCommand('paste'," + new com.google.gson.Gson().toJson(Minecraft.getInstance().keyboardHandler.getClipboard()) + ")", EditorOrigin.URL, 0);
+            else if (key == GLFW.GLFW_KEY_A) browser.executeJavaScript("window.cceduEditCommand && window.cceduEditCommand('selectAll')", EditorOrigin.URL, 0);
         }
         if (browser != null) { browser.sendKeyPress(key,scan,mods); return true; }
         return super.keyPressed(key,scan,mods);
     }
+    /** Only the narrow workbench beside a running program leaves the world in view to walk in. */
+    @Override public boolean letsPlayerWalk() { return compact && error == null && browser != null && !nativePopup && !pageTyping && MacIme.composition().isEmpty(); }
     @Override public boolean keyReleased(int key, int scan, int mods) {
+        if (ScreenWalking.release(key,scan)) return true;
         if (browser != null) { browser.sendKeyRelease(key,scan,mods); return true; } return false;
     }
     @Override public boolean charTyped(char c, int mods) {

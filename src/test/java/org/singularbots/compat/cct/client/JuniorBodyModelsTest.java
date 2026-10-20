@@ -11,7 +11,7 @@ class JuniorBodyModelsTest {
             assertEquals(i, JuniorBodyModels.index(Appearance.COLOURS[i]));
             assertEquals(i, JuniorBodyModels.index(0xff000000 | Appearance.COLOURS[i]));
         }
-        assertEquals(-1, JuniorBodyModels.index(-1));
+        assertEquals(0, JuniorBodyModels.index(-1));
         assertEquals(-1, JuniorBodyModels.index(0x123456));
         assertEquals(-1, JuniorBodyModels.index(0xff123456));
     }

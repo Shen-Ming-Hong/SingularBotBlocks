@@ -12,9 +12,9 @@ Blockly 內建 zh-hant 語言包的用詞在 `editor/src/wording.js` 覆寫；�
 | 區塊 | 積木 | 與工具箱、編輯器一致 |
 | 循環 | 迴圈、重複 | 臺灣用語，與「迴圈」分類一致 |
 | 陳述式、返回、傳回、true／false | 積木、結果是「是」／「否」 | 程式術語 |
-| 真／假 | 是／否 | 條件多為問句，例如「前方有方塊嗎」 |
+| 真／假 | 是／否 | 條件寫成陳述句，例如「前方有方塊」，接在「如果」「一直重複，只要」「不是」後面都讀得通 |
 | 字串、串連 | 文字、接起來 | 程式術語 |
-| 再製、添加評論 | 複製、加上註解 | 一般用語 |
+| 再製、添加評論 | 複製一份、加上註解 | 一般用語；積木右鍵只有「複製一份」，馬上在原積木旁放一個副本；用 Cmd+C 複製後可在空白處按右鍵選「貼上」，副本放在按右鍵的位置 |
 | 背包 | 物品欄 | Minecraft 官方 `container.inventory` |
 | 吸取 | 撿起 | Minecraft 官方 `subtitles.entity.item.pickup` |
 | 丟出 | 丟棄 | Minecraft 官方 `key.drop` |
@@ -28,7 +28,7 @@ Blockly 內建 zh-hant 語言包的用詞在 `editor/src/wording.js` 覆寫；�
 
 | 訊息 | 原本（Blockly zh-hant） | 現在 |
 | --- | --- | --- |
-| `DUPLICATE_BLOCK` | 再製 | 複製 |
+| `DUPLICATE_BLOCK` | 再製 | 複製一份 |
 | `ADD_COMMENT` | 添加評論 | 加上註解 |
 | `DELETE_BLOCK` | 刪除區塊 | 刪除積木 |
 | `DELETE_X_BLOCKS` | 刪除%1個區塊 | 刪除 %1 個積木 |
@@ -150,13 +150,13 @@ Blockly 內建 zh-hant 語言包的用詞在 `editor/src/wording.js` 覆寫；�
 | （新分類） | 函式：先列出程式庫裡其他存好的程式（「執行程式」積木），再放「函式」積木（做一件事／算出答案） |
 | 丟出 %1 整組物品 | 把選取的整組物品丟棄到 %1 |
 | 吸取 %1 的物品 | 撿起 %1 的物品 |
-| 嘗試 %1 是否成功 | %1 成功了嗎 |
+| 嘗試 %1 是否成功 | %1 成功 |
 | 物品／方塊 ID %1 | 物品／方塊 %1 |
 | 選擇背包格 %1 | 選取物品欄第 %1 格 |
 | 移到背包格 %1 數量 %2 | 把選取的物品搬到第 %1 格，搬 %2 個 |
 | 背包格 %1 的物品 ID | 第 %1 格是什麼物品 |
 | %1 的方塊 ID | %1 是什麼方塊 |
-| %1 紅石訊號 | %1 有紅石訊號嗎 |
+| %1 紅石訊號 | %1 有紅石訊號 |
 | 設定 %1 紅石 %2 | 讓 %1 發出紅石訊號 %2 |
 | 確認 %1 否則錯誤 %2 | 檢查 %1 不對就停下並顯示 %2 |
 | 呼叫程式 %1 | 執行程式 %1 |
@@ -262,3 +262,34 @@ Blockly 內建 zh-hant 語言包的用詞在 `editor/src/wording.js` 覆寫；�
 | `diagnostic.restore_combat` | 戰鬥造成的變更無法安全復原 | 打鬥造成的改變沒辦法安全地回去 |
 | `diagnostic.restore_at` | 復原衝突：%s 的方塊已改變 | 回不去：%s 的方塊已經變了 |
 | `diagnostic.restore_denied_at` | 教師未允許在 %s 復原 | 老師不允許在 %s 回到復原點 |
+| `diagnostic.compile_variables` | （英文）Too many variables | 變數太多了（最多 128 個） |
+| `diagnostic.compile_variable` | （英文）Duplicate or invalid variable | 有變數的名字重複了，或不能用 |
+| `diagnostic.compile_one_start` | （英文）Only one start block is allowed | 只能有一個「當程式開始」積木 |
+| `diagnostic.compile_function_name` | （英文）Duplicate or invalid function name | 有函式的名字重複了，或不能用 |
+| `diagnostic.compile_function_input` | （英文）Unknown or repeated function input | 函式的輸入找不到，或重複了 |
+| `diagnostic.compile_functions` | （英文）Too many functions | 函式太多了（最多 256 個） |
+| `diagnostic.compile_workspace_nesting` | （英文）Workspace nesting exceeds 128 | 積木一層包一層太多了（超過 128 層） |
+| `diagnostic.compile_block_id` | （英文）Missing or duplicate stable block ID | 積木的編號不見了或重複了 |
+| `diagnostic.compile_blocks` | （英文）Workspace exceeds 4096 blocks | 積木太多了（最多 4096 個） |
+| `diagnostic.compile_field_size` | （英文）Field too large | 積木裡的文字太長了 |
+| `diagnostic.compile_statement_nesting` | （英文）Too many nested statements | 積木一層包一層太多了（超過 128 層） |
+| `diagnostic.compile_command` | （英文）Unknown turtle command | 不認得這個機器人動作 |
+| `diagnostic.compile_argument` | （英文）Command does not accept an argument | 這個動作不能加上數字 |
+| `diagnostic.compile_choose_program` | （英文）Choose a program to call | 「執行程式」積木還沒選要執行哪個程式 |
+| `diagnostic.compile_return` | （英文）Return must be inside a function | 「交回答案」積木要放在函式裡面 |
+| `diagnostic.compile_break` | （英文）Break must be inside a loop | 「跳出迴圈」積木要放在迴圈裡面 |
+| `diagnostic.compile_only_break` | （英文）Only break is supported | 這裡只能用「跳出迴圈」 |
+| `diagnostic.compile_expression_nesting` | （英文）Expression nesting exceeds 64 | 積木一個塞一個太多層了（超過 64 層） |
+| `diagnostic.compile_number` | （英文）Number is not finite | 數字太大了，或不是正常的數字 |
+| `diagnostic.compile_registry_name` | （英文）Invalid item or block ID | 物品或方塊的 ID 不正確 |
+| `diagnostic.compile_text_join` | （英文）Invalid text join size | 「把文字接起來」的段數不正確 |
+| `diagnostic.compile_query` | （英文）Invalid turtle query | 不認得這個機器人偵測 |
+| `diagnostic.compile_boolean_action` | （英文）Invalid boolean turtle action | 這個動作不能當成「是」或「否」來用 |
+| `diagnostic.compile_size` | （英文）Compiled program exceeds 1 MiB | 程式太大了（超過 1 MiB） |
+| `diagnostic.compile_variable_id` | （英文）Unknown variable ID | 找不到這個變數 |
+| `diagnostic.compile_unknown_function` | （英文）Unknown function: %s | 找不到函式「%s」 |
+| `diagnostic.compile_unsupported_block` | （英文）Unsupported block: %s | 不支援這個積木：%s |
+| `diagnostic.compile_choice` | （英文）Invalid %s | 積木的選項不正確（%s） |
+| `diagnostic.compile_missing_field` | （英文）Missing field %s | 積木少了欄位（%s） |
+| `diagnostic.compile_malformed_block` | （英文）Malformed block data: %s | 積木資料有問題：%s |
+| `diagnostic.compile_malformed_workspace` | （英文）Malformed workspace: %s | 積木工作區資料有問題：%s |

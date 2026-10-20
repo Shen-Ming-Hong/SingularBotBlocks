@@ -109,7 +109,7 @@ class FieldItemPicker extends Blockly.Field{
 }
 // A number typed straight into an inventory input is a robot slot: a whole number from 1 to 16,
 // picked from that robot's own inventory instead of typed.
-export const SLOT_INPUTS=Object.freeze({ccedu_select:'SLOT',ccedu_transfer:'SLOT',ccedu_item_name:'SLOT'});
+export const SLOT_INPUTS=Object.freeze({ccedu_select:'SLOT',ccedu_transfer:'SLOT',ccedu_item_name:'SLOT',ccedu_item_count:'SLOT',ccedu_item_space:'SLOT'});
 export const clampSlot=value=>{const n=Math.round(Number(value));return Number.isFinite(n)?Math.min(16,Math.max(1,n)):1;};
 const inSlotInput=block=>{const parent=block?.getParent?.(),name=parent&&SLOT_INPUTS[parent.type];return block?.type==='math_number'&&!!name&&parent.getInputTargetBlock(name)===block;};
 // Resolves to 16 entries of [] or [itemId, count]; null when no robot is connected.
@@ -168,14 +168,39 @@ export const isLoose=block=>block.hasDisabledReason(LOOSE);
 export function markLooseStacks(workspace){
  const started=workspace.getBlocksByType('ccedu_start',false).length>0;
  withoutUndo(()=>{for(const block of workspace.getAllBlocks(false)){
-  // A function definition runs only when it is called, so it is never a stray stack.
-  const loose=started&&!block.getParent()&&block.type!=='ccedu_start'&&!FUNCTION_DEFINITIONS.includes(block.type);
+  // Every block of a stray stack is marked, because Blockly greys only blocks nested inside a disabled one,
+  // not the blocks chained below it. A function definition runs only when called, so it is never stray.
+  const root=block.getRootBlock();
+  const loose=started&&root.type!=='ccedu_start'&&!FUNCTION_DEFINITIONS.includes(root.type);
   if(block.hasDisabledReason(LOOSE)===loose)continue;
   block.setDisabledReason(loose,LOOSE);
   if(loose){block.cceduTooltip=block.tooltip;block.setTooltip(pickerZh?'沒有接在「當程式開始」下面，這組積木不會執行。':'Not attached under "when program starts"; this stack will not run.');}
   else if('cceduTooltip' in block){block.setTooltip(block.cceduTooltip);delete block.cceduTooltip;}
  }});
 }
+// The "call program" block picks another program from the student's library instead of typing its name, so a call
+// cannot be misspelt. The value it stores is still the program's name: saved programs, the server compiler, sharing
+// and the Lua runtime all look programs up by name, and the server rewrites every call when a program is renamed.
+let libraryList=[],libraryCurrent='';
+/** The latest library list and the program being edited, so call blocks offer every other program by name. */
+export function setProgramLibrary(programs=[],current=''){libraryList=Array.isArray(programs)?programs:[];libraryCurrent=current||'';}
+export function programCallOptions(value=''){
+ const names=libraryList.filter(p=>p&&p.id!==libraryCurrent&&typeof p.name==='string'&&p.name.trim()).map(p=>p.name);
+ const options=names.map(n=>[n,n]);
+ // A call to a program that is gone, or not yet in the list, keeps its name and says so instead of being dropped.
+ if(value&&!names.includes(value))options.unshift([(pickerZh?'（找不到）':'(missing) ')+value,value]);
+ if(!options.length)options.push([pickerZh?'（還沒有其他程式）':'(no other programs yet)','']);
+ return options;
+}
+class FieldProgram extends Blockly.FieldDropdown{
+ constructor(value){super(function(){return programCallOptions(this.getValue()||'');},undefined,undefined);if(typeof value==='string')this.setValue(value);}
+ static fromJson(options){return new FieldProgram(typeof options.value==='string'?options.value:undefined);}
+ // Any name loads, even one the library no longer has; the options are rebuilt around it.
+ doClassValidation_(newValue){return typeof newValue==='string'?newValue:null;}
+ getText_(){const value=this.getValue()||'';const found=programCallOptions(value).find(o=>o[1]===value);return found?found[0]:value;}
+}
+/** Redraws every call block after the library list changed, e.g. a program was renamed by the other side. */
+export function refreshProgramCalls(workspace){for(const b of workspace.getAllBlocks(false))if(b.type==='ccedu_call'){const f=b.getField('NAME');f.getOptions(false);f.forceRerender();}}
 export function registerTurtleBlocks(locale='en_us'){
  if(Blockly.Blocks.ccedu_turtle_command)return;
  if(!Blockly.Extensions.isRegistered('ccedu_start_fixed'))Blockly.Extensions.register('ccedu_start_fixed',function(){this.setDeletable(false);});
@@ -183,7 +208,7 @@ export function registerTurtleBlocks(locale='en_us'){
  // Blockly's own blocks and menus use the classroom wording too; setLocale has already loaded zh-hant.
  if(pickerZh)Object.assign(Blockly.Msg,CLASSROOM_ZH);
  // A new function would otherwise open with a placeholder comment bubble ("Describe this function...") on it.
- Blockly.Msg.PROCEDURES_DEFNORETURN_COMMENT='';Blockly.Msg.PROCEDURES_DEFRETURN_COMMENT='';Blockly.fieldRegistry.register('field_item_picker',FieldItemPicker);
+ Blockly.Msg.PROCEDURES_DEFNORETURN_COMMENT='';Blockly.Msg.PROCEDURES_DEFRETURN_COMMENT='';Blockly.fieldRegistry.register('field_item_picker',FieldItemPicker);Blockly.fieldRegistry.register('field_program',FieldProgram);
  // math_number's own field, which turns into the slot picker only inside an inventory input.
  Blockly.fieldRegistry.unregister('field_number');Blockly.fieldRegistry.register('field_number',FieldSlotNumber);
  const zh=locale==='zh_tw',tr=(a,b)=>zh?a:b,side={type:'field_dropdown',name:'SIDE',options:[[tr('前方','front'),'forward'],[tr('上方','above'),'up'],[tr('下方','below'),'down']]};
@@ -191,11 +216,14 @@ export function registerTurtleBlocks(locale='en_us'){
  const output=(type,message0,args0,check,colour=160)=>({type,message0,args0,output:check,colour});
  const input=(name,check)=>({type:'input_value',name,check});
  const options=commands=>commands.map(c=>[zh?(labels[c]||c):c,c]);
+ // Blockly's comparison pops out a value whose type differs from the other side; students may compare any two values.
+ const compareInit=Blockly.Blocks.logic_compare.init;
+ Blockly.Blocks.logic_compare.init=function(){compareInit.call(this);this.onchange=undefined;};
  Blockly.defineBlocksWithJsonArray([
  {type:'ccedu_start',message0:tr('當程式開始','when program starts'),nextStatement:null,colour:'#c99316',hat:'cap',extensions:['ccedu_start_fixed'],tooltip:tr('按「執行」時，從這裡往下依序執行。','Run starts here and goes down the stack.')},
  ...Object.entries(ACTION_BLOCKS).map(([type,[zhText,enText,choices]])=>statement(type,tr(zhText,enText),[{type:'field_dropdown',name:'COMMAND',options:choices.map(([zhLabel,enLabel,command])=>[tr(zhLabel,enLabel),command])}])),
  statement('ccedu_turtle_command','%1',[{type:'field_dropdown',name:'COMMAND',options:options(TURTLE_COMMANDS)}]),
- output('ccedu_turtle_result',tr('%1 成功了嗎','try %1 succeeded'),[{type:'field_dropdown',name:'COMMAND',options:options(TURTLE_COMMANDS.filter(c=>!['turnLeft','turnRight','detect','detectUp','detectDown','compare','compareUp','compareDown'].includes(c)))}],'Boolean'),
+ output('ccedu_turtle_result',tr('%1 成功','try %1 succeeded'),[{type:'field_dropdown',name:'COMMAND',options:options(TURTLE_COMMANDS.filter(c=>!['turnLeft','turnRight','detect','detectUp','detectDown','compare','compareUp','compareDown'].includes(c)))}],'Boolean',210),
  statement('ccedu_break',tr('跳出迴圈','break out of loop'),[],120),
  output('ccedu_registry_name',tr('物品／方塊 %1','item / block ID %1'),[{type:'field_item_picker',name:'NAME',value:'minecraft:stone'}],'String',35),
  statement('ccedu_turtle_action',tr('%1 數量／文字 %2','%1 amount / text %2'),[{type:'field_dropdown',name:'COMMAND',options:options(['drop','dropUp','dropDown','suck','suckUp','suckDown','place','placeUp','placeDown'])},input('ARG')]),
@@ -203,13 +231,23 @@ export function registerTurtleBlocks(locale='en_us'){
  statement('ccedu_select',tr('選取物品欄第 %1 格','select inventory slot %1'),[input('SLOT','Number')],35),
  statement('ccedu_transfer',tr('把選取的物品搬到第 %1 格，搬 %2 個','transfer to slot %1 count %2'),[input('SLOT','Number'),input('COUNT','Number')],35),
  output('ccedu_item_name',tr('第 %1 格是什麼物品','item ID in slot %1'),[input('SLOT','Number')],'String',35),
- output('ccedu_inspect',tr('%1 是什麼方塊','block ID %1'),[side],'String'),
- output('ccedu_redstone_query',tr('%1 有紅石訊號嗎','redstone input %1'),[side],'Boolean',5),
+ output('ccedu_inspect',tr('%1 是什麼方塊','block ID %1'),[side],'String',35),
+ // True/false blocks read as plain statements ("below has a block"), not questions, so they still read right
+ // after 如果, 一直重複，只要, 不是 and 且／或.
+ // One true/false block per question, with only the direction to choose. The old ccedu_turtle_query mixed these with
+ // number queries and an unused slot input, and had no output type, so it still loads but is no longer offered.
+ {...output('ccedu_detect',tr('%1 有方塊','is there a block %1'),[side],'Boolean',210),tooltip:tr('那裡有方塊就是「是」，空的（空氣、水或岩漿）就是「否」。','True when a block is there; air, water and lava count as empty.')},
+ // ccedu_compare is no longer offered (students compare 是什麼方塊 with an item themselves) but saved programs still load.
+ {...output('ccedu_compare',tr('%1 的方塊和選取的物品一樣','block %1 matches the selected item'),[side],'Boolean'),tooltip:tr('拿物品欄選取的那一格和那個方向的方塊比，一樣就是「是」。','Compares the block there with the selected inventory slot.')},
+ output('ccedu_item_count',tr('第 %1 格有幾個物品','item count in slot %1'),[input('SLOT','Number')],'Number',35),
+ output('ccedu_item_space',tr('第 %1 格還能放幾個','space left in slot %1'),[input('SLOT','Number')],'Number',35),
+ output('ccedu_selected_slot',tr('現在選取第幾格','selected slot'),[],'Number',35),
+ output('ccedu_redstone_query',tr('%1 有紅石訊號','redstone input %1'),[side],'Boolean',5),
  statement('ccedu_redstone_set',tr('讓 %1 發出紅石訊號 %2','set redstone %1 %2'),[side,input('VALUE','Boolean')],5),
  statement('ccedu_say',tr('說 %1','say %1'),[input('TEXT')],65),
  statement('ccedu_sleep',tr('等待 %1 秒','wait %1 seconds'),[input('SECONDS','Number')],65),
  statement('ccedu_assert',tr('檢查 %1 不對就停下並顯示 %2','assert %1 error %2'),[input('TEST','Boolean'),input('MESSAGE','String')],65),
- statement('ccedu_call',tr('執行程式 %1','call program %1'),[{type:'field_input',name:'NAME',text:tr('程式名稱','program name')}],285),
+ statement('ccedu_call',tr('執行程式 %1','call program %1'),[{type:'field_program',name:'NAME'}],285),
  statement('ccedu_comment',tr('註解 %1','comment %1'),[{type:'field_input',name:'TEXT',text:''}],210),
  statement('ccedu_snapshot','%1',[{type:'field_dropdown',name:'ACTION',options:[[tr('儲存復原點','save turtle state'),'save'],[tr('回到復原點','restore turtle state'),'restore']]}],285),
  output('ccedu_random_boolean',tr('隨機選是或否','random true or false'),[],'Boolean',230),
@@ -229,6 +267,11 @@ export function registerTurtleBlocks(locale='en_us'){
  luaGenerator.forBlock.ccedu_item_name=b=>['turtleedu.getItemName('+value(b,'SLOT')+')',Order.HIGH];
  const suffix=b=>({forward:'',up:'Up',down:'Down'}[b.getFieldValue('SIDE')]);
  luaGenerator.forBlock.ccedu_inspect=b=>['turtleedu.inspect'+suffix(b)+'()',Order.HIGH];
+ luaGenerator.forBlock.ccedu_detect=b=>['turtle.detect'+suffix(b)+'()',Order.HIGH];
+ luaGenerator.forBlock.ccedu_compare=b=>['turtle.compare'+suffix(b)+'()',Order.HIGH];
+ luaGenerator.forBlock.ccedu_item_count=b=>['turtle.getItemCount('+value(b,'SLOT')+')',Order.HIGH];
+ luaGenerator.forBlock.ccedu_item_space=b=>['turtle.getItemSpace('+value(b,'SLOT')+')',Order.HIGH];
+ luaGenerator.forBlock.ccedu_selected_slot=()=>['turtle.getSelectedSlot()',Order.HIGH];
  luaGenerator.forBlock.ccedu_redstone_query=b=>['turtleedu.checkRedstone'+suffix(b)+'()',Order.HIGH];
  luaGenerator.forBlock.ccedu_redstone_set=b=>'turtleedu.setRedstone'+suffix(b)+'('+value(b,'VALUE','false')+')\n';
  luaGenerator.forBlock.ccedu_say=b=>'turtleedu.say('+value(b,'TEXT','""')+')\n';
@@ -247,10 +290,13 @@ export function toolbox(locale){
  const category=(zhName,enName,colour,types)=>({kind:'category',name:zh?zhName:enName,colour,contents:types.map(type=>typeof type==='string'?{kind:'block',type}:{kind:'block',...type})});
  return {kind:'categoryToolbox',contents:[
  // The old all-in-one ccedu_turtle_command and ccedu_turtle_action (with an amount) still load but are no longer offered.
- category('機器人動作','Turtle',100,[...Object.keys(ACTION_BLOCKS),'ccedu_turtle_result','ccedu_turtle_query','ccedu_inspect']),
- category('物品欄','Inventory',35,[{type:'ccedu_select',inputs:{SLOT:num(1)}},{type:'ccedu_transfer',inputs:{SLOT:num(2),COUNT:num(64)}},{type:'ccedu_item_name',inputs:{SLOT:num(1)}},'ccedu_registry_name']),
+ category('機器人動作','Turtle',100,Object.keys(ACTION_BLOCKS)),
+ category('物品欄','Inventory',35,[{type:'ccedu_select',inputs:{SLOT:num(1)}},{type:'ccedu_transfer',inputs:{SLOT:num(2),COUNT:num(64)}},{type:'ccedu_item_name',inputs:{SLOT:num(1)}},{type:'ccedu_item_count',inputs:{SLOT:num(1)}},{type:'ccedu_item_space',inputs:{SLOT:num(1)}},'ccedu_selected_slot','ccedu_inspect','ccedu_registry_name']),
  category('紅石','Redstone',5,['ccedu_redstone_query',{type:'ccedu_redstone_set',inputs:{VALUE:bool('TRUE')}}]),
- category('判斷','Logic',210,['controls_if',{type:'logic_compare',inputs:{A:num(0),B:num(0)}},'logic_operation','logic_negate','logic_boolean']),
+ // Each robot block sits in the category for what it gives back: actions above, true/false questions here, IDs in
+ // the inventory category. The comparison starts with two empty slots so any value fits: numbers, text, block or
+ // item IDs, variables. Students build their own checks (e.g. "block in front = stone") from the general blocks.
+ category('判斷','Logic',210,['controls_if','logic_compare','ccedu_detect','ccedu_turtle_result','logic_operation','logic_negate','logic_boolean']),
  category('迴圈','Loops',120,[{type:'controls_repeat_ext',inputs:{TIMES:num(10)}},'controls_whileUntil',{type:'controls_for',inputs:{FROM:num(1),TO:num(10),BY:num(1)}},'ccedu_break']),
  category('數字','Math',230,['math_number',{type:'math_arithmetic',inputs:{A:num(1),B:num(1)}},{type:'math_modulo',inputs:{DIVIDEND:num(64),DIVISOR:num(10)}},{type:'math_random_int',inputs:{FROM:num(1),TO:num(100)}},'math_random_float','ccedu_random_boolean']),
  category('文字','Text',160,['text',{type:'text_join',inputs:{ADD0:str(''),ADD1:str('')}},{type:'text_length',inputs:{VALUE:str(tr('你好','hello'))}}]),
@@ -271,6 +317,7 @@ export function variableFlyout(workspace){
  * `programs` is the latest library list; the flyout is rebuilt each time the category opens.
  */
 export function functionFlyout(workspace,{programs=[],current='',locale='en_us'}={}){
+ setProgramLibrary(programs,current);
  const zh=locale==='zh_tw',tr=(a,b)=>zh?a:b,xml=Blockly.utils.xml;
  const label=text=>{const el=xml.createElement('label');el.setAttribute('text',text);return el;};
  const others=programs.filter(p=>p&&p.id!==current&&typeof p.name==='string'&&p.name.trim());
@@ -280,5 +327,25 @@ export function functionFlyout(workspace,{programs=[],current='',locale='en_us'}
 }
 // Loading is not an edit: Blockly delivers its create events after the caller's loading flag is cleared,
 // which used to mark every opened program dirty and save it again. Undo also must not remove the loaded program.
-export function loadWorkspace(workspace,saved){if(!saved||typeof saved!=='object'||Array.isArray(saved))throw new Error('Workspace must be an object');Blockly.Events.disable();try{Blockly.serialization.workspaces.load(migrateActionBlocks(saved),workspace);}finally{Blockly.Events.enable();}workspace.clearUndo();}
+// While a block is dragged near a connection Blockly shows an insertion marker there, and saving then writes
+// {"block":null} for it. Drop those entries, and any connection left empty, so saved programs never carry nulls.
+export function dropInsertionMarkers(value){
+ if(Array.isArray(value))return value.map(dropInsertionMarkers);
+ if(!value||typeof value!=='object')return value;
+ const out={};
+ for(const [key,child] of Object.entries(value)){
+  if(key==='block'&&child===null)continue;
+  const kept=dropInsertionMarkers(child);
+  if(child&&typeof child==='object'&&!Array.isArray(child)&&'block' in child&&child.block===null&&!Object.keys(kept).length)continue;
+  out[key]=kept;
+ }
+ return out;
+}
+export function loadWorkspace(workspace,saved){
+ if(!saved||typeof saved!=='object'||Array.isArray(saved))throw new Error('Workspace must be an object');
+ // Blockly skips pointer listeners when blocks are created read-only; install them before restoring the temporary lock.
+ const readOnly=workspace.options.readOnly;Blockly.Events.disable();workspace.options.readOnly=false;
+ try{Blockly.serialization.workspaces.load(migrateActionBlocks(saved),workspace);}finally{workspace.options.readOnly=readOnly;for(const block of workspace.getAllBlocks(false))block.setEditable(block.isOwnEditable());Blockly.Events.enable();}
+ workspace.clearUndo();
+}
 export function preview(workspace){return luaGenerator.workspaceToCode(workspace);}

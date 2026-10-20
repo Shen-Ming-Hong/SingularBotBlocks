@@ -14,6 +14,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /** Skip tool-category restrictions only in the Junior command's scoped fake-player operation. */
 @Mixin(value=TurtleTool.class,remap=false)
 public abstract class JuniorMiningMixin {
+    @Redirect(method="lambda$dig$0",at=@At(value="INVOKE",target="Lnet/minecraft/server/level/ServerPlayerGameMode;destroyBlock(Lnet/minecraft/core/BlockPos;)Z",remap=true))
+    private boolean collectDrops(net.minecraft.server.level.ServerPlayerGameMode player,BlockPos pos){
+        return org.singularbots.compat.cct.JuniorMining.dig(player,pos);
+    }
     @Inject(method="checkBlockBreakable",at=@At("HEAD"),cancellable=true)
     private void allBreakableBlocks(Level level,BlockPos pos,TurtlePlayer player,CallbackInfoReturnable<TurtleCommandResult> result){
         var access=TeachingPermissions.CURRENT.get();

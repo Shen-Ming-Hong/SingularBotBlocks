@@ -71,3 +71,16 @@ test('function blocks read as making and using a function, in classroom Chinese'
   def.loadExtraState({params:[{name:'格數',id:'n'}]});assert.match(def.toString(),/輸入： 格數/);
  }finally{w.dispose();}
 });
+
+test('true/false blocks read as statements, so 如果／只要／不是 in front of them still makes sense',()=>{
+ const w=new Blockly.Workspace();
+ try{
+  for(const type of toolbox('zh_tw').contents.flatMap(c=>c.contents||[]).map(b=>b.type).concat('ccedu_compare')){
+   const block=w.newBlock(type);
+   if(block.outputConnection?.getCheck()?.includes('Boolean'))assert.ok(!/[嗎？]/.test(block.toString()),`${type}: ${block.toString()}`);
+  }
+  const loop=w.newBlock('controls_whileUntil'),not=w.newBlock('logic_negate'),look=w.newBlock('ccedu_detect');
+  look.setFieldValue('down','SIDE');not.getInput('BOOL').connection.connect(look.outputConnection);loop.getInput('BOOL').connection.connect(not.outputConnection);
+  assert.equal(loop.toString().replace(/[()]/g,''),'一直重複，只要 不是 下方 有方塊 做 ?');
+ }finally{w.dispose();}
+});

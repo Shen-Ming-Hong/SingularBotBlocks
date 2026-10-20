@@ -21,6 +21,7 @@ public final class ProgramTransfer {
                 for(var receiver:RemoteService.loaded(player.serverLevel())){
                     if(receiver.getAccess().getOwningPlayer()==null||receiver.libraryId().equals(turtle.libraryId())||(!all&&!receiver.libraryId().toString().equals(target)))continue;
                     if(player.position().distanceToSqr(receiver.getBlockPos().getCenter())>4096||!seen.add(receiver.libraryId()))continue;
+                    TeacherTakeover.write(player,receiver.libraryId());
                     install(store,receiver.libraryId(),source.deepCopy(),"Teacher "+player.getGameProfile().getName()+": "+source.get("name").getAsString());count++;
                 }
                 if(count==0)throw new IllegalArgumentException("No eligible loaded recipient turtle");result.addProperty("recipients",count);
@@ -45,10 +46,7 @@ public final class ProgramTransfer {
         // Raw Lua may choose a name at runtime, so preserve its whole available library.
         if(p.get("mode").getAsString().equals("lua"))names.addAll(library);else visitCalls(p.getAsJsonObject("workspace"),name->{names.add(name);return name;});
     }
-    private static void visitCalls(JsonElement value,java.util.function.UnaryOperator<String> rename){
-        if(value.isJsonObject()){var j=value.getAsJsonObject();if(j.has("type")&&j.get("type").getAsString().equals("ccedu_call")){var fields=j.getAsJsonObject("fields");fields.addProperty("NAME",rename.apply(fields.get("NAME").getAsString()));}for(var entry:j.entrySet())visitCalls(entry.getValue(),rename);}
-        else if(value.isJsonArray())for(var entry:value.getAsJsonArray())visitCalls(entry,rename);
-    }
+    private static void visitCalls(JsonElement value,java.util.function.UnaryOperator<String> rename){ProgramStore.renameCalls(value,rename);}
     private static JsonObject install(ProgramStore store,UUID turtle,JsonObject bundle,String rootName)throws Exception{
         ProgramStore.validateContent(bundle);
         var dependencies=bundle.has("dependencies")?bundle.getAsJsonArray("dependencies"):new JsonArray();if(dependencies.size()>ProgramStore.MAX_PROGRAMS)throw new IllegalArgumentException("Too many dependencies");

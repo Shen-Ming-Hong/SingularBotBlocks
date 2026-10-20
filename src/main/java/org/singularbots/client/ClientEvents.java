@@ -13,7 +13,7 @@ public final class ClientEvents {
     private static boolean smokeOpened;
     private static int smokeTicks;
 
-    /** The opaque editor also hides the HUD, so skip drawing it. */
+    /** The opaque editor also hides the HUD, so skip drawing it; while running or stepping the hotbar would only sit half under the editor. */
     @SubscribeEvent public static void hideHud(net.neoforged.neoforge.client.event.RenderGuiEvent.Pre event) {
         if (Minecraft.getInstance().screen instanceof EditorScreen) event.setCanceled(true);
     }

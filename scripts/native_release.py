@@ -59,7 +59,9 @@ def verify_platform(dist, target):
 
 
 def stage(dist, output, run_id, source_commit):
-    results = [verify_platform(dist, target) for target in native.VERSIONS["platforms"]]
+    # Unsupported platforms are no longer built in CI; keep them only when an older run has them.
+    targets = [t for t in native.VERSIONS["platforms"] if t not in UNSUPPORTED or (dist / ("native-" + t)).is_dir()]
+    results = [verify_platform(dist, target) for target in targets]
     output.mkdir(parents=True, exist_ok=False)
     for r in results:
         shutil.copy2(r["archive"], output / r["archive"].name)
