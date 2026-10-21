@@ -1,6 +1,7 @@
 import * as Blockly from 'blockly';
 import {luaGenerator,Order} from 'blockly/lua';
 import {CLASSROOM_ZH} from './wording.js';
+import {tr,language,setLanguage,isChinese,inLanguage} from './i18n.js';
 export const TURTLE_COMMANDS=Object.freeze(['forward','back','up','down','turnLeft','turnRight','dig','digUp','digDown','place','placeUp','placeDown','attack','attackUp','attackDown','detect','detectUp','detectDown','compare','compareUp','compareDown','drop','dropUp','dropDown','suck','suckUp','suckDown','equipLeft','equipRight']);
 const labels={forward:'前進',back:'後退',up:'上升',down:'下降',turnLeft:'左轉',turnRight:'右轉',dig:'挖掘前方',digUp:'挖掘上方',digDown:'挖掘下方',place:'放置前方',placeUp:'放置上方',placeDown:'放置下方',attack:'攻擊前方',attackUp:'攻擊上方',attackDown:'攻擊下方',drop:'丟棄到前方',dropUp:'丟棄到上方',dropDown:'丟棄到下方',suck:'撿起前方',suckUp:'撿起上方',suckDown:'撿起下方',equipLeft:'裝備左側',equipRight:'裝備右側',detect:'前方有方塊',detectUp:'上方有方塊',detectDown:'下方有方塊',compare:'前方是選取的方塊',compareUp:'上方是選取的方塊',compareDown:'下方是選取的方塊',getItemCount:'物品數量',getItemSpace:'還能放幾個',getSelectedSlot:'選取第幾格'};
 // One toolbox block per kind of action, so each dropdown only holds that action's directions.
@@ -27,9 +28,10 @@ export function migrateActionBlocks(saved){
 }
 export const ITEM_ID=/^[a-z0-9_.-]+:[a-z0-9/._-]+$/;
 // Every registered item and block in the current game (mods included), sent once by the client.
-let catalog=null,pickerZh=false,openPicker=null;
+let catalog=null,openPicker=null;
 export function setItemCatalog(data){
- const items=data.items.map(([id,zh,en,flags,icon])=>({id,zh,en,block:(flags&1)!==0,item:(flags&2)!==0,icon,search:[id,id.slice(id.indexOf(':')+1).replace(/_/g,' '),zh,en].join('\n').toLowerCase()}));
+ // Each row has the name in the player's game language and in English, so either can be searched.
+ const items=data.items.map(([id,local,en,flags,icon])=>({id,local,en,block:(flags&1)!==0,item:(flags&2)!==0,icon,search:[id,id.slice(id.indexOf(':')+1).replace(/_/g,' '),local,en].join('\n').toLowerCase()}));
  catalog={atlas:data.atlas,size:data.icon,columns:data.columns,rows:data.rows,items,byId:new Map(items.map(item=>[item.id,item]))};
  openPicker?.();
 }
@@ -40,10 +42,10 @@ let itemText=false;
 const iconSize=()=>itemText?22:30;
 export function setItemIdText(show){if(itemText===!!show)return false;itemText=!!show;return true;}
 const sprite=(item,size)=>`background-image:url("${catalog.atlas}");background-size:${catalog.columns*size}px ${catalog.rows*size}px;background-position:-${item.icon%catalog.columns*size}px -${Math.floor(item.icon/catalog.columns)*size}px`;
-// Exact ID or name first, then prefixes, then any match; Chinese and English names and the ID all count.
+// Exact ID or name first, then prefixes, then any match; the game-language and English names and the ID all count.
 export function searchItems(items,query,kind='all'){
  const q=query.trim().toLowerCase(),pool=items.filter(item=>kind==='all'||item[kind]);if(!q)return pool;
- const rank=item=>{const names=[item.id,item.id.slice(item.id.indexOf(':')+1),item.zh.toLowerCase(),item.en.toLowerCase()];return names.includes(q)?0:names.some(n=>n.startsWith(q))?1:2;};
+ const rank=item=>{const names=[item.id,item.id.slice(item.id.indexOf(':')+1),item.local.toLowerCase(),item.en.toLowerCase()];return names.includes(q)?0:names.some(n=>n.startsWith(q))?1:2;};
  return pool.filter(item=>item.search.includes(q)).map(item=>[rank(item),item]).sort((a,b)=>a[0]-b[0]).map(([,item])=>item);
 }
 class FieldItemPicker extends Blockly.Field{
@@ -57,7 +59,7 @@ class FieldItemPicker extends Blockly.Field{
  }
  getText_(){
   if(itemText)return null;if(!catalog)return '';const item=catalog.byId.get(this.getValue());
-  return this.hasIcon_?'':item?(pickerZh?item.zh:item.en):null;
+  return this.hasIcon_?'':item?(item.local):null;
  }
  render_(){
   const item=catalog?.byId.get(this.getValue());this.hasIcon_=!!this.icon_&&!!item&&item.icon>=0;
@@ -65,7 +67,7 @@ class FieldItemPicker extends Blockly.Field{
   if(this.icon_){this.icon_.style.display=this.hasIcon_?'':'none';
    if(this.hasIcon_){const size=catalog.size;this.icon_.setAttribute('viewBox',`${item.icon%catalog.columns*size} ${Math.floor(item.icon/catalog.columns)*size} ${size} ${size}`);
     this.iconImage_.setAttribute('href',catalog.atlas);this.iconImage_.setAttribute('width',String(catalog.columns*size));this.iconImage_.setAttribute('height',String(catalog.rows*size));}}
-  this.setTooltip(item?`${pickerZh?item.zh:item.en}\n${item.id}`:this.getValue());
+  this.setTooltip(item?`${item.local}\n${item.id}`:this.getValue());
   super.render_();
  }
  updateSize_(margin){
@@ -84,7 +86,7 @@ class FieldItemPicker extends Blockly.Field{
   setTimeout(()=>this.search_?.focus(),0);
  }
  picker_(){
-  const tr=(a,b)=>pickerZh?a:b,el=(tag,className,text)=>{const e=document.createElement(tag);if(className)e.className=className;if(text)e.textContent=text;return e;};
+  const el=(tag,className,text)=>{const e=document.createElement(tag);if(className)e.className=className;if(text)e.textContent=text;return e;};
   const root=el('div','item-picker'),search=el('input','item-search'),tabs=el('div','item-tabs'),grid=el('div','item-grid'),footer=el('div','item-count'),tip=el('div','item-tip');
   search.type='search';search.spellcheck=false;search.placeholder=tr('搜尋方塊或物品（中文／English／ID）','Search blocks or items (name or ID)');this.search_=search;
   let kind='all',results=[],shown=0;
@@ -93,11 +95,11 @@ class FieldItemPicker extends Blockly.Field{
    if(item.icon>=0){const icon=el('span','item-sprite');icon.style.cssText=sprite(item,catalog.size);slot.append(icon);}else slot.append(el('span','item-missing',item.id.slice(item.id.indexOf(':')+1,item.id.indexOf(':')+3)));
    if(item.id===this.getValue())slot.classList.add('selected');
    slot.onclick=()=>choose(item);
-   slot.onpointerenter=()=>{tip.replaceChildren(el('b','',pickerZh?item.zh:item.en),el('span','',item.id));tip.hidden=false;const r=slot.getBoundingClientRect(),base=root.getBoundingClientRect();tip.style.left=`${Math.min(r.left-base.left,base.width-tip.offsetWidth)}px`;tip.style.top=`${r.bottom-base.top+4}px`;};
+   slot.onpointerenter=()=>{tip.replaceChildren(el('b','',item.local),el('span','',item.id));tip.hidden=false;const r=slot.getBoundingClientRect(),base=root.getBoundingClientRect();tip.style.left=`${Math.min(r.left-base.left,base.width-tip.offsetWidth)}px`;tip.style.top=`${r.bottom-base.top+4}px`;};
    slot.onpointerleave=()=>{tip.hidden=true;};grid.append(slot);}};
   const update=()=>{if(!catalog){grid.replaceChildren(el('p','item-loading',tr('正在讀取這個世界的方塊與物品…','Loading the blocks and items in this world…')));footer.textContent='';return;}
    results=searchItems(catalog.items,search.value,kind);shown=0;grid.replaceChildren();grid.scrollTop=0;tip.hidden=true;more();
-   footer.textContent=results.length?tr(`共 ${results.length} 項`,`${results.length} results`):tr('找不到符合的方塊或物品','No matching blocks or items');};
+   footer.textContent=results.length?tr('共 %1 項','%1 results',results.length):tr('找不到符合的方塊或物品','No matching blocks or items');};
   for(const [value,zhLabel,enLabel] of [['all','全部','All'],['block','方塊','Blocks'],['item','物品','Items']]){const tab=el('button','item-tab',tr(zhLabel,enLabel));tab.type='button';tab.dataset.kind=value;tab.classList.toggle('active',value===kind);
    tab.onclick=()=>{kind=value;for(const t of tabs.children)t.classList.toggle('active',t===tab);update();search.focus();};tabs.append(tab);}
   search.oninput=update;
@@ -123,7 +125,7 @@ class FieldSlotNumber extends Blockly.FieldNumber{
   Blockly.DropDownDiv.setColour('#c6c6c6','#000000');Blockly.DropDownDiv.showPositionedByField(this);
  }
  slotPicker_(){
-  const tr=(a,b)=>pickerZh?a:b,el=(tag,className,text)=>{const e=document.createElement(tag);if(className)e.className=className;if(text)e.textContent=text;return e;};
+  const el=(tag,className,text)=>{const e=document.createElement(tag);if(className)e.className=className;if(text)e.textContent=text;return e;};
   const root=el('div','item-picker slot-picker'),grid=el('div','slot-grid'),note=el('div','item-count',tr('正在讀取機器人物品欄…','Reading the robot inventory…')),tip=el('div','item-tip');
   const current=Number(this.getValue());
   const draw=inventory=>{grid.replaceChildren();for(let i=0;i<16;i++){const [id,count]=inventory?.[i]||[],slot=el('button','item-slot');slot.type='button';slot.dataset.slot=String(i+1);
@@ -134,7 +136,7 @@ class FieldSlotNumber extends Blockly.FieldNumber{
     if(id&&count>1)slot.append(el('span','slot-amount',String(count)));
     if(i+1===current)slot.classList.add('selected');
     slot.onclick=()=>{this.setValue(i+1);Blockly.DropDownDiv.hideIfOwner(this,true);};
-    slot.onpointerenter=()=>{tip.replaceChildren(el('b','',tr(`第 ${i+1} 格`,`Slot ${i+1}`)),el('span','',id?`${item?(pickerZh?item.zh:item.en):id} × ${count}`:tr('空格','Empty')));tip.hidden=false;const r=slot.getBoundingClientRect(),base=root.getBoundingClientRect();tip.style.left=`${Math.min(r.left-base.left,base.width-tip.offsetWidth)}px`;tip.style.top=`${r.bottom-base.top+4}px`;};
+    slot.onpointerenter=()=>{tip.replaceChildren(el('b','',tr('第 %1 格','Slot %1',i+1)),el('span','',id?`${item?(item.local):id} × ${count}`:tr('空格','Empty')));tip.hidden=false;const r=slot.getBoundingClientRect(),base=root.getBoundingClientRect();tip.style.left=`${Math.min(r.left-base.left,base.width-tip.offsetWidth)}px`;tip.style.top=`${r.bottom-base.top+4}px`;};
     slot.onpointerleave=()=>{tip.hidden=true;};grid.append(slot);}};
   draw(null);tip.hidden=true;root.append(el('div','slot-title',tr('選擇機器人物品欄的格子','Pick a robot inventory slot')),grid,note,tip);
   Promise.resolve(inventorySource?.()).then(inventory=>{if(!root.isConnected)return;draw(inventory);
@@ -174,7 +176,7 @@ export function markLooseStacks(workspace){
   const loose=started&&root.type!=='ccedu_start'&&!FUNCTION_DEFINITIONS.includes(root.type);
   if(block.hasDisabledReason(LOOSE)===loose)continue;
   block.setDisabledReason(loose,LOOSE);
-  if(loose){block.cceduTooltip=block.tooltip;block.setTooltip(pickerZh?'沒有接在「當程式開始」下面，這組積木不會執行。':'Not attached under "when program starts"; this stack will not run.');}
+  if(loose){block.cceduTooltip=block.tooltip;block.setTooltip(tr('沒有接在「當程式開始」下面，這組積木不會執行。','Not attached under "when program starts"; this stack will not run.'));}
   else if('cceduTooltip' in block){block.setTooltip(block.cceduTooltip);delete block.cceduTooltip;}
  }});
 }
@@ -188,8 +190,8 @@ export function programCallOptions(value=''){
  const names=libraryList.filter(p=>p&&p.id!==libraryCurrent&&typeof p.name==='string'&&p.name.trim()).map(p=>p.name);
  const options=names.map(n=>[n,n]);
  // A call to a program that is gone, or not yet in the list, keeps its name and says so instead of being dropped.
- if(value&&!names.includes(value))options.unshift([(pickerZh?'（找不到）':'(missing) ')+value,value]);
- if(!options.length)options.push([pickerZh?'（還沒有其他程式）':'(no other programs yet)','']);
+ if(value&&!names.includes(value))options.unshift([tr('（找不到）%1','(missing) %1',value),value]);
+ if(!options.length)options.push([tr('（還沒有其他程式）','(no other programs yet)'),'']);
  return options;
 }
 class FieldProgram extends Blockly.FieldDropdown{
@@ -204,18 +206,19 @@ export function refreshProgramCalls(workspace){for(const b of workspace.getAllBl
 export function registerTurtleBlocks(locale='en_us'){
  if(Blockly.Blocks.ccedu_turtle_command)return;
  if(!Blockly.Extensions.isRegistered('ccedu_start_fixed'))Blockly.Extensions.register('ccedu_start_fixed',function(){this.setDeletable(false);});
- pickerZh=locale==='zh_tw';
+ if(locale&&locale!==language())setLanguage(locale);
  // Blockly's own blocks and menus use the classroom wording too; setLocale has already loaded zh-hant.
- if(pickerZh)Object.assign(Blockly.Msg,CLASSROOM_ZH);
+ if(isChinese())Object.assign(Blockly.Msg,CLASSROOM_ZH);
  // A new function would otherwise open with a placeholder comment bubble ("Describe this function...") on it.
  Blockly.Msg.PROCEDURES_DEFNORETURN_COMMENT='';Blockly.Msg.PROCEDURES_DEFRETURN_COMMENT='';Blockly.fieldRegistry.register('field_item_picker',FieldItemPicker);Blockly.fieldRegistry.register('field_program',FieldProgram);
  // math_number's own field, which turns into the slot picker only inside an inventory input.
  Blockly.fieldRegistry.unregister('field_number');Blockly.fieldRegistry.register('field_number',FieldSlotNumber);
- const zh=locale==='zh_tw',tr=(a,b)=>zh?a:b,side={type:'field_dropdown',name:'SIDE',options:[[tr('前方','front'),'forward'],[tr('上方','above'),'up'],[tr('下方','below'),'down']]};
+ const side={type:'field_dropdown',name:'SIDE',options:[[tr('前方','front'),'forward'],[tr('上方','above'),'up'],[tr('下方','below'),'down']]};
  const statement=(type,message0,args0,colour=100)=>({type,message0,args0,previousStatement:null,nextStatement:null,colour});
  const output=(type,message0,args0,check,colour=160)=>({type,message0,args0,output:check,colour});
  const input=(name,check)=>({type:'input_value',name,check});
- const options=commands=>commands.map(c=>[zh?(labels[c]||c):c,c]);
+ // The old blocks are no longer offered; outside Chinese they show the turtle method name, as they always did.
+ const options=commands=>commands.map(c=>[isChinese()?labels[c]||c:c,c]);
  // Blockly's comparison pops out a value whose type differs from the other side; students may compare any two values.
  const compareInit=Blockly.Blocks.logic_compare.init;
  Blockly.Blocks.logic_compare.init=function(){compareInit.call(this);this.onchange=undefined;};
@@ -285,9 +288,9 @@ export function registerTurtleBlocks(locale='en_us'){
 // Inputs that take a number, text or true/false come pre-filled with an editable value (a shadow),
 // so a dragged-out block can be typed into directly; dropping another block onto the input replaces it.
 const num=n=>({shadow:{type:'math_number',fields:{NUM:n}}}),str=t=>({shadow:{type:'text',fields:{TEXT:t}}}),bool=v=>({shadow:{type:'logic_boolean',fields:{BOOL:v}}});
-export function toolbox(locale){
- const zh=locale==='zh_tw',tr=(a,b)=>zh?a:b;
- const category=(zhName,enName,colour,types)=>({kind:'category',name:zh?zhName:enName,colour,contents:types.map(type=>typeof type==='string'?{kind:'block',type}:{kind:'block',...type})});
+export function toolbox(locale){return inLanguage(locale,buildToolbox);}
+function buildToolbox(){
+ const category=(zhName,enName,colour,types)=>({kind:'category',name:tr(zhName,enName),colour,contents:types.map(type=>typeof type==='string'?{kind:'block',type}:{kind:'block',...type})});
  return {kind:'categoryToolbox',contents:[
  // The old all-in-one ccedu_turtle_command and ccedu_turtle_action (with an amount) still load but are no longer offered.
  category('機器人動作','Turtle',100,Object.keys(ACTION_BLOCKS)),
@@ -300,8 +303,8 @@ export function toolbox(locale){
  category('迴圈','Loops',120,[{type:'controls_repeat_ext',inputs:{TIMES:num(10)}},'controls_whileUntil',{type:'controls_for',inputs:{FROM:num(1),TO:num(10),BY:num(1)}},'ccedu_break']),
  category('數字','Math',230,['math_number',{type:'math_arithmetic',inputs:{A:num(1),B:num(1)}},{type:'math_modulo',inputs:{DIVIDEND:num(64),DIVISOR:num(10)}},{type:'math_random_int',inputs:{FROM:num(1),TO:num(100)}},'math_random_float','ccedu_random_boolean']),
  category('文字','Text',160,['text',{type:'text_join',inputs:{ADD0:str(''),ADD1:str('')}},{type:'text_length',inputs:{VALUE:str(tr('你好','hello'))}}]),
- {kind:'category',name:zh?'變數':'Variables',colour:330,custom:'VARIABLE'},
- {kind:'category',name:zh?'函式':'Functions',colour:290,custom:'CCEDU_FUNCTIONS'},
+ {kind:'category',name:tr('變數','Variables'),colour:330,custom:'VARIABLE'},
+ {kind:'category',name:tr('函式','Functions'),colour:290,custom:'CCEDU_FUNCTIONS'},
  category('程式與除錯','Programs',285,['ccedu_call',{type:'ccedu_sleep',inputs:{SECONDS:num(1)}},{type:'ccedu_say',inputs:{TEXT:str(tr('你好','Hello'))}},{type:'ccedu_assert',inputs:{TEST:bool('TRUE'),MESSAGE:str(tr('發生錯誤','Something went wrong'))}},'ccedu_comment','ccedu_snapshot']),
  ]};
 }
@@ -316,9 +319,12 @@ export function variableFlyout(workspace){
  * edited is left out so it cannot call itself), then Blockly's own blocks for making a function in this program.
  * `programs` is the latest library list; the flyout is rebuilt each time the category opens.
  */
-export function functionFlyout(workspace,{programs=[],current='',locale='en_us'}={}){
+export function functionFlyout(workspace,{programs=[],current='',locale}={}){
  setProgramLibrary(programs,current);
- const zh=locale==='zh_tw',tr=(a,b)=>zh?a:b,xml=Blockly.utils.xml;
+ return inLanguage(locale,()=>libraryFlyout(workspace,programs,current));
+}
+function libraryFlyout(workspace,programs,current){
+ const xml=Blockly.utils.xml;
  const label=text=>{const el=xml.createElement('label');el.setAttribute('text',text);return el;};
  const others=programs.filter(p=>p&&p.id!==current&&typeof p.name==='string'&&p.name.trim());
  const calls=others.map(p=>{const block=xml.createElement('block'),field=xml.createElement('field');block.setAttribute('type','ccedu_call');field.setAttribute('name','NAME');field.textContent=p.name;block.append(field);return block;});

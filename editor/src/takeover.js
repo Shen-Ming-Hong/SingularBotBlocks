@@ -11,7 +11,7 @@ export function installTakeover({document,workspace,tr,busy,save,reload,ack,stat
   for(const id of ['programName','luaEditor'])el(id).readOnly=blocked;
   for(const id of ['new','newBlocks','newLua','delete','copy','convert','recover','save','share'])block(id,blocked);
   for(const id of ['programs','run','step','pause','resume','stop','snapshot','restore','selectedSlot','lock'])block(id,control());
-  banner.hidden=!state.phase&&!needsSync&&!syncing;banner.textContent=needsSync||syncing?tr('正在取得最新程式…','Loading the latest program…'):state.phase==='preparing'?tr('正在儲存學生的內容，準備交接…','Saving the student’s work before handing over…'):tr(`老師示範中：${state.teacher||''}`,`Teacher demonstration: ${state.teacher||''}`);
+  banner.hidden=!state.phase&&!needsSync&&!syncing;banner.textContent=needsSync||syncing?tr('正在取得最新程式…','Loading the latest program…'):state.phase==='preparing'?tr('正在儲存學生的內容，準備交接…','Saving the student’s work before handing over…'):tr('老師示範中：%1','Teacher demonstration: %1',state.teacher||'');
   if(state.canTakeover&&!button){button=document.createElement('button');button.id='takeover';button.type='button';button.setAttribute('role','switch');button.dataset.icon='robot';el('compact').before(button);button.onclick=async()=>{button.disabled=true;try{await save();await requestToggle(!state.mine);}catch(e){status(e.message,true);}finally{refresh();}};}
   if(!state.canTakeover&&button){button.remove();button=null;}
   if(restoring)restore();

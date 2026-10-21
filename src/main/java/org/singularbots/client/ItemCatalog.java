@@ -25,13 +25,15 @@ import org.slf4j.LoggerFactory;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
-/** Every registered item and block, including other mods, with both-language names and rendered icons for the editor picker. */
+/** Every registered item and block, including other mods, with names in the game language and English and rendered icons for the editor picker. */
 final class ItemCatalog {
     static final int ICON = 32, COLUMNS = 64, MAX_ICONS = COLUMNS * 512;
     static final String ATLAS = "generated/item-atlas.png";
     private static final int BLOCK = 1, ITEM = 2;
     private static volatile byte[] atlas;
     private static JsonObject catalog;
+    private static String catalogLanguage = "";
+    private static final Map<String, String> KEYS = new java.util.concurrent.ConcurrentHashMap<>();
     private static final List<Consumer<JsonObject>> WAITING = new ArrayList<>();
     private static final List<Consumer<String>> FAILING = new ArrayList<>();
 
@@ -42,15 +44,20 @@ final class ItemCatalog {
     /**
      * Built once per game session; registries do not change after startup. Names and PNG encoding run in the
      * background so only drawing the icons uses the render thread. Callbacks run on the render thread.
+     * After the player switches the game language only the names are looked up again; the icons stay.
      */
     static void request(Consumer<JsonObject> done, Consumer<String> failed) {
-        if (catalog != null) { done.accept(catalog); return; }
+        String language = language();
+        if (catalog != null) {
+            if (!language.equals(catalogLanguage)) { catalog = relabel(catalog, language); catalogLanguage = language; }
+            done.accept(catalog); return;
+        }
         WAITING.add(done); FAILING.add(failed);
         if (WAITING.size() > 1) return;
         var minecraft = Minecraft.getInstance();
         long started = System.nanoTime();
         long[] stages = new long[3];
-        CompletableFuture.supplyAsync(ItemCatalog::collect, Util.backgroundExecutor())
+        CompletableFuture.supplyAsync(() -> collect(language), Util.backgroundExecutor())
             .thenComposeAsync(rows -> { stages[0] = System.nanoTime(); return AtlasRenderer.start(rows.icons).thenApply(image -> { stages[1] = System.nanoTime(); return Map.entry(rows, image); }); }, minecraft)
             .thenApplyAsync(rendered -> {
                 try (var image = rendered.getValue()) { atlas = image.asByteArray(); }
@@ -66,7 +73,7 @@ final class ItemCatalog {
                     failing.forEach(f -> f.accept(String.valueOf(error.getCause() == null ? error : error.getCause())));
                     return;
                 }
-                catalog = result;
+                catalog = result; catalogLanguage = language;
                 LoggerFactory.getLogger("SingularBotBlocks").info("Item catalog: {} entries in {} ms (names {} ms, icons over frames {} ms, encode {} ms)",
                     result.getAsJsonArray("items").size(), ms(started, System.nanoTime()), ms(started, stages[0]), ms(stages[0], stages[1]), ms(stages[1], stages[2]));
                 waiting.forEach(d -> d.accept(result));
@@ -78,10 +85,26 @@ final class ItemCatalog {
     private record Entry(String id, String key, ItemStack icon, int flags) {}
     private record Rows(JsonArray items, List<ItemStack> icons) {}
 
-    private static Rows collect() {
-        var minecraft = Minecraft.getInstance();
-        Language en = ClientLanguage.loadFrom(minecraft.getResourceManager(), List.of("en_us"), false);
-        Language zh = ClientLanguage.loadFrom(minecraft.getResourceManager(), List.of("en_us", "zh_tw"), false);
+    private static String language() { return Minecraft.getInstance().getLanguageManager().getSelected(); }
+
+    /** Names in the game language, with English filling the keys that language does not have, as the game does. */
+    private static Language load(String language) {
+        return ClientLanguage.loadFrom(Minecraft.getInstance().getResourceManager(), language.equals("en_us") ? List.of("en_us") : List.of("en_us", language), false);
+    }
+
+    private static JsonObject relabel(JsonObject old, String language) {
+        Language local = load(language);
+        var result = old.deepCopy();
+        for (var row : result.getAsJsonArray("items")) {
+            var cells = row.getAsJsonArray(); String id = cells.get(0).getAsString();
+            cells.set(1, new com.google.gson.JsonPrimitive(name(local, id, KEYS.getOrDefault(id, ""))));
+        }
+        return result;
+    }
+
+    private static Rows collect(String language) {
+        Language en = load("en_us");
+        Language local = load(language);
         var entries = new TreeMap<String, Entry>();
         for (var item : BuiltInRegistries.ITEM) {
             if (item == Items.AIR) continue;
@@ -101,7 +124,8 @@ final class ItemCatalog {
             int icon = -1;
             if (!entry.icon.isEmpty() && icons.size() < MAX_ICONS) { icon = icons.size(); icons.add(entry.icon); }
             var row = new JsonArray();
-            row.add(entry.id); row.add(name(zh, entry)); row.add(name(en, entry)); row.add(entry.flags); row.add(icon);
+            KEYS.put(entry.id, entry.key);
+            row.add(entry.id); row.add(name(local, entry.id, entry.key)); row.add(name(en, entry.id, entry.key)); row.add(entry.flags); row.add(icon);
             items.add(row);
         }
         return new Rows(items, icons);
@@ -116,11 +140,11 @@ final class ItemCatalog {
         return result;
     }
 
-    private static String name(Language language, Entry entry) {
-        String name = language.getOrDefault(entry.key, "");
-        if (!name.isEmpty() && !name.equals(entry.key)) return name;
-        String path = entry.id.substring(entry.id.indexOf(':') + 1).replace('_', ' ').replace('/', ' ');
-        return path.isEmpty() ? entry.id : Character.toUpperCase(path.charAt(0)) + path.substring(1);
+    private static String name(Language language, String id, String key) {
+        String name = key.isEmpty() ? "" : language.getOrDefault(key, "");
+        if (!name.isEmpty() && !name.equals(key)) return name;
+        String path = id.substring(id.indexOf(':') + 1).replace('_', ' ').replace('/', ' ');
+        return path.isEmpty() ? id : Character.toUpperCase(path.charAt(0)) + path.substring(1);
     }
 
     /** Draws the icons the way the inventory does, two pixels per GUI unit, a slice per frame so the editor keeps responding. */
