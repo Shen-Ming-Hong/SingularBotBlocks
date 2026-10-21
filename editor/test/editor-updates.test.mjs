@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
+import {PAGE_TEXT} from '../src/page.js';
 
 const source=readFileSync(new URL('../src/editor.js',import.meta.url),'utf8');
 const section=(start,end)=>source.slice(source.indexOf(start),source.indexOf(end));
@@ -250,7 +251,8 @@ test('editor language follows the game setting instead of an in-page selector',(
 test('the static loading status is translated for non-Chinese game languages',()=>{
  const html=readFileSync(new URL('../src/index.html',import.meta.url),'utf8');
  assert.match(html,/<p id="status"[^>]*>正在載入本地編輯器…<\/p>/);
- assert.match(source,/if\(!zh\)\{[^\n]*\$\('status'\)\.textContent==='正在載入本地編輯器…'\)\$\('status'\)\.textContent='Loading the local editor…'/);
+ assert.ok(PAGE_TEXT.some(([selector,kind,zh,en])=>selector==='#status'&&kind==='text'&&zh==='正在載入本地編輯器…'&&en==='Loading the local editor…'));
+ assert.match(source,/localizePage\(document,tr,htmlLang\(locale\)\)/);
 });
 
 test('input-method text is composed inside the focused text field and replaced by the committed word',()=>{

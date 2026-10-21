@@ -131,7 +131,7 @@ test('loading a saved workspace fires no change events and leaves nothing to und
 });
 
 test('beginner classes show only the item look; classes that read Lua keep the ID text',()=>{
-  setItemCatalog({atlas:'a.png',icon:32,columns:64,rows:1,items:[['minecraft:diamond','鑽石','Diamond',2,0],['minecraft:fire','火','Fire',1,-1]]});
+  setItemCatalog({atlas:'a.png',icon:32,columns:64,rows:1,items:[['minecraft:diamond','Diamond','Diamond',2,0],['minecraft:fire','Fire','Fire',1,-1]]});
   const w=new Blockly.Workspace();
   try {
     const field=type=>{const b=w.newBlock('ccedu_registry_name');b.setFieldValue(type,'NAME');const f=b.getField('NAME');f.hasIcon_=type==='minecraft:diamond';return f;};

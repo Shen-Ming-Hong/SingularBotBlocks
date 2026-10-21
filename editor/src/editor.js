@@ -9,8 +9,12 @@ import {openOnlyToolbox,registerClipboardMenu,installMenuKey} from './toolbox.js
 import {describeRobot,needsRecallConfirm} from './robots.js';
 import {installTakeover} from './takeover.js';
 import {historyText} from './history.js';
-const locale=new URLSearchParams(location.search).get('lang')||'zh_tw',zh=locale==='zh_tw',tr=(a,b)=>zh?a:b,$=id=>document.getElementById(id);
-Blockly.setLocale(zh?TraditionalChinese:English);registerTurtleBlocks(locale);
+import {setLanguage,tr,isChinese,LOCALE,htmlLang} from './i18n.js';
+import {localizePage} from './page.js';
+// The game passes its language; boot.js has already loaded i18n/<lang>.js (the editor text and Blockly's messages).
+const asked=new URLSearchParams(location.search).get('lang')||'zh_tw',locale=LOCALE.test(asked)?asked:'en_us',bundle=window.CCEDU_I18N?.locale===locale?window.CCEDU_I18N:{};
+setLanguage(locale,bundle.ui);const zh=isChinese(),$=id=>document.getElementById(id);
+Blockly.setLocale(zh?TraditionalChinese:{...English,...(bundle.blockly||{})});registerTurtleBlocks(locale);localizePage(document,tr,htmlLang(locale));
 const themes=blocklyThemes(Blockly),startTheme=initialTheme(location.search);
 const workspace=Blockly.inject('workspace',{toolbox:toolbox(locale),plugins:{toolbox:openOnlyToolbox(Blockly)},theme:themes[startTheme],renderer:'zelos',media:'media/',trashcan:true,grid:{spacing:24,length:2,colour:'#41504a',snap:false},move:{scrollbars:true,drag:true,wheel:false},zoom:{controls:true,wheel:true,startScale:0.9,maxScale:2,minScale:0.4,scaleSpeed:1.15}});
 workspace.registerToolboxCategoryCallback('VARIABLE',variableFlyout);registerClipboardMenu(Blockly,tr,text=>setStatus(text));window.cceduContextMenu=installMenuKey(Blockly,workspace);
@@ -110,10 +114,10 @@ async function recallRobot(robot,title){
  if(needsRecallConfirm(robot)&&!await ask(tr('這台正在執行程式，召回會讓它停下來。要召回嗎？','This robot is running a program; recalling it stops the program. Recall it?')))return;
  await save();const result=await request('programRecall',{robot:robot.id});
  if(result.mode==='item'){
-  robotsStatus(result.pocket?tr(`${title}已經收進你的背包`,`${title} is back in your inventory`):tr(`你的背包滿了，${title}放在你腳邊`,`Your inventory is full; ${title} is at your feet`));
+  robotsStatus(result.pocket?tr('%1已經收進你的背包','%1 is back in your inventory',title):tr('你的背包滿了，%1放在你腳邊','Your inventory is full; %1 is at your feet',title));
   // The robot this editor was opened from is now an item, so there is nothing left to edit on.
   if(result.current){$('robotsDialog').close();await request('exitToWorld').catch(()=>{});return;}
- }else robotsStatus(tr(`${title}已經移到你身邊，背包和程式都跟著它`,`${title} moved next to you with its backpack and programs`));
+ }else robotsStatus(tr('%1已經移到你身邊，背包和程式都跟著它','%1 moved next to you with its backpack and programs',title));
  await showRobots();
 }
 $('robots').onclick=safely(async()=>{await save();robotsStatus('');robotsShown='';robotsOrder='';await showRobots();$('robotsDialog').showModal();clearInterval(robotsTimer);
@@ -179,7 +183,7 @@ async function transfers(){
 }
 // Lists refresh in the background instead of a manual button; skip while a list is open or focused.
 let listing=false;setInterval(async()=>{if(!ready||!connected||listing||document.activeElement?.tagName==='SELECT')return;listing=true;try{await library();await transfers();}catch{}finally{listing=false;}},5000);
-$('share').onclick=safely(async()=>{if(!program||!$('targets').value)return;await save();const sent=await request('programShare',{id:program.id,target:$('targets').value});setStatus(tr(`已分享給 ${sent.recipients} 位學生`,`Sent to ${sent.recipients} students`));});
+$('share').onclick=safely(async()=>{if(!program||!$('targets').value)return;await save();const sent=await request('programShare',{id:program.id,target:$('targets').value});setStatus(tr('已分享給 %1 位學生','Sent to %1 students',sent.recipients));});
 // Continuous runs return to the remote page so students can watch the robot; the robot
 // camera stays the student's choice. Stepping stays here to follow the highlighted block and variables.
 const watchOps=new Set(['programRun','programResume']);
@@ -278,7 +282,7 @@ $('more').onclick=safely(async()=>{await remoteState();$('moreDialog').showModal
 $('selectedSlot').replaceChildren(...Array.from({length:16},(_,i)=>new Option(String(i+1),String(i))));
 // The slot picker shows the inventory of the robot this editor was opened from.
 setInventorySource(async()=>connected?(await request('remoteState')).inventory||null:null);
-async function remoteState(){if(!connected)return;remote=await request('remoteState');$('selectedSlot').value=String(remote.slot||0);$('lock').disabled=!remote.teacher;$('lock').textContent=tr(remote.locked?'解除鎖定':'鎖定機器人',remote.locked?'Unlock robot':'Lock robot');$('lock').title=remote.teacher?'':tr('只有老師能鎖定','Teacher only');$('restore').disabled=!remote.hasSnapshot;if(remote.error)setStatus(remote.error,true);}
+async function remoteState(){if(!connected)return;remote=await request('remoteState');$('selectedSlot').value=String(remote.slot||0);$('lock').disabled=!remote.teacher;$('lock').textContent=remote.locked?tr('解除鎖定','Unlock robot'):tr('鎖定機器人','Lock robot');$('lock').title=remote.teacher?'':tr('只有老師能鎖定','Teacher only');$('restore').disabled=!remote.hasSnapshot;if(remote.error)setStatus(remote.error,true);}
 
 $('snapshot').onclick=safely(async()=>{await save();await request('remoteAction',{action:'snapshot'});setStatus(tr('正在儲存復原點','Snapshot requested'));});
 $('restore').onclick=safely(async()=>{await request('remoteAction',{action:'restore'});await state();});
@@ -286,7 +290,7 @@ $('selectedSlot').onchange=safely(()=>request('remoteAction',{action:'select',va
 $('lock').onclick=safely(()=>request('remoteAction',{action:'lock',value:remote.locked?0:1}));
 // The light/dark switch is remembered by the game for this computer, so every robot's editor opens in the same look.
 const theme=installThemeToggle({themes,workspace,root:document.documentElement,button:$('theme'),tr,start:startTheme,persist:name=>request('setTheme',{theme:name})});
-if(!zh){document.documentElement.lang='en';if($('status').textContent==='正在載入本地編輯器…')$('status').textContent='Loading the local editor…';const text={stage:'My robot programming workspace',historyTitle:'My program and robot history',historyClose:'Back to editor',robotsTitle:'My robots',robotsClose:'Back to editor',moreTitle:'Robot settings',moreClose:'Back to editor',snapshot:'Save snapshot',restore:'Restore snapshot',slotLabel:'Inventory slot',lock:'Lock robot',save:'Saved',close:'Back',new:'New',newBlocks:'Block program',newLua:'Lua program',recover:'Recover unsaved draft',convert:'To Lua',run:'Run',pause:'Pause',resume:'Resume',step:'Step',stop:'Stop',runtimeStatus:'Stopped',modeTag:'Blocks',share:'Teacher send',previewTitle:'LUA PREVIEW',variablesTitle:'VARIABLES',visualDisabled:'The teacher disabled block editing; Lua programs remain available.'};for(const[id,value]of Object.entries(text))$(id).textContent=value;$('programName').placeholder='Program name';for(const[id,tip]of Object.entries({history:'My history',robots:'My robots',more:'Robot settings',copy:'Save copy',delete:'Delete program'})){$(id).setAttribute('aria-label',tip);$(id).dataset.tip=tip;}}
+// index.html's fixed text was put in the game language by localizePage at startup.
 
 window.cceduSmoke=async()=>{
  smokeTesting=true;const sample={blocks:{languageVersion:0,blocks:[{type:'ccedu_turtle_command',id:'smoke-forward',x:48,y:48,fields:{COMMAND:'forward'},next:{block:{type:'ccedu_turtle_command',id:'smoke-left',fields:{COMMAND:'turnLeft'}}}}]}};

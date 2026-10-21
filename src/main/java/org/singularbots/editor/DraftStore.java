@@ -8,6 +8,8 @@ import java.nio.file.*;
 
 /** Browser-gate test drafts, deliberately separate from server programs. */
 public final class DraftStore {
+    /** A Minecraft language code such as zh_tw, en_us, fil_ph, bar or zlm_arab. */
+    public static final java.util.regex.Pattern LOCALE = java.util.regex.Pattern.compile("[a-z]{2,4}(_[a-z0-9]{2,4})?");
     public static final int MAX_BYTES = 2 * 1024 * 1024;
     private final Path path;
 
@@ -44,7 +46,7 @@ public final class DraftStore {
             throw new IllegalArgumentException("Unsupported draft version");
         if (!draft.has("workspace") || !draft.get("workspace").isJsonObject())
             throw new IllegalArgumentException("Missing Blockly workspace");
-        if (draft.has("locale") && !java.util.Set.of("zh_tw", "en_us").contains(draft.get("locale").getAsString()))
+        if (draft.has("locale") && !LOCALE.matcher(draft.get("locale").getAsString()).matches())
             throw new IllegalArgumentException("Unsupported editor language");
     }
 }

@@ -61,3 +61,5 @@ body.compact :is(header,#programbar,#transferbar,#previewTitle,#preview){display
 #takeoverStatus{margin:0;padding:8px 14px;background:#30393d;border-bottom:2px solid var(--edge);color:var(--ink)}
 #takeover[aria-checked="true"]{outline:2px solid #78b852}
 html[data-theme="light"] #takeoverStatus{background:#d3d9d4}
+/* Noto Sans TC draws Han characters in Traditional Chinese shapes; Japanese, Korean and Simplified Chinese use the system font. */
+html:is(:lang(ja),:lang(ko),:lang(zh-Hans)) body,html:is(:lang(ja),:lang(ko),:lang(zh-Hans)) :is(button,select,input,.blocklyText,.blocklyTreeLabel){font-family:system-ui,sans-serif!important}

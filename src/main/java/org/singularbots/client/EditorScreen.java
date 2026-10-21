@@ -110,8 +110,10 @@ public final class EditorScreen extends Screen implements ScreenWalking.Walkable
         if (browser != null) { browser.close(); browser = null; }
         if (client != null) { client.dispose(); client = null; }
     }
+    /** The editor follows the game language; it has every language Minecraft offers and shows English for others. */
     private static String currentLocale() {
-        return Minecraft.getInstance().getLanguageManager().getSelected().equals("zh_tw") ? "zh_tw" : "en_us";
+        String selected = Minecraft.getInstance().getLanguageManager().getSelected();
+        return org.singularbots.editor.DraftStore.LOCALE.matcher(selected).matches() ? selected : "en_us";
     }
 
     @Override protected void init() {

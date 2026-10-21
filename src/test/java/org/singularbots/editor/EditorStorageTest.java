@@ -26,6 +26,14 @@ class EditorStorageTest {
         assertThrows(IllegalArgumentException.class, () -> store.save(invalid));
         assertEquals(draft("keep"), store.load());
     }
+    @Test void draftsAcceptEveryMinecraftLanguageCode() throws Exception {
+        DraftStore store = new DraftStore(directory);
+        for (String locale : new String[]{"en_us", "ja_jp", "fil_ph", "bar", "lol_us", "zlm_arab"}) {
+            JsonObject d = draft("x"); d.addProperty("locale", locale); store.save(d); assertEquals(d, store.load());
+        }
+        JsonObject bad = draft("x"); bad.addProperty("locale", "../en_us");
+        assertThrows(IllegalArgumentException.class, () -> store.save(bad));
+    }
     @Test void corruptDraftIsPreservedAndReported() throws Exception {
         Path file = directory.resolve("browser-test-draft.json"); Files.writeString(file,"broken{");
         assertThrows(IOException.class, () -> new DraftStore(directory).load());

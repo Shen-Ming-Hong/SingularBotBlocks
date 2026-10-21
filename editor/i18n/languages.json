@@ -1,0 +1,431 @@
+{
+ "af_za": {
+  "blockly": "af"
+ },
+ "ar_sa": {
+  "blockly": "ar"
+ },
+ "ast_es": {
+  "blockly": "ast"
+ },
+ "az_az": {
+  "blockly": "az"
+ },
+ "ba_ru": {
+  "blockly": "ba"
+ },
+ "bar": {
+  "blockly": "de"
+ },
+ "be_by": {
+  "blockly": "be"
+ },
+ "be_latn": {
+  "blockly": "be-tarask"
+ },
+ "bg_bg": {
+  "blockly": "bg"
+ },
+ "br_fr": {
+  "blockly": "br"
+ },
+ "brb": {
+  "blockly": "nl"
+ },
+ "bs_ba": {
+  "blockly": "bs"
+ },
+ "ca_es": {
+  "blockly": "ca"
+ },
+ "cs_cz": {
+  "blockly": "cs"
+ },
+ "cv_cu": {
+  "blockly": "ru"
+ },
+ "cy_gb": {
+  "blockly": null
+ },
+ "da_dk": {
+  "blockly": "da"
+ },
+ "de_at": {
+  "blockly": "de"
+ },
+ "de_ch": {
+  "blockly": "de"
+ },
+ "de_de": {
+  "blockly": "de"
+ },
+ "el_gr": {
+  "blockly": "el"
+ },
+ "en_au": {
+  "blockly": "en-gb"
+ },
+ "en_ca": {
+  "blockly": "en"
+ },
+ "en_gb": {
+  "blockly": "en-gb"
+ },
+ "en_nz": {
+  "blockly": "en-gb"
+ },
+ "en_pt": {
+  "blockly": "en"
+ },
+ "en_ud": {
+  "blockly": "en"
+ },
+ "en_us": {
+  "blockly": "en"
+ },
+ "enp": {
+  "blockly": "en"
+ },
+ "enws": {
+  "blockly": "en"
+ },
+ "eo_uy": {
+  "blockly": "eo"
+ },
+ "es_ar": {
+  "blockly": "es"
+ },
+ "es_cl": {
+  "blockly": "es"
+ },
+ "es_ec": {
+  "blockly": "es"
+ },
+ "es_es": {
+  "blockly": "es"
+ },
+ "es_mx": {
+  "blockly": "es"
+ },
+ "es_uy": {
+  "blockly": "es"
+ },
+ "es_ve": {
+  "blockly": "es"
+ },
+ "esan": {
+  "blockly": "es"
+ },
+ "et_ee": {
+  "blockly": "et"
+ },
+ "eu_es": {
+  "blockly": "eu"
+ },
+ "fa_ir": {
+  "blockly": "fa"
+ },
+ "fi_fi": {
+  "blockly": "fi"
+ },
+ "fil_ph": {
+  "blockly": "tl"
+ },
+ "fo_fo": {
+  "blockly": "fo"
+ },
+ "fr_ca": {
+  "blockly": "fr"
+ },
+ "fr_ch": {
+  "blockly": "fr"
+ },
+ "fr_fr": {
+  "blockly": "fr"
+ },
+ "fra_de": {
+  "blockly": "de"
+ },
+ "fur_it": {
+  "blockly": "it"
+ },
+ "fy_nl": {
+  "blockly": "nl"
+ },
+ "ga_ie": {
+  "blockly": null
+ },
+ "gd_gb": {
+  "blockly": null
+ },
+ "gl_es": {
+  "blockly": "gl"
+ },
+ "go_fr": {
+  "blockly": null
+ },
+ "got_de": {
+  "blockly": null
+ },
+ "hal_ua": {
+  "blockly": "uk"
+ },
+ "haw_us": {
+  "blockly": null
+ },
+ "he_il": {
+  "blockly": "he"
+ },
+ "hi_in": {
+  "blockly": "hi"
+ },
+ "hn_no": {
+  "blockly": "nb"
+ },
+ "hr_hr": {
+  "blockly": "hr"
+ },
+ "hu_hu": {
+  "blockly": "hu"
+ },
+ "hy_am": {
+  "blockly": "hy"
+ },
+ "id_id": {
+  "blockly": "id"
+ },
+ "ig_ng": {
+  "blockly": "ig"
+ },
+ "io_en": {
+  "blockly": null
+ },
+ "is_is": {
+  "blockly": "is"
+ },
+ "isv": {
+  "blockly": null
+ },
+ "it_it": {
+  "blockly": "it"
+ },
+ "ja_jp": {
+  "blockly": "ja"
+ },
+ "jbo_en": {
+  "blockly": null
+ },
+ "ka_ge": {
+  "blockly": "ka"
+ },
+ "kk_kz": {
+  "blockly": null
+ },
+ "kn_in": {
+  "blockly": "kn"
+ },
+ "ko_kr": {
+  "blockly": "ko"
+ },
+ "ksh": {
+  "blockly": "ksh"
+ },
+ "kw_gb": {
+  "blockly": null
+ },
+ "ky_kg": {
+  "blockly": "ky"
+ },
+ "la_la": {
+  "blockly": "la"
+ },
+ "lb_lu": {
+  "blockly": "lb"
+ },
+ "li_li": {
+  "blockly": "nl"
+ },
+ "lmo": {
+  "blockly": "it"
+ },
+ "lo_la": {
+  "blockly": "lo"
+ },
+ "lol_us": {
+  "blockly": "en"
+ },
+ "lt_lt": {
+  "blockly": "lt"
+ },
+ "lv_lv": {
+  "blockly": "lv"
+ },
+ "lzh": {
+  "blockly": "zh-hant"
+ },
+ "mk_mk": {
+  "blockly": "mk"
+ },
+ "mn_mn": {
+  "blockly": null
+ },
+ "ms_my": {
+  "blockly": "ms"
+ },
+ "mt_mt": {
+  "blockly": null
+ },
+ "nah": {
+  "blockly": null
+ },
+ "nds_de": {
+  "blockly": "de"
+ },
+ "nl_be": {
+  "blockly": "nl"
+ },
+ "nl_nl": {
+  "blockly": "nl"
+ },
+ "nn_no": {
+  "blockly": "nb"
+ },
+ "no_no": {
+  "blockly": "nb"
+ },
+ "oc_fr": {
+  "blockly": "oc"
+ },
+ "ovd": {
+  "blockly": "sv"
+ },
+ "pl_pl": {
+  "blockly": "pl"
+ },
+ "pls": {
+  "blockly": null
+ },
+ "pt_br": {
+  "blockly": "pt-br"
+ },
+ "pt_pt": {
+  "blockly": "pt"
+ },
+ "qcb_es": {
+  "blockly": "es"
+ },
+ "qid": {
+  "blockly": null
+ },
+ "qya_aa": {
+  "blockly": null
+ },
+ "ro_ro": {
+  "blockly": "ro"
+ },
+ "rpr": {
+  "blockly": "ru"
+ },
+ "ru_ru": {
+  "blockly": "ru"
+ },
+ "ry_ua": {
+  "blockly": "uk"
+ },
+ "sah_sah": {
+  "blockly": "ru"
+ },
+ "se_no": {
+  "blockly": "nb"
+ },
+ "sk_sk": {
+  "blockly": "sk"
+ },
+ "sl_si": {
+  "blockly": "sl"
+ },
+ "so_so": {
+  "blockly": null
+ },
+ "sq_al": {
+  "blockly": "sq"
+ },
+ "sr_cs": {
+  "blockly": "sr-latn"
+ },
+ "sr_sp": {
+  "blockly": "sr"
+ },
+ "sv_se": {
+  "blockly": "sv"
+ },
+ "sxu": {
+  "blockly": "de"
+ },
+ "szl": {
+  "blockly": "pl"
+ },
+ "ta_in": {
+  "blockly": "ta"
+ },
+ "th_th": {
+  "blockly": "th"
+ },
+ "tl_ph": {
+  "blockly": "tl"
+ },
+ "tlh_aa": {
+  "blockly": "tlh"
+ },
+ "tok": {
+  "blockly": null
+ },
+ "tr_tr": {
+  "blockly": "tr"
+ },
+ "tt_ru": {
+  "blockly": "ru"
+ },
+ "tzo_mx": {
+  "blockly": null
+ },
+ "uk_ua": {
+  "blockly": "uk"
+ },
+ "uz_uz": {
+  "blockly": "uz"
+ },
+ "val_es": {
+  "blockly": "ca"
+ },
+ "vec_it": {
+  "blockly": "it"
+ },
+ "vi_vn": {
+  "blockly": "vi"
+ },
+ "vp_vl": {
+  "blockly": null
+ },
+ "vro": {
+  "blockly": "et"
+ },
+ "yi_de": {
+  "blockly": null
+ },
+ "yo_ng": {
+  "blockly": "yo"
+ },
+ "zh_cn": {
+  "blockly": "zh-hans"
+ },
+ "zh_hk": {
+  "blockly": "zh-hant"
+ },
+ "zh_tw": {
+  "blockly": "zh-hant"
+ },
+ "zlm_arab": {
+  "blockly": null
+ }
+}

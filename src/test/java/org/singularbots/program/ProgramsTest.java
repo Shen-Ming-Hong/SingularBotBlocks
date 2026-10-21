@@ -123,7 +123,9 @@ class ProgramsTest {
     @Test void futureVersionIsRejectedWithoutReplacingTheOriginal()throws Exception{
         var turtle=UUID.randomUUID();var id=UUID.randomUUID();var store=new ProgramStore(dir);
         var p=json("{\"name\":\"future\",\"mode\":\"lua\",\"source\":\"turtle.up()\"}");var future=store.save(turtle,id,0,p);future.addProperty("version",2);
-        var file=dir.resolve(turtle.toString()).resolve(id+".json");Files.writeString(file,future.toString());
+        var file=dir.resolve(turtle.toString()).resolve(id+".json");var saved=Files.getLastModifiedTime(file);Files.writeString(file,future.toString());
+        // Same size and inode as the saved file, so move the timestamp on or the store's cache may still match it.
+        Files.setLastModifiedTime(file,java.nio.file.attribute.FileTime.fromMillis(saved.toMillis()+2000));
         assertThrows(java.io.IOException.class,()->store.save(turtle,id,1,p));assertEquals(future.toString(),Files.readString(file));
     }
     @Test void libraryListFollowsSavesDeletesAndEditsOutsideTheStore()throws Exception{
