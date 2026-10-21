@@ -95,4 +95,6 @@ jobs:
           dependencies: |
             cc-tweaked(required)
             mcef(required)
+          # The token may only create versions, so leave older versions' featured flag alone.
+          modrinth-unfeature-mode: none
           fail-mode: fail
