@@ -104,6 +104,7 @@
  "Run controls": "Điều khiển chạy",
  "Run starts here and goes down the stack.": "Khi bấm Chạy, chương trình chạy từ đây xuống dưới theo thứ tự.",
  "Running": "Đang chạy",
+ "Running: view only. Press Stop to edit.": "Đang chạy: chỉ xem. Nhấn Dừng để chỉnh sửa.",
  "Runtime": "Trạng thái chạy",
  "Save": "Lưu",
  "Save copy": "Lưu thành bản sao",

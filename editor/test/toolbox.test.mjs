@@ -13,7 +13,7 @@ globalThis.window=win;globalThis.document=win.document;
 // jsdom has no PointerEvent; Blockly's toolbox listens for pointerdown.
 globalThis.PointerEvent=class extends win.MouseEvent{constructor(type,init={}){super(type,init);this.pointerId=1;this.pointerType='mouse';}};
 const Blockly=await import('blockly');
-const {openOnlyToolbox}=await import('../src/toolbox.js');
+const {openOnlyToolbox,lockFlyouts}=await import('../src/toolbox.js');
 
 function inject(plugins){
  const host=document.createElement('div');document.body.append(host);
@@ -185,4 +185,15 @@ for(const mine of [true,false])test(`${mine?'teacher takeover':'student release'
   assert.equal(block.isEditable(),false);assert.ok(field.getSvgRoot().classList.contains('blocklyNonEditableText'));
   assert.equal(Blockly.ShortcutRegistry.registry.getRegistry().paste.preconditionFn(workspace),false);
  }finally{Blockly.BlockSvg.prototype.onMouseDown=original;workspace.dispose();controls.window.close();}
+});
+
+test('a read-only workspace takes no blocks from the toolbox or trashcan flyouts, and takes them again once editable',()=>{
+ lockFlyouts(Blockly);const workspace=inject({});
+ try{
+  const box=workspace.getToolbox(),[a]=box.getToolboxItems();press(a);
+  const flyout=box.getFlyout(),block=flyout.getWorkspace().getTopBlocks(false)[0];assert.ok(block);
+  assert.equal(flyout.isBlockCreatable(block),true);
+  workspace.options.readOnly=true;assert.equal(flyout.isBlockCreatable(block),false);
+  workspace.options.readOnly=false;assert.equal(flyout.isBlockCreatable(block),true);
+ }finally{workspace.dispose();}
 });

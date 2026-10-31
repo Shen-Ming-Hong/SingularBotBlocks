@@ -104,6 +104,7 @@
  "Run controls": "ປຸ່ມຄວບຄຸມການແລ່ນ",
  "Run starts here and goes down the stack.": "ການແລ່ນເລີ່ມຕົ້ນຈາກບ່ອນນີ້ ແລ້ວເຮັດຕາມກຸ່ມບລ໋ອກລົງໄປ.",
  "Running": "ກຳລັງແລ່ນ",
+ "Running: view only. Press Stop to edit.": "ກຳລັງແລ່ນ: ເບິ່ງໄດ້ຢ່າງດຽວ. ກົດ “ຢຸດ” ເພື່ອແກ້ໄຂ.",
  "Runtime": "ສະຖານະການແລ່ນ",
  "Save": "ບັນທຶກ",
  "Save copy": "ບັນທຶກເປັນສຳເນົາ",

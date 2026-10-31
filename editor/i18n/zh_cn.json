@@ -104,6 +104,7 @@
  "Run controls": "运行控制",
  "Run starts here and goes down the stack.": "按“运行”时，从这里往下依次运行。",
  "Running": "运行中",
+ "Running: view only. Press Stop to edit.": "运行中：只能观看，按“停止”后才能修改。",
  "Runtime": "运行状态",
  "Save": "保存",
  "Save copy": "另存副本",

@@ -104,6 +104,7 @@
  "Run controls": "Comandas d'execucion",
  "Run starts here and goes down the stack.": "L'execucion comença aquí e davala la pila.",
  "Running": "En execucion",
+ "Running: view only. Press Stop to edit.": "En execucion : lectura sola. Quichatz Arrestar per modificar.",
  "Runtime": "Estat d'execucion",
  "Save": "Salvar",
  "Save copy": "Salvar una còpia",

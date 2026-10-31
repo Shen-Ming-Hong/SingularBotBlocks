@@ -1,5 +1,7 @@
 // A handoff freezes input before draining saves; releasing restores input only after the latest server copy is loaded.
-export function installTakeover({document,workspace,tr,busy,save,reload,ack,status,freeze=()=>{},restore=()=>{},visual,compact}){
+// While the robot runs or pauses in the program on screen, the same lock keeps its blocks for viewing only: the student can scroll,
+// zoom and follow the highlighted step, and edits again once the run stops or ends in an error.
+export function installTakeover({document,workspace,tr,busy,save,reload,ack,status,freeze=()=>{},restore=()=>{},visual,compact,running=()=>false}){
  let state={epoch:-1,phase:'',writeBlocked:false,controlBlocked:false},syncing=false,needsSync=false,preparing='',draining=false,wasBlocked=false,button;
  const disabled=new Map();
  const block=(id,yes)=>{const node=el(id);if(yes){if(!disabled.has(id))disabled.set(id,node.disabled);node.disabled=true;}else if(disabled.has(id)){node.disabled=disabled.get(id);disabled.delete(id);}};
@@ -7,11 +9,13 @@ export function installTakeover({document,workspace,tr,busy,save,reload,ack,stat
  const write=()=>needsSync||syncing||!!state.writeBlocked&&!(state.drain&&state.phase==='preparing'&&busy());
  const control=()=>needsSync||syncing||!!state.controlBlocked;
  function refresh(){
-  const blocked=write();if(workspace.options.readOnly!==blocked){workspace.options.readOnly=blocked;for(const block of workspace.getAllBlocks(false))block.setEditable(block.isOwnEditable());}const restoring=!blocked&&wasBlocked;if(blocked&&!wasBlocked)freeze();wasBlocked=blocked;workspace.getToolbox()?.setVisible(!blocked&&visual()&&!compact());
+  const locked=write(),watching=!locked&&running(),blocked=locked||watching;
+  if(workspace.options.readOnly!==blocked){workspace.options.readOnly=blocked;for(const block of workspace.getAllBlocks(false))block.setEditable(block.isOwnEditable());if(blocked)workspace.hideChaff?.();}const restoring=!locked&&wasBlocked;if(locked&&!wasBlocked)freeze();wasBlocked=locked;workspace.getToolbox()?.setVisible(!blocked&&visual()&&!compact());
   for(const id of ['programName','luaEditor'])el(id).readOnly=blocked;
-  for(const id of ['new','newBlocks','newLua','delete','copy','convert','recover','save','share'])block(id,blocked);
+  // A running program can't be deleted or overwritten by a draft; new programs and copies stay available.
+  for(const id of ['new','newBlocks','newLua','delete','copy','convert','recover','save','share'])block(id,locked||watching&&['delete','recover','save'].includes(id));
   for(const id of ['programs','run','step','pause','resume','stop','snapshot','restore','selectedSlot','lock'])block(id,control());
-  banner.hidden=!state.phase&&!needsSync&&!syncing;banner.textContent=needsSync||syncing?tr('正在取得最新程式…','Loading the latest program…'):state.phase==='preparing'?tr('正在儲存學生的內容，準備交接…','Saving the student’s work before handing over…'):tr('老師示範中：%1','Teacher demonstration: %1',state.teacher||'');
+  banner.hidden=!state.phase&&!needsSync&&!syncing&&!watching;banner.textContent=watching?tr('執行中：只能觀看，按「停止」後才能修改。','Running: view only. Press Stop to edit.'):needsSync||syncing?tr('正在取得最新程式…','Loading the latest program…'):state.phase==='preparing'?tr('正在儲存學生的內容，準備交接…','Saving the student’s work before handing over…'):tr('老師示範中：%1','Teacher demonstration: %1',state.teacher||'');
   if(state.canTakeover&&!button){button=document.createElement('button');button.id='takeover';button.type='button';button.setAttribute('role','switch');button.dataset.icon='robot';el('compact').before(button);button.onclick=async()=>{button.disabled=true;try{await save();await requestToggle(!state.mine);}catch(e){status(e.message,true);}finally{refresh();}};}
   if(!state.canTakeover&&button){button.remove();button=null;}
   if(restoring)restore();

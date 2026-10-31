@@ -5,7 +5,7 @@ import {newProgramId} from './identity.js';
 import {installDialogs,variableDefault} from './dialogs.js';
 import {registerTurtleBlocks,toolbox,loadWorkspace,preview,FUNCTION_DEFINITIONS,setItemCatalog,setItemIdText,ensureStartBlock,markLooseStacks,isLoose,variableFlyout,functionFlyout,setProgramLibrary,refreshProgramCalls,setInventorySource,clampSlotNumbers,dropInsertionMarkers} from './blocks.js';
 import {blocklyThemes,initialTheme,installThemeToggle} from './theme.js';
-import {openOnlyToolbox,registerClipboardMenu,installMenuKey} from './toolbox.js';
+import {openOnlyToolbox,registerClipboardMenu,installMenuKey,lockFlyouts} from './toolbox.js';
 import {describeRobot,needsRecallConfirm} from './robots.js';
 import {installTakeover} from './takeover.js';
 import {historyText} from './history.js';
@@ -16,7 +16,7 @@ const asked=new URLSearchParams(location.search).get('lang')||'zh_tw',locale=LOC
 setLanguage(locale,bundle.ui);const zh=isChinese(),$=id=>document.getElementById(id);
 Blockly.setLocale(zh?TraditionalChinese:{...English,...(bundle.blockly||{})});registerTurtleBlocks(locale);localizePage(document,tr,htmlLang(locale));
 const themes=blocklyThemes(Blockly),startTheme=initialTheme(location.search);
-const workspace=Blockly.inject('workspace',{toolbox:toolbox(locale),plugins:{toolbox:openOnlyToolbox(Blockly)},theme:themes[startTheme],renderer:'zelos',media:'media/',trashcan:true,grid:{spacing:24,length:2,colour:'#41504a',snap:false},move:{scrollbars:true,drag:true,wheel:false},zoom:{controls:true,wheel:true,startScale:0.9,maxScale:2,minScale:0.4,scaleSpeed:1.15}});
+lockFlyouts(Blockly);const workspace=Blockly.inject('workspace',{toolbox:toolbox(locale),plugins:{toolbox:openOnlyToolbox(Blockly)},theme:themes[startTheme],renderer:'zelos',media:'media/',trashcan:true,grid:{spacing:24,length:2,colour:'#41504a',snap:false},move:{scrollbars:true,drag:true,wheel:false},zoom:{controls:true,wheel:true,startScale:0.9,maxScale:2,minScale:0.4,scaleSpeed:1.15}});
 workspace.registerToolboxCategoryCallback('VARIABLE',variableFlyout);registerClipboardMenu(Blockly,tr,text=>setStatus(text));window.cceduContextMenu=installMenuKey(Blockly,workspace);
 // Every other saved program can be called from here, beside the functions made inside this program.
 let libraryPrograms=[];workspace.registerToolboxCategoryCallback('CCEDU_FUNCTIONS',ws=>functionFlyout(ws,{programs:libraryPrograms,current:program?.id,locale}));
@@ -41,7 +41,7 @@ $('luaEditor').onscroll=()=>{$('luaLineHighlight').scrollTop=$('luaEditor').scro
 const refreshPreview=()=>{try{if(luaAllowed)$('preview').textContent=program?.mode==='lua'?$('luaEditor').value:preview(workspace);highlightLua(program?.mode==='lua'&&program.id===lastErrorProgram?lastErrorLine:0);}catch(e){setStatus(e.message,true);}};
 function display(p){loading=true;clearTimeout(timer);program=p;setProgramLibrary(libraryPrograms,p?.id);$('programName').value=p?.name||'';const lua=p?.mode==='lua';$('modeTag').dataset.mode=lua?'lua':'blocks';$('modeTag').textContent=lua?'Lua':tr('積木','Blocks');$('workbench').style.display=lua?'none':'block';$('codePane').style.display=lua?'block':'none';editingPolicy();$('convert').disabled=!connected||lua;if(lua)$('luaEditor').value=p.source||'';else loadWorkspace(workspace,p?.workspace||{blocks:{languageVersion:0,blocks:[]}});dirty=false;loading=false;
  // A program saved before the start block existed gets one above its topmost stack; that change is saved like an edit.
- if(p&&!lua&&!takeover.writeBlocked){ensureStartBlock(workspace);markLooseStacks(workspace);clampSlotNumbers(workspace);}syncSave();refreshPreview();Blockly.svgResize(workspace);}
+ if(p&&!lua&&!takeover.writeBlocked){ensureStartBlock(workspace);markLooseStacks(workspace);clampSlotNumbers(workspace);}syncSave();takeover.refresh();refreshPreview();Blockly.svgResize(workspace);}
 // Beginner worlds (teacher setting lua=false) show no Lua anywhere. Only a teacher with sharing on sees the send bar:
 // students never copy programs to each other, and there are no floppy disks.
 // These controls start hidden in index.html so a preloaded page never flashes them before the world policy arrives.
@@ -192,11 +192,11 @@ for(const [button,op] of Object.entries({run:'programRun',pause:'programPause',r
 }
 function runtimeControls(status){$('runtimeLamp').dataset.status=status;const paused=status==='paused';$('pause').hidden=paused;$('resume').hidden=!paused;if(connected){$('pause').disabled=status!=='running';$('stop').disabled=status==='stopped';}stepLayout(status);if(typeof takeover!=='undefined')takeover.refresh();}
 // While stepping, or when the student opens the editor from the remote page while the program runs, the game shrinks the workbench to the
-// right side, without the block categories, so the student sees the robot react beside the highlighted block; it returns to full screen when the program stops. The student can still expand it to edit.
+// right side, without the block categories, so the student sees the robot react beside the highlighted block; it returns to full screen when the program stops. The student can expand it to watch, and edits after stopping.
 let compact=false,expanded=false;
 function stepLayout(status){const active=status==='running'||status==='paused';if(!active)expanded=false;const want=active&&!expanded&&connected;$('compact').hidden=!active;const label=want?tr('放大編輯器','Expand editor'):tr('縮小編輯器','Shrink editor');$('compact').dataset.icon=want?'expand':'shrink';$('compact').dataset.tip=label;$('compact').setAttribute('aria-label',label);if(want===compact)return;compact=want;document.body.classList.toggle('compact',want);
  // The block categories fold away so the narrow workbench keeps its width for the program and the world beside it.
- const box=workspace.getToolbox();if(box){box.clearSelection();box.setVisible(!want);Blockly.svgResize(workspace);}
+ const box=workspace.getToolbox();if(box){box.clearSelection();box.setVisible(!want&&!workspace.options.readOnly);Blockly.svgResize(workspace);}
  request('layout',{compact:want}).catch(()=>{});}
 $('compact').onclick=()=>{expanded=compact;stepLayout(pollStatus);};
 // The narrow workbench follows the stepped block when it moves out of view. The full editor moves only when the running block
@@ -227,8 +227,10 @@ async function followCall(s,data){
  display(result.program);inspecting=target===data.selected?null:{id:target,from:data.selected,auto:true};lastRun=active?target:'';$('programs').value=target;
  if(target!==data.selected)setStatus(tr('子程式：','Called program: ')+(result.program.name||''));else if(!runtimeError)setStatus('',false);
 }
-async function state(){if(!connected||polling)return;polling=true;try{const data=await request('programState',{id:program?.id});suggestions=data.suggestions;applyPolicy(data);suggest();await follow(data);const s=data.runtime;await followCall(s,data);pollStatus=s.status;const labels={stopped:tr('待命','Stopped'),running:tr('執行中','Running'),paused:tr('已暫停','Paused'),error:tr('程式錯誤','Error')};$('runtimeStatus').textContent=labels[s.status]||s.status;runtimeControls(s.status);$('step').textContent=s.debugMode==='actions'?tr('逐步動作','Step action'):tr('逐步','Step');const variables=Object.entries(s.variables).map(([k,v])=>`${k} = ${JSON.stringify(v)}`).join('\n');$('variables').textContent=variables;$('variables').hidden=$('variablesTitle').hidden=!variables;debugProgram=s.programId||'';$('debugSource').hidden=s.status==='stopped'||!debugProgram||debugProgram===program?.id;$('debugSource').textContent=tr('切換到機器人正在執行的程式：','Switch to the program the robot is running: ')+(s.programName||debugProgram);const shown=s.status!=='stopped'&&(!debugProgram||debugProgram===program?.id)?s.blockId||null:null;const failed=s.status==='error';workspace.highlightBlock(failed?null:shown);if(failed)markError(shown,'runtime');else if(s.status!=='stopped'||errorSource==='runtime')markError(null);keepInView(shown);lastErrorProgram=s.programId||'';highlightLua(s.status==='error'&&program?.mode==='lua'&&program.id===lastErrorProgram?s.errorLine||0:0);if(s.status==='error'&&s.error){runtimeError=s.error;setStatus(s.error,true);}else if(runtimeError){runtimeError='';setStatus('',false);}await remoteState();}catch(e){setStatus(e.message,true);}finally{polling=false;}}
+async function state(){if(!connected||polling)return;polling=true;try{const data=await request('programState',{id:program?.id});suggestions=data.suggestions;applyPolicy(data);suggest();await follow(data);const s=data.runtime;await followCall(s,data);pollStatus=s.status;runStack=Array.isArray(s.callStack)?s.callStack:[s.programId];const labels={stopped:tr('待命','Stopped'),running:tr('執行中','Running'),paused:tr('已暫停','Paused'),error:tr('程式錯誤','Error')};$('runtimeStatus').textContent=labels[s.status]||s.status;runtimeControls(s.status);$('step').textContent=s.debugMode==='actions'?tr('逐步動作','Step action'):tr('逐步','Step');const variables=Object.entries(s.variables).map(([k,v])=>`${k} = ${JSON.stringify(v)}`).join('\n');$('variables').textContent=variables;$('variables').hidden=$('variablesTitle').hidden=!variables;debugProgram=s.programId||'';$('debugSource').hidden=s.status==='stopped'||!debugProgram||debugProgram===program?.id;$('debugSource').textContent=tr('切換到機器人正在執行的程式：','Switch to the program the robot is running: ')+(s.programName||debugProgram);const shown=s.status!=='stopped'&&(!debugProgram||debugProgram===program?.id)?s.blockId||null:null;const failed=s.status==='error';workspace.highlightBlock(failed?null:shown);if(failed)markError(shown,'runtime');else if(s.status!=='stopped'||errorSource==='runtime')markError(null);keepInView(shown);lastErrorProgram=s.programId||'';highlightLua(s.status==='error'&&program?.mode==='lua'&&program.id===lastErrorProgram?s.errorLine||0:0);if(s.status==='error'&&s.error){runtimeError=s.error;setStatus(s.error,true);}else if(runtimeError){runtimeError='';setStatus('',false);}await remoteState();}catch(e){setStatus(e.message,true);}finally{polling=false;}}
 
+// Every program on the robot's call stack is running, so each one opens read-only while the run is active.
+let runStack=[];const runLocked=()=>!!program&&(pollStatus==='running'||pollStatus==='paused')&&runStack.includes(program.id);
 // The server holds each running block for a 0.5 s beat; polling faster while running keeps the highlight on the robot's current action.
 let pollStatus='stopped';function pollDelay(){return pollStatus==='running'?150:300;}
 (function poll(){setTimeout(async()=>{if(ready&&connected)await state();poll();},pollDelay());})();
@@ -299,7 +301,7 @@ window.cceduSmoke=async()=>{
 async function reloadAfterTakeover(){const rows=await library(),chosen=rows.find(p=>p.id===savedSelection)||rows.find(p=>p.id===program?.id)||rows[0];if(chosen){const data=await request('programInspect',{id:chosen.id});display(data.program);}else display(null);}
 const takeover=installTakeover({document,workspace,tr,busy:()=>workspace.isDragging()||!!preedit,save,
  reload:reloadAfterTakeover,
- ack:(token,saved)=>request('takeoverAck',{token,saved}),status:setStatus,restore:()=>{editingPolicy();syncSave();runtimeControls(pollStatus);Blockly.svgResize(workspace);workspace.scrollCenter();if(connected&&!program)safely(()=>fresh(visualEditor?'blocks':'lua'))();},freeze:()=>{Blockly.hideChaff();for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();document.activeElement?.blur();},visual:()=>visualEditor,compact:()=>compact});
+ ack:(token,saved)=>request('takeoverAck',{token,saved}),status:setStatus,restore:()=>{editingPolicy();syncSave();runtimeControls(pollStatus);Blockly.svgResize(workspace);workspace.scrollCenter();if(connected&&!program)safely(()=>fresh(visualEditor?'blocks':'lua'))();},freeze:()=>{Blockly.hideChaff();for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();document.activeElement?.blur();},visual:()=>visualEditor,compact:()=>compact,running:runLocked});
 takeover.setToggle(enabled=>request('programTakeover',{enabled}));
 window.cceduTakeoverNotice=(data,prepare)=>{takeover.update(data);if(prepare)void takeover.prepare(data);};
 async function initialize(){

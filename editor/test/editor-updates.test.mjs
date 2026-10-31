@@ -291,7 +291,7 @@ test('stepping or opening the editor while the program runs shrinks the workbenc
  const elements={},requests=[],classes=new Set(),toolbox={visible:true,resized:0,cleared:0,clearSelection(){this.cleared++;},setVisible(on){this.visible=on;}};
  const context={connected:true,tr:(zh)=>zh,request:async(op,data)=>{requests.push([op,data.compact]);return {};},
   document:{body:{classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)}}},
-  workspace:{getToolbox:()=>toolbox},Blockly:{svgResize:()=>toolbox.resized++},$:id=>(elements[id]??={dataset:{},setAttribute(name,value){this[name]=value;}})};
+  workspace:{getToolbox:()=>toolbox,options:{readOnly:false}},Blockly:{svgResize:()=>toolbox.resized++},$:id=>(elements[id]??={dataset:{},setAttribute(name,value){this[name]=value;}})};
  runInNewContext(section('let compact=false','// The narrow workbench')+';this.layout=stepLayout;',context);
  context.layout('stopped');
  assert.equal(requests.length,0);assert.equal(elements.compact.hidden,true);
@@ -310,6 +310,9 @@ test('stepping or opening the editor while the program runs shrinks the workbenc
  assert.deepEqual(requests.at(-1),['layout',true]);
  context.layout('error');
  assert.deepEqual(requests.at(-1),['layout',false]);assert.equal(elements.compact.hidden,true);
+ // Expanding a running program that is locked for viewing keeps the block categories folded away.
+ context.layout('running');context.workspace.options.readOnly=true;context.pollStatus='running';elements.compact.onclick();
+ assert.deepEqual(requests.at(-1),['layout',false]);assert.equal(toolbox.visible,false);
 });
 
 test('the editor follows the running program into a called library program and back out level by level',async()=>{

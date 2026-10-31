@@ -72,3 +72,18 @@ test('stale notices cannot re-enter an old handoff and a cancelled drag does not
  f.takeover.update(released(2));await pending;f.takeover.update(active(1));
  assert.equal(f.takeover.writeBlocked,false);assert.deepEqual(f.calls,[]);f.workspace.dispose();
 });
+test('a running program opens for viewing only and unlocks after it stops, without a takeover reload',()=>{
+ const initial={};let running=true,froze=0,restored=0;const f=fixture({running:()=>running,freeze:()=>froze++,restore:()=>restored++});const block=f.workspace.newBlock('math_number');
+ for(const id of ['new','copy','programs','run','stop'])initial[id]=f.document.getElementById(id).disabled;f.takeover.refresh();
+ assert.equal(f.workspace.options.readOnly,true);assert.equal(block.isEditable(),false);assert.equal(block.isMovable(),false);assert.equal(block.isDeletable(),false);
+ assert.equal(Blockly.ShortcutRegistry.registry.getRegistry().paste.preconditionFn(f.workspace),false);
+ assert.equal(f.document.getElementById('luaEditor').readOnly,true);assert.equal(f.document.getElementById('programName').readOnly,true);
+ for(const id of ['delete','recover','save'])assert.equal(f.document.getElementById(id).disabled,true,id);
+ for(const id of ['new','copy','programs','run','stop'])assert.equal(f.document.getElementById(id).disabled,initial[id],id);
+ const banner=f.document.getElementById('takeoverStatus');assert.equal(banner.hidden,false);assert.match(banner.textContent,/停止/);
+ assert.equal(f.takeover.writeBlocked,false);
+ running=false;f.takeover.refresh();
+ assert.equal(f.workspace.options.readOnly,false);assert.equal(block.isEditable(),true);assert.equal(block.isMovable(),true);
+ assert.equal(f.document.getElementById('luaEditor').readOnly,false);assert.equal(f.document.getElementById('delete').disabled,false);assert.equal(banner.hidden,true);
+ assert.deepEqual([froze,restored,f.calls.length],[0,0,0]);f.workspace.dispose();
+});

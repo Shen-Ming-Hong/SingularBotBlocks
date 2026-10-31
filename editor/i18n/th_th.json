@@ -104,6 +104,7 @@
  "Run controls": "ปุ่มควบคุมการรัน",
  "Run starts here and goes down the stack.": "การรันจะเริ่มตรงนี้ แล้วทำตามชุดบล็อกลงมาเรื่อย ๆ",
  "Running": "กำลังรัน",
+ "Running: view only. Press Stop to edit.": "กำลังรัน: ดูได้อย่างเดียว กด “หยุด” เพื่อแก้ไข",
  "Runtime": "สถานะการรัน",
  "Save": "บันทึก",
  "Save copy": "บันทึกเป็นสำเนา",

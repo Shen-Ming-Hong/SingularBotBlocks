@@ -104,6 +104,7 @@
  "Run controls": "執行控制",
  "Run starts here and goes down the stack.": "按「執行」時，由這裡開始往下依次執行。",
  "Running": "執行中",
+ "Running: view only. Press Stop to edit.": "執行中：只能觀看，按「停止」後才能修改。",
  "Runtime": "執行狀態",
  "Save": "儲存",
  "Save copy": "另存副本",

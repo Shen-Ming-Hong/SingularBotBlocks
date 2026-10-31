@@ -18,6 +18,16 @@ export function openOnlyToolbox(Blockly){
 }
 
 /**
+ * A read-only workspace (a running program or a teacher takeover) still lets the trashcan open, and Blockly lets a block be
+ * dragged out of any flyout without checking whether the workspace it lands in can be edited. Flyout blocks can only be
+ * created into a workspace that is editable.
+ */
+export function lockFlyouts(Blockly){
+ const creatable=Blockly.Flyout.prototype.isBlockCreatable;
+ Blockly.Flyout.prototype.isBlockCreatable=function(block){return !this.targetWorkspace?.options.readOnly&&creatable.call(this,block);};
+}
+
+/**
  * Paste on the workspace right-click menu, using Blockly's own Cmd+V command so it shares one clipboard with Cmd+C /
  * Option+C. Keys with Command cannot be sent to the game while it is in the background, and children may not know the
  * shortcut; the menu works either way, and puts the block where the menu was opened. The block menu has no copy item

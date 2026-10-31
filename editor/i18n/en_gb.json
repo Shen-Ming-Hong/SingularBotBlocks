@@ -104,6 +104,7 @@
  "Run controls": "Run controls",
  "Run starts here and goes down the stack.": "When you press Run, the program starts here and runs down the stack.",
  "Running": "Running",
+ "Running: view only. Press Stop to edit.": "Running: view only. Press Stop to edit.",
  "Runtime": "Run status",
  "Save": "Save",
  "Save copy": "Save copy",

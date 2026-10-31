@@ -104,6 +104,7 @@
  "Run controls": "Controles de ejecución",
  "Run starts here and goes down the stack.": "La ejecución empieza acá y sigue hacia abajo por el grupo de bloques.",
  "Running": "En ejecución",
+ "Running: view only. Press Stop to edit.": "En ejecución: solo lectura. Presioná «Detener» para editar.",
  "Runtime": "Estado de ejecución",
  "Save": "Guardar",
  "Save copy": "Guardar copia",

@@ -104,6 +104,7 @@
  "Run controls": "Futtatás vezérlése",
  "Run starts here and goes down the stack.": "A futtatás itt kezdődik, és lefelé halad a blokkoknál.",
  "Running": "Fut",
+ "Running: view only. Press Stop to edit.": "Fut: csak megtekintés. A szerkesztéshez nyomd meg a Leállítás gombot.",
  "Runtime": "Futási állapot",
  "Save": "Mentés",
  "Save copy": "Másolat mentése",

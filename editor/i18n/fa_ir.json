@@ -104,6 +104,7 @@
  "Run controls": "کنترل‌های اجرا",
  "Run starts here and goes down the stack.": "اجرا از اینجا شروع می‌شود و در گروه به سمت پایین ادامه می‌یابد.",
  "Running": "در حال اجرا",
+ "Running: view only. Press Stop to edit.": "در حال اجرا: فقط مشاهده. برای ویرایش «توقف» را بزنید.",
  "Runtime": "وضعیت اجرا",
  "Save": "ذخیره",
  "Save copy": "ذخیره‌ی رونوشت",
