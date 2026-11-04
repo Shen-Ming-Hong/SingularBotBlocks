@@ -8,7 +8,7 @@ A classroom mod for Minecraft Java 1.21.1 / NeoForge: students program their own
 
 ## The robot
 
-![Three robots whose edge light runs in silver-blue, green and red](docs/images/robot-signals.gif)
+![Three white robots whose edge lights show idle in silver-blue, running in green and an error in red](docs/images/robot-signals.gif)
 
 A light runs around all twelve edges of every robot, in every body colour, and its colour shows what the robot's program is doing:
 
@@ -34,16 +34,18 @@ The robot also glows on its own. Its eye screen and edge light stay bright in th
 
 | | |
 | --- | --- |
-| ![The Singular Bot Blocks creative tab with its one Programming Robot](docs/images/creative-tab.png) | ![A pink robot named Robo 1 next to its small controller](docs/images/controller.jpg) |
+| ![The Singular Bot Blocks creative tab with its one Programming Robot](docs/images/creative-tab.png) | ![A pink robot with its diamond pickaxe next to its small controller](docs/images/controller.jpg) |
 | One robot in the creative tab | Right-click the robot to drive it |
-| ![The appearance page with the robot's name, decoration and colour arrows](docs/images/appearance.jpg) | ![Four robots in green, pink, blue and orange with different decorations](docs/images/robots.jpg) |
+| ![The appearance page with the robot's name Robo 1, decoration and colour arrows](docs/images/appearance.jpg) | ![Four robots in orange, blue, pink and green with a straw hat, sunglasses, a crown and a headband](docs/images/robots.jpg) |
 | Name it, pick a colour and a decoration | Every student's robot can look different |
 
-![The block editor with a program: when program starts, repeat 4 times, dig front, move forward](docs/images/editor.png)
+![The block editor with a program: when program starts, repeat 4 times, if there is a block in front then dig front, move forward](docs/images/editor.png)
 
-![A robot digging through a row of planks and moving forward after Run](docs/images/running.gif)
+![The editor shrunk to the side while the robot digs, with the if, dig and move blocks lighting up in turn](docs/images/running-blocks.gif)
 
-![The editor shrunk to the side while the robot digs, with the dig and move blocks lighting up in turn](docs/images/running-blocks.gif)
+![A robot with a diamond pickaxe and a green edge light digging through a row of stone towards the camera](docs/images/tunnel.gif)
+
+![A robot mining a row of diamond, gold, iron, emerald, redstone, lapis, coal and copper ore, then its backpack holding what it collected](docs/images/mining.gif)
 
 ## For teachers
 

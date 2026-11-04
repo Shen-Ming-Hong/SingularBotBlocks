@@ -53,7 +53,7 @@ jobs:
           name: native-${{ matrix.platform }}
           path: native-artifacts/*
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 3
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -61,4 +61,4 @@ jobs:
           path: |
             native-build/build-source.json
             native-build/jcef_build/CMakeFiles/CMakeConfigureLog.yaml
-          retention-days: 30
+          retention-days: 3

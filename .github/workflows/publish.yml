@@ -53,10 +53,37 @@ jobs:
           esac
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "type=$type" >> "$GITHUB_OUTPUT"
+      # A tag pushed after a manual upload (for example once a machine that can
+      # push tags is available) must not upload the same version again. A manual
+      # run for a version that already exists fails instead.
+      - name: Already on Modrinth?
+        id: existing
+        env:
+          MODRINTH_ID: ${{ vars.MODRINTH_ID }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          versions=$(curl -fsS --retry 3 -H "Authorization: $MODRINTH_TOKEN" \
+            -H 'User-Agent: SingularBotBlocks-publish' \
+            "https://api.modrinth.com/v2/project/$MODRINTH_ID/version")
+          if printf '%s' "$versions" | jq -e --arg v "$VERSION" 'any(.[]; .version_number == $v)' > /dev/null; then
+            if [ "$GITHUB_REF_TYPE" = tag ]; then
+              echo "::notice::Modrinth already has $VERSION; the tag is kept and nothing is uploaded"
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "::error::Modrinth already has $VERSION; raise mod_version before uploading again"; exit 1
+            fi
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
       - run: npm ci --prefix editor --ignore-scripts
+        if: steps.existing.outputs.skip != 'true'
       - run: npm test --prefix editor
+        if: steps.existing.outputs.skip != 'true'
       - run: ./gradlew build --no-daemon
+        if: steps.existing.outputs.skip != 'true'
       - name: Check the JAR
+        if: steps.existing.outputs.skip != 'true'
         id: jar
         run: |
           jar="build/libs/singularbots-1.21.1-neoforge-${{ steps.version.outputs.version }}.jar"
@@ -68,6 +95,7 @@ jobs:
           sha256sum "$jar"
           echo "path=$jar" >> "$GITHUB_OUTPUT"
       - name: Changelog
+        if: steps.existing.outputs.skip != 'true'
         env:
           INPUT: ${{ inputs.changelog }}
         run: |
@@ -79,6 +107,7 @@ jobs:
           fi
           touch changelog.md
       - uses: Kir-Antipov/mc-publish@v3.3
+        if: steps.existing.outputs.skip != 'true'
         with:
           modrinth-id: ${{ vars.MODRINTH_ID }}
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}

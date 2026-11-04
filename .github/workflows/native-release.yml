@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       native_run:
-        description: Successful Native browser run id whose artifacts to keep
+        description: Successful Native browser run id whose artifacts to keep (artifacts expire after 3 days)
         required: true
       tag:
         description: Release tag (default native-cef116-run<id>)

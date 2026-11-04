@@ -56,4 +56,4 @@ jobs:
             run-server-1.21.1/server-smoke.log
             run-persistence-1.21.1/persistence-*.json
             run-persistence-1.21.1/persistence-*.log
-          retention-days: 14
+          retention-days: 3
