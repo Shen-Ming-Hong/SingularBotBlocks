@@ -21,7 +21,7 @@ The macOS packaging patch skips the upstream demo Java/Ant app bundle: MCEF alre
 
 ## Prepare an isolated client
 
-Create a new Minecraft 1.21.1 / NeoForge game directory using Java 21. The mod is built against NeoForge 21.1.252 and accepts any 21.1.x from 21.1.252 (21.1.262 has been tested on a client); use the same NeoForge line on the server. Install the 1.21.1 NeoForge artifacts of CC: Tweaked 1.120.2 and MCEF 2.1.6. CC: Tweaked retains "forge" in this NeoForge artifact filename. Verify the loader and Minecraft version, not just the filename.
+Create a new Minecraft 1.21.1 / NeoForge game directory using Java 21. The mod is built against NeoForge 21.1.252 and accepts any 21.1.x from 21.1.252 (21.1.262 has been tested on a client); use the same NeoForge line on the server. Install the 1.21.1 NeoForge artifacts of CC: Tweaked 1.120.2 (or 1.121.x, which needs NeoForge 21.1.265 or later) and MCEF 2.1.6. CC: Tweaked retains "forge" in this NeoForge artifact filename. Verify the loader and Minecraft version, not just the filename.
 
 With internet access, nothing else is needed: on the first launch MCEF 2.1.6 downloads the matching JCEF/CEF runtime (an archive of over 100 MB that unpacks to a few hundred MB) from its official server into `mods/mcef-libraries`, and the editor accepts it after checking that MCEF reports the pinned JCEF commit and CEF/Chromium version. For an offline or pre-staged client, install a native package from this project instead.
 
@@ -37,7 +37,7 @@ The installer checks the checksum, architecture and pinned JCEF source version. 
 
 ## Dedicated server
 
-Server deployment includes NeoForge, CC: Tweaked 1.120.2 and the same Singular Bot Blocks JAR as the clients; other mods in a pack that add blocks or items must also match on both sides. MCEF and Chromium are client-only and must not be required on the server. Dedicated servers on NeoForge 21.1.256 and 21.1.262 boot with this mod. The mod does not keep chunks loaded: a robot runs only while a player keeps its chunk loaded, so a program stops when its owner leaves and nobody else is nearby. Headless development server boot/shutdown without either dependency has passed locally; classroom multiplayer acceptance remains pending. Gameplay GameTests also run without MCEF/JCEF.
+Server deployment includes NeoForge, CC: Tweaked 1.120.2 (or 1.121.x on NeoForge 21.1.265+, the same version as the clients) and the same Singular Bot Blocks JAR as the clients; other mods in a pack that add blocks or items must also match on both sides. MCEF and Chromium are client-only and must not be required on the server. Dedicated servers on NeoForge 21.1.256 and 21.1.262 boot with this mod. The mod does not keep chunks loaded: a robot runs only while a player keeps its chunk loaded, so a program stops when its owner leaves and nobody else is nearby. Headless development server boot/shutdown without either dependency has passed locally; classroom multiplayer acceptance remains pending. Gameplay GameTests also run without MCEF/JCEF.
 
 ## Verification record
 

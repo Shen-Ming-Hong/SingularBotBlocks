@@ -19,7 +19,11 @@ import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-/** Client-only CC 1.120.2 hook; other turtles, labels, animation and upgrades are unchanged. */
+/**
+ * Client-only CC 1.120.x hook (tints as {@code int[]}); JuniorBodyRendererMixin121 covers CC 1.121, where tints became
+ * an {@code IntUnaryOperator}. CcCompatPlugin applies whichever matches the installed renderer. Other turtles, labels,
+ * animation and upgrades are unchanged.
+ */
 @Mixin(value = TurtleBlockEntityRenderer.class, remap = false)
 public abstract class JuniorBodyRendererMixin {
     @Shadow

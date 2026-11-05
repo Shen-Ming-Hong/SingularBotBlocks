@@ -53,7 +53,7 @@ Teachers are operators (OP level 2); everyone else is a student. `/botblocks` sw
 
 ## Installing
 
-Every client and the server need Minecraft 1.21.1, NeoForge 21.1.252 or a later 21.1.x, CC: Tweaked 1.120.2 and the same Singular Bot Blocks JAR. Each client also needs MCEF 2.1.6-1.21.1, which runs the editor; the server needs no MCEF. On the first launch MCEF downloads its Chromium browser (an archive of over 100 MB that unpacks to a few hundred MB) from its official server, so that launch needs an internet connection. For offline classrooms, install a prepared native package instead, as described in [docs/install.md](docs/install.md). Use a new world: programs from the 1.8.9 mod are not converted.
+Every client and the server need Minecraft 1.21.1, NeoForge 21.1.252 or a later 21.1.x, CC: Tweaked 1.120.2 or 1.121.x (1.121 needs NeoForge 21.1.265 or later) and the same Singular Bot Blocks JAR. Each client also needs MCEF 2.1.6-1.21.1, which runs the editor; the server needs no MCEF. On the first launch MCEF downloads its Chromium browser (an archive of over 100 MB that unpacks to a few hundred MB) from its official server, so that launch needs an internet connection. For offline classrooms, install a prepared native package instead, as described in [docs/install.md](docs/install.md). Use a new world: programs from the 1.8.9 mod are not converted.
 
 The mod keeps no chunks loaded: a robot only works while a player is near enough to keep its chunk loaded, so its program stops when its owner leaves and nobody else is nearby.
 
@@ -64,7 +64,7 @@ The mod keeps no chunks loaded: a robot only works while a player is near enough
 | Minecraft | 1.21.1 |
 | Java target | 21 |
 | NeoForge | 21.1.252 (build); accepts any later 21.1.x |
-| CC: Tweaked | 1.120.2 |
+| CC: Tweaked | 1.120.2 (build); also accepts 1.121.x with NeoForge 21.1.265+ |
 | MCEF (client only) | 2.1.6-1.21.1 |
 | Blockly | 11.2.2 |
 | JCEF | a78e832f9f13c2c688caea3d04d8b84fcd238d94 |

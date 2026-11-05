@@ -2,11 +2,13 @@
   "required": true,
   "minVersion": "0.8.5",
   "package": "org.singularbots.mixin",
+  "plugin": "org.singularbots.mixinplugin.CcCompatPlugin",
   "compatibilityLevel": "JAVA_21",
   "client": [
     "OfflineChecksumMixin",
     "PreinstalledRuntimeMixin",
     "JuniorBodyRendererMixin",
+    "JuniorBodyRendererMixin121",
     "EditorWorldRenderMixin"
   ],
   "injectors": {

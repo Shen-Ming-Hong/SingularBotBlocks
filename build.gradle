@@ -73,7 +73,8 @@ dependencies {
     compileOnly "cc.tweaked:cc-tweaked-${minecraft_version}-forge-api:${cc_version}"
     // Pinned implementation references are confined to compat/cct and Mixins.
     compileOnly "cc.tweaked:cc-tweaked-${minecraft_version}-forge:${cc_version}"
-    runtimeOnly "cc.tweaked:cc-tweaked-${minecraft_version}-forge:${cc_version}"
+    // -Pcc_runtime_version=1.121.0 (with -Pneo_version=21.1.265) runs the 1.120.2-built mod on CC 1.121.
+    runtimeOnly "cc.tweaked:cc-tweaked-${minecraft_version}-forge:${providers.gradleProperty('cc_runtime_version').getOrElse(cc_version)}"
     compileOnly "maven.modrinth:mcef:${mcef_version_id}"
     // Only the client run loads MCEF. A dedicated server has no browser dependency.
     clientRuntimeOnly "maven.modrinth:mcef:${mcef_version_id}"
@@ -100,7 +101,7 @@ sourceSets.main.resources.srcDir layout.buildDirectory.dir('generated/editor')
 processResources {
     dependsOn 'buildEditor'
     def pins = [mod_version: mod_version, minecraft_version: minecraft_version,
-                neo_version: neo_version, cc_version: cc_version, mcef_version: mcef_version]
+                neo_version: neo_version, cc_version: cc_version, cc_version_range: cc_version_range, mcef_version: mcef_version]
     inputs.properties pins
     filesMatching('META-INF/neoforge.mods.toml') { expand pins }
 }

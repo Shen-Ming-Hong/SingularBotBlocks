@@ -23,7 +23,7 @@ side="BOTH"
 [[dependencies.singularbots]]
 modId="computercraft"
 type="required"
-versionRange="[${cc_version}]"
+versionRange="${cc_version_range}"
 ordering="AFTER"
 side="BOTH"
 [[dependencies.singularbots]]
