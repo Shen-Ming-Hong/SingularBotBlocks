@@ -53,7 +53,7 @@ Teachers are operators (OP level 2); everyone else is a student. `/botblocks` sw
 
 ## Installing
 
-Every client and the server need Minecraft 1.21.1, NeoForge 21.1.252 or a later 21.1.x, CC: Tweaked 1.120.2 and the same Singular Bot Blocks JAR. Each client also needs MCEF 2.1.6-1.21.1 with the matching native browser package, which runs the editor; the server needs no MCEF. MCEF's normal binary downloader is currently unavailable, so prepare the native package before starting clients, as described in [docs/install.md](docs/install.md). Use a new world: programs from the 1.8.9 mod are not converted.
+Every client and the server need Minecraft 1.21.1, NeoForge 21.1.252 or a later 21.1.x, CC: Tweaked 1.120.2 and the same Singular Bot Blocks JAR. Each client also needs MCEF 2.1.6-1.21.1, which runs the editor; the server needs no MCEF. On the first launch MCEF downloads its Chromium browser (an archive of over 100 MB that unpacks to a few hundred MB) from its official server, so that launch needs an internet connection. For offline classrooms, install a prepared native package instead, as described in [docs/install.md](docs/install.md). Use a new world: programs from the 1.8.9 mod are not converted.
 
 The mod keeps no chunks loaded: a robot only works while a player is near enough to keep its chunk loaded, so its program stops when its owner leaves and nobody else is nearby.
 
@@ -76,7 +76,7 @@ New worlds and a new program format are used; no Minecraft 1.8.9 conversion is i
 
 Use a JDK 21, Node.js 22 and Python 3.11 or newer. Development and native deployment instructions are in [docs/install.md](docs/install.md); gameplay instructions are in [繁體中文 / English](docs/gameplay-guide.md). Do not install this development build in a classroom world.
 
-Blockly assets are bundled locally. No CDN is needed during lessons. MCEF's normal binary downloader is currently unavailable, so the native workflow builds the pinned official JCEF source against official CEF distributions. Native packages are prepared before clients are started. A dedicated server requires no MCEF/native browser package.
+Blockly assets are bundled locally. No CDN is needed during lessons. For offline installation, the native workflow builds the pinned official JCEF source against official CEF distributions; a prepared package is installed before clients are started and stops MCEF from downloading. A dedicated server requires no MCEF/native browser package.
 
 ## License
 

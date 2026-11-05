@@ -23,6 +23,8 @@ The macOS packaging patch skips the upstream demo Java/Ant app bundle: MCEF alre
 
 Create a new Minecraft 1.21.1 / NeoForge game directory using Java 21. The mod is built against NeoForge 21.1.252 and accepts any 21.1.x from 21.1.252 (21.1.262 has been tested on a client); use the same NeoForge line on the server. Install the 1.21.1 NeoForge artifacts of CC: Tweaked 1.120.2 and MCEF 2.1.6. CC: Tweaked retains "forge" in this NeoForge artifact filename. Verify the loader and Minecraft version, not just the filename.
 
+With internet access, nothing else is needed: on the first launch MCEF 2.1.6 downloads the matching JCEF/CEF runtime (an archive of over 100 MB that unpacks to a few hundred MB) from its official server into `mods/mcef-libraries`, and the editor accepts it after checking that MCEF reports the pinned JCEF commit and CEF/Chromium version. For an offline or pre-staged client, install a native package from this project instead.
+
 Obtain the runtime archive and its `.sha256` file from the same native workflow run. Replace the checksum below with the value from that file:
 
 ```sh

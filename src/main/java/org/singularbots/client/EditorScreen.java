@@ -135,11 +135,11 @@ public final class EditorScreen extends Screen implements ScreenWalking.Walkable
         try {
             if (!MCEF.isInitialized()) throw new IllegalStateException("MCEF 2.1.6 is not initialized; install the pinned native runtime and restart");
             Path runtime = Path.of(System.getProperty("jcef.path"));
-            nativeManifest = JsonParser.parseString(Files.readString(runtime.resolve("computercraftedu-native.json"))).getAsJsonObject();
-            nativeInstallation = JsonParser.parseString(Files.readString(runtime.resolve("computercraftedu-install.json"))).getAsJsonObject();
-            if (!"a78e832f9f13c2c688caea3d04d8b84fcd238d94".equals(nativeManifest.get("jcef_commit").getAsString())
-                || !"116.0.27+gd8c85ac+chromium-116.0.5845.190".equals(nativeManifest.get("cef_version").getAsString()))
-                throw new IllegalStateException("Browser native runtime does not match the pinned build");
+            var version = MCEF.getApp().getHandle().getVersion();
+            var checked = BrowserRuntimeCheck.verify(runtime, new BrowserRuntimeCheck.Loaded(MCEF.getJavaCefCommit(),
+                version == null ? null : new int[]{version.CEF_VERSION_MAJOR, version.CEF_VERSION_MINOR, version.CEF_VERSION_PATCH},
+                version == null ? null : new int[]{version.CHROME_VERSION_MAJOR, version.CHROME_VERSION_MINOR, version.CHROME_VERSION_BUILD, version.CHROME_VERSION_PATCH}));
+            nativeManifest = checked.build(); nativeInstallation = checked.installation();
             client = MCEF.getApp().getHandle().createClient();
             client.addRequestHandler(new CefRequestHandlerAdapter() {
                 @Override public boolean onBeforeBrowse(CefBrowser b, CefFrame f, CefRequest r, boolean gesture, boolean redirect) {
