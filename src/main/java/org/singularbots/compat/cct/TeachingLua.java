@@ -68,11 +68,27 @@ public final class TeachingLua {
         @LuaFunction(mainThread=true) public String inspect(){return inspect(access.getDirection());}
         @LuaFunction(mainThread=true) public String inspectUp(){return inspect(net.minecraft.core.Direction.UP);}
         @LuaFunction(mainThread=true) public String inspectDown(){return inspect(net.minecraft.core.Direction.DOWN);}
+        // Crops: "is it ready to harvest" and its growth stage, read from the block itself (see CropGrowth).
+        private net.minecraft.world.level.block.state.BlockState state(net.minecraft.core.Direction direction){var pos=system.getPosition().relative(direction);return system.getLevel().hasChunkAt(pos)?system.getLevel().getBlockState(pos):net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();}
+        @LuaFunction(mainThread=true) public boolean isCropGrown(){return org.singularbots.turtle.CropGrowth.grown(state(access.getDirection()));}
+        @LuaFunction(mainThread=true) public boolean isCropGrownUp(){return org.singularbots.turtle.CropGrowth.grown(state(net.minecraft.core.Direction.UP));}
+        @LuaFunction(mainThread=true) public boolean isCropGrownDown(){return org.singularbots.turtle.CropGrowth.grown(state(net.minecraft.core.Direction.DOWN));}
+        @LuaFunction(mainThread=true) public int getCropAge(){return org.singularbots.turtle.CropGrowth.age(state(access.getDirection()));}
+        @LuaFunction(mainThread=true) public int getCropAgeUp(){return org.singularbots.turtle.CropGrowth.age(state(net.minecraft.core.Direction.UP));}
+        @LuaFunction(mainThread=true) public int getCropAgeDown(){return org.singularbots.turtle.CropGrowth.age(state(net.minecraft.core.Direction.DOWN));}
         @LuaFunction(mainThread=true) public String getItemName(Optional<Integer> number)throws LuaException{int slot=number.orElse(access.getSelectedSlot()+1)-1;if(slot<0||slot>=16)throw new LuaException("Slot must be 1 to 16");var item=access.getInventory().getItem(slot);return item.isEmpty()?"minecraft:air":net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item.getItem()).toString();}
+        /**
+         * The chat line for say. A true/false value (e.g. "crop in front is fully grown") reads as Minecraft's own
+         * Yes / No in each player's language (是／否 in Traditional Chinese) instead of Lua's true / false.
+         */
+        public static net.minecraft.network.chat.Component message(String label,String text,boolean yes)throws LuaException{
+            if(text!=null&&text.length()>256)throw new LuaException("Message exceeds 256 characters");
+            var line=net.minecraft.network.chat.Component.literal("<"+(label==null?"Junior Turtle":label)+"> ");
+            return text!=null?line.append(text):line.append(net.minecraft.network.chat.Component.translatable(yes?"gui.yes":"gui.no"));
+        }
         @LuaFunction(mainThread=true) public void say(IArguments args)throws LuaException{
-            String text=LuaText.decode(args.getStringCoerced(0));
-            if(text.length()>256)throw new LuaException("Message exceeds 256 characters");
-            var label=system.getLabel();var message=net.minecraft.network.chat.Component.literal("<"+(label==null?"Junior Turtle":label)+"> "+text);
+            var value=args.get(0);
+            var message=value instanceof Boolean yes?message(system.getLabel(),null,yes):message(system.getLabel(),LuaText.decode(args.getStringCoerced(0)),false);
             for(var player:system.getLevel().players())if(player.position().distanceToSqr(system.getPosition().getCenter())<=64*64)player.sendSystemMessage(message);
         }
     }

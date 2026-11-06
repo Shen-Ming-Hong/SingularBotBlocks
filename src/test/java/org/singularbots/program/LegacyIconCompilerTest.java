@@ -183,12 +183,17 @@ class LegacyIconCompilerTest {
             assertTrue(lua(ws(side("ccedu_compare",s[1]))).contains("turtle.compare"+s[0]+"()"),s[1]);
         }
         assertTrue(lua(ws(b("controls_if").input("IF0",side("ccedu_detect","down")).input("DO0",cmd("dig")))).contains("if turtle.detectDown() then"));
+        for(var s:new String[][]{{"","forward"},{"Up","up"},{"Down","down"}}){
+            assertTrue(lua(ws(side("ccedu_crop_grown",s[1]))).contains("turtleedu.isCropGrown"+s[0]+"()"),s[1]);
+            assertTrue(lua(ws(side("ccedu_crop_age",s[1]))).contains("turtleedu.getCropAge"+s[0]+"()"),s[1]);
+        }
+        assertTrue(lua(ws(b("controls_if").input("IF0",side("ccedu_crop_grown","forward")).input("DO0",cmd("dig")))).contains("if turtleedu.isCropGrown() then"));
         assertTrue(lua(ws(b("ccedu_item_count").shadow("SLOT",num(3)))).contains("turtle.getItemCount(3.0)"));
         assertTrue(lua(ws(b("ccedu_item_space").shadow("SLOT",num(16)))).contains("turtle.getItemSpace(16.0)"));
         assertTrue(lua(ws(b("ccedu_selected_slot"))).contains("turtle.getSelectedSlot()"));
     }
     @Test void sidesAreLimitedToFrontUpAndDown(){
-        for(var type:List.of("ccedu_inspect","ccedu_detect","ccedu_compare","ccedu_redstone_query","ccedu_redstone_set"))assertEquals("Invalid SIDE",rejected(ws(side(type,"left"))).getMessage(),type);
+        for(var type:List.of("ccedu_inspect","ccedu_detect","ccedu_crop_grown","ccedu_crop_age","ccedu_compare","ccedu_redstone_query","ccedu_redstone_set"))assertEquals("Invalid SIDE",rejected(ws(side(type,"left"))).getMessage(),type);
         assertTrue(lua(ws(side("ccedu_redstone_set","down"))).contains("turtleedu.setRedstoneDown(false)"),"an empty value turns the signal off");
     }
     @Test void registryIdsMustBeNamespacedLowercaseIds(){
@@ -270,11 +275,12 @@ class LegacyIconCompilerTest {
         var called=new TreeMap<String,Set<String>>();var all=new ArrayList<B>();
         for(var icon:ICONS.values())all.add(icon.block().get());
         all.add(b("ccedu_snapshot").field("ACTION","save"));all.add(b("ccedu_snapshot").field("ACTION","restore"));
+        for(var type:List.of("ccedu_crop_grown","ccedu_crop_age"))for(var where:List.of("forward","up","down"))all.add(side(type,where));
         for(var block:all){
             var m=Pattern.compile("\\b(turtleedu|edu)\\.(\\w+)\\(").matcher(WorkspaceCompiler.compile(ws(block)).lua());
             while(m.find())called.computeIfAbsent(m.group(1),k->new TreeSet<>()).add(m.group(2));
         }
-        assertEquals(Set.of("checkRedstone","checkRedstoneUp","checkRedstoneDown","setRedstone","setRedstoneUp","setRedstoneDown","inspect","inspectUp","inspectDown","getItemName","say"),called.get("turtleedu"));
+        assertEquals(Set.of("checkRedstone","checkRedstoneUp","checkRedstoneDown","setRedstone","setRedstoneUp","setRedstoneDown","inspect","inspectUp","inspectDown","getItemName","say","isCropGrown","isCropGrownUp","isCropGrownDown","getCropAge","getCropAgeUp","getCropAgeDown"),called.get("turtleedu"));
         assertEquals(Set.of("callProgram","checkpoint","expression","saveTurtleState","restoreTurtleState"),called.get("edu"));
         for(var e:called.entrySet()){var available=helpers(e.getKey());for(var name:e.getValue())assertTrue(available.contains(name),e.getKey()+"."+name+" is called by compiled programs but not provided; available "+available);}
     }

@@ -240,6 +240,9 @@ export function registerTurtleBlocks(locale='en_us'){
  // One true/false block per question, with only the direction to choose. The old ccedu_turtle_query mixed these with
  // number queries and an unused slot input, and had no output type, so it still loads but is no longer offered.
  {...output('ccedu_detect',tr('%1 有方塊','is there a block %1'),[side],'Boolean',210),tooltip:tr('那裡有方塊就是「是」，空的（空氣、水或岩漿）就是「否」。','True when a block is there; air, water and lava count as empty.')},
+ // Crops: the last growth stage comes from the block itself, so wheat (7), sweet berries or a mod's berry bush (3) all work.
+ {...output('ccedu_crop_grown',tr('%1 作物已成熟','crop %1 is fully grown'),[side],'Boolean',210),tooltip:tr('那裡的作物長到最後一個階段就是「是」；還沒長大、或那裡不是作物，就是「否」。','True when the crop there has reached its last growth stage; false while it is still growing or when there is no crop.')},
+ {...output('ccedu_crop_age',tr('%1 作物生長階段','crop growth stage %1'),[side],'Number',210),tooltip:tr('剛種下是 0，每長大一次加 1；最後是幾要看作物（小麥 7、甜莓叢 3）。那裡不是作物就是 -1。','0 when just planted, plus 1 each time it grows; the last stage depends on the crop (wheat 7, sweet berries 3). -1 when there is no crop.')},
  // ccedu_compare is no longer offered (students compare 是什麼方塊 with an item themselves) but saved programs still load.
  {...output('ccedu_compare',tr('%1 的方塊和選取的物品一樣','block %1 matches the selected item'),[side],'Boolean'),tooltip:tr('拿物品欄選取的那一格和那個方向的方塊比，一樣就是「是」。','Compares the block there with the selected inventory slot.')},
  output('ccedu_item_count',tr('第 %1 格有幾個物品','item count in slot %1'),[input('SLOT','Number')],'Number',35),
@@ -271,6 +274,8 @@ export function registerTurtleBlocks(locale='en_us'){
  const suffix=b=>({forward:'',up:'Up',down:'Down'}[b.getFieldValue('SIDE')]);
  luaGenerator.forBlock.ccedu_inspect=b=>['turtleedu.inspect'+suffix(b)+'()',Order.HIGH];
  luaGenerator.forBlock.ccedu_detect=b=>['turtle.detect'+suffix(b)+'()',Order.HIGH];
+ luaGenerator.forBlock.ccedu_crop_grown=b=>['turtleedu.isCropGrown'+suffix(b)+'()',Order.HIGH];
+ luaGenerator.forBlock.ccedu_crop_age=b=>['turtleedu.getCropAge'+suffix(b)+'()',Order.HIGH];
  luaGenerator.forBlock.ccedu_compare=b=>['turtle.compare'+suffix(b)+'()',Order.HIGH];
  luaGenerator.forBlock.ccedu_item_count=b=>['turtle.getItemCount('+value(b,'SLOT')+')',Order.HIGH];
  luaGenerator.forBlock.ccedu_item_space=b=>['turtle.getItemSpace('+value(b,'SLOT')+')',Order.HIGH];
@@ -299,7 +304,7 @@ function buildToolbox(){
  // Each robot block sits in the category for what it gives back: actions above, true/false questions here, IDs in
  // the inventory category. The comparison starts with two empty slots so any value fits: numbers, text, block or
  // item IDs, variables. Students build their own checks (e.g. "block in front = stone") from the general blocks.
- category('判斷','Logic',210,['controls_if','logic_compare','ccedu_detect','ccedu_turtle_result','logic_operation','logic_negate','logic_boolean']),
+ category('判斷','Logic',210,['controls_if','logic_compare','ccedu_detect','ccedu_crop_grown','ccedu_crop_age','ccedu_turtle_result','logic_operation','logic_negate','logic_boolean']),
  category('迴圈','Loops',120,[{type:'controls_repeat_ext',inputs:{TIMES:num(10)}},'controls_whileUntil',{type:'controls_for',inputs:{FROM:num(1),TO:num(10),BY:num(1)}},'ccedu_break']),
  category('數字','Math',230,['math_number',{type:'math_arithmetic',inputs:{A:num(1),B:num(1)}},{type:'math_modulo',inputs:{DIVIDEND:num(64),DIVISOR:num(10)}},{type:'math_random_int',inputs:{FROM:num(1),TO:num(100)}},'math_random_float','ccedu_random_boolean']),
  category('文字','Text',160,['text',{type:'text_join',inputs:{ADD0:str(''),ADD1:str('')}},{type:'text_length',inputs:{VALUE:str(tr('你好','hello'))}}]),

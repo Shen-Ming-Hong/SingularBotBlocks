@@ -24,7 +24,7 @@ public final class WorkspaceCompiler {
         "ccedu_equip",Set.of("equipLeft","equipRight"));
     // ccedu_turtle_command (every command in one dropdown) and ccedu_turtle_action (with an amount) are no longer
     // in the toolbox but stay valid so programs saved with them still load and run.
-    private static final Set<String> TYPES=withActionBlocks("ccedu_start","ccedu_turtle_command","ccedu_turtle_action","ccedu_turtle_result","ccedu_break","ccedu_registry_name","ccedu_select","ccedu_transfer","ccedu_redstone_set","ccedu_say","ccedu_sleep","ccedu_assert","ccedu_call","ccedu_comment","ccedu_snapshot","ccedu_random_boolean","variables_set","math_change","controls_if","controls_repeat_ext","controls_whileUntil","controls_for","controls_flow_statements","math_number","text","logic_boolean","logic_null","variables_get","logic_negate","math_arithmetic","logic_compare","logic_operation","math_modulo","math_random_int","math_random_float","text_length","text_join","ccedu_turtle_query","ccedu_inspect","ccedu_detect","ccedu_compare","ccedu_item_count","ccedu_item_space","ccedu_selected_slot","ccedu_redstone_query","ccedu_item_name",
+    private static final Set<String> TYPES=withActionBlocks("ccedu_start","ccedu_turtle_command","ccedu_turtle_action","ccedu_turtle_result","ccedu_break","ccedu_registry_name","ccedu_select","ccedu_transfer","ccedu_redstone_set","ccedu_say","ccedu_sleep","ccedu_assert","ccedu_call","ccedu_comment","ccedu_snapshot","ccedu_random_boolean","variables_set","math_change","controls_if","controls_repeat_ext","controls_whileUntil","controls_for","controls_flow_statements","math_number","text","logic_boolean","logic_null","variables_get","logic_negate","math_arithmetic","logic_compare","logic_operation","math_modulo","math_random_int","math_random_float","text_length","text_join","ccedu_turtle_query","ccedu_inspect","ccedu_detect","ccedu_crop_grown","ccedu_crop_age","ccedu_compare","ccedu_item_count","ccedu_item_space","ccedu_selected_slot","ccedu_redstone_query","ccedu_item_name",
         "procedures_defnoreturn","procedures_defreturn","procedures_callnoreturn","procedures_callreturn","procedures_ifreturn");
     private static final Set<String> DEFINITIONS=Set.of("procedures_defnoreturn","procedures_defreturn");
     private static Set<String> withActionBlocks(String... types){var all=new HashSet<>(List.of(types));all.addAll(ACTION_BLOCKS.keySet());return Set.copyOf(all);}
@@ -208,6 +208,8 @@ public final class WorkspaceCompiler {
             case "ccedu_turtle_result" -> {String method=field(b,"COMMAND");if(!COMMANDS.contains(method)||Set.of("turnLeft","turnRight").contains(method))throw invalid("Invalid boolean turtle action");result="turtle."+method+"()";}
             case "ccedu_inspect" -> result="turtleedu."+sideMethod(b,"inspect")+"()";
             case "ccedu_detect" -> result="turtle."+sideMethod(b,"detect")+"()";
+            case "ccedu_crop_grown" -> result="turtleedu."+sideMethod(b,"isCropGrown")+"()";
+            case "ccedu_crop_age" -> result="turtleedu."+sideMethod(b,"getCropAge")+"()";
             case "ccedu_compare" -> result="turtle."+sideMethod(b,"compare")+"()";
             case "ccedu_item_count" -> result="turtle.getItemCount("+inputExpr(b,"SLOT","",depth)+")";
             case "ccedu_item_space" -> result="turtle.getItemSpace("+inputExpr(b,"SLOT","",depth)+")";

@@ -60,6 +60,7 @@ test('game words match Minecraft official Traditional Chinese',()=>{
   const drop=w.newBlock('ccedu_drop').getField('COMMAND'),suck=w.newBlock('ccedu_suck');
   assert.match(drop.getSourceBlock().toString(),/丟棄/);assert.match(suck.toString(),/撿起/);
   assert.match(w.newBlock('ccedu_redstone_query').toString(),/紅石訊號/);
+  assert.equal(w.newBlock('ccedu_crop_grown').toString(),'前方 作物已成熟');assert.equal(w.newBlock('ccedu_crop_age').toString(),'前方 作物生長階段');
  }finally{w.dispose();}
 });
 

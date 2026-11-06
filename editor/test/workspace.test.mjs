@@ -87,6 +87,21 @@ test('robot blocks sit once in the category for what they give back, and the com
    assert.ok(preview(w).includes("turtleedu.inspect() == 'minecraft:stone'"),preview(w));
   }finally{w.dispose();}
 });
+test('crop blocks sit in logic: "fully grown" is a condition and the growth stage a number, for any side',()=>{
+  const logic=toolbox('zh_tw').contents.find(c=>c.name==='判斷').contents.map(b=>b.type);
+  assert.deepEqual(logic.slice(logic.indexOf('ccedu_detect'),logic.indexOf('ccedu_detect')+3),['ccedu_detect','ccedu_crop_grown','ccedu_crop_age']);
+  const w=new Blockly.Workspace();
+  try{
+   assert.deepEqual(w.newBlock('ccedu_crop_grown').outputConnection.getCheck(),['Boolean']);
+   assert.deepEqual(w.newBlock('ccedu_crop_age').outputConnection.getCheck(),['Number']);
+   w.clear();loadWorkspace(w,{blocks:{blocks:[{type:'controls_if',id:'branch',inputs:{IF0:{block:{type:'ccedu_crop_grown',id:'ripe',fields:{SIDE:'forward'}}},DO0:{block:{type:'ccedu_dig',id:'dig',fields:{COMMAND:'dig'}}}}}]}});
+   assert.ok(preview(w).includes('if turtleedu.isCropGrown() then'),preview(w));
+   for(const [side,suffix] of [['forward',''],['up','Up'],['down','Down']]){
+    w.clear();loadWorkspace(w,{blocks:{blocks:[{type:'ccedu_say',id:'s',inputs:{TEXT:{block:{type:'ccedu_crop_age',id:'a',fields:{SIDE:side}}}}},{type:'ccedu_say',id:'t',inputs:{TEXT:{block:{type:'ccedu_crop_grown',id:'g',fields:{SIDE:side}}}}}]}});
+    assert.ok(preview(w).includes('turtleedu.getCropAge'+suffix+'()'),preview(w));assert.ok(preview(w).includes('turtleedu.isCropGrown'+suffix+'()'),preview(w));
+   }
+  }finally{w.dispose();}
+});
 test('boolean action can be used as a condition without an assertion',()=>{
   const w=new Blockly.Workspace();try{loadWorkspace(w,{blocks:{blocks:[{type:'controls_if',id:'branch',inputs:{IF0:{block:{type:'ccedu_turtle_result',id:'action',fields:{COMMAND:'forward'}}}}}]}});assert.ok(preview(w).includes('if turtle.forward() then'));}finally{w.dispose();}
 });
